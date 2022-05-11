@@ -1,6 +1,6 @@
 import cell as c
 
-class Supervisor:
+class Stretch:
 	"""Controller class for the model, represents the system at large"""
 	n_cells = 0
 	cells = []
