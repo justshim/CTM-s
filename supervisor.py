@@ -2,11 +2,10 @@ import cell as c
 
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
-	n_cells = 0
-	cells = []
-
+	
 	def __init__(self):
-		pass
+		self.cells = []
+		self.n_cells = 0
 
 	def computeEcal(self):
 		pass
