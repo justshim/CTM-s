@@ -13,7 +13,7 @@ class Cell:
 
 
 	def toString(self):
-		print("ID: "+str(self.ID))
+		print("Cell ID: "+str(self.ID))
 		print("Length: "+str(self.length))
 
 	def computePhi(self):
