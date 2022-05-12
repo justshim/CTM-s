@@ -4,19 +4,17 @@ import station as st
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
 
-	def __init__(self):
+	def __init__(self, timeLength):
 		self.cells = []
 		self.stations = []
 		self.n_cells = 0
 		self.n_stations = 0
-
-	def computeEcal(self):
-		pass
+		self.timeLength = timeLength
 
 	def computeDelta(self):
 		pass
 
-	def computePhi(self):
+	def computePi(self):
 		pass
 		
 	def createCell(self, length, v, w, q, q_max, s, r, rho_max, beta, p):
@@ -28,3 +26,45 @@ class Stretch:
 		station = st.Station(self.n_stations, r_s_max, i, j) 
 		self.stations.append(station)
 		self.n_stations = self.n_stations + 1
+
+	def setT(self, newT):
+		self.timeLength=newT
+
+	def update(self):
+		#aggiornamento delle stazioni
+		for s in self.stations:
+			for c in self.cells:
+					if(s.i==c.ID):
+						s.computeSs(c.phi_minus)
+
+			s.computeRs()
+			s.updateService(self.timeLength)
+			s.computeE(self.timeLength)
+			s.computeDsBig()
+
+
+		#aggiornamento celle
+		beta_tot=0
+		ds=0
+
+		for i in range (len(self.cells)):
+			for s in self.stations:
+				if(s.j==i):
+					ss=s.Ss
+					beta_tot=beta_tot+s.computeTotalBeta()
+				else:
+					ss=0
+			c.computeRho(self.timeLength, ss)
+			c.computeDBig(beta_tot)
+			c.computeSBig()
+			for s in self.stations:
+				if(s.j==i):
+					ds=ds+s.d_s_big	
+			c.updateCongestionState(self.cells[i-1].DBig, ds)
+
+			
+			
+
+		
+
+
