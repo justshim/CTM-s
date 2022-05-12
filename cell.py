@@ -1,7 +1,7 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
 	def __init__(self, ID, length, v, w, q, q_max, s, r, rho_max, beta, p):
-		self.ID = ID
+		self.ID_cell = ID
 		self.length = length
 		self.v = v
 		self.w = w
@@ -11,6 +11,7 @@ class Cell:
 		self.s = s
 		self.r = r
 		self.rho_max = rho_max
+		self.phi = 0
 		self.phi_minus = 0
 		self.phi_plus = 0
 		self.rho = 0
@@ -21,25 +22,34 @@ class Cell:
 
 
 	def toString(self):
-		print("Cell ID: "+str(self.ID))
+		print("Cell ID: "+str(self.ID_cell))
 		print("Length: "+str(self.length))
 		print("r: "+str(self.r))
 		print("s: "+str(self.s))
+		print()
 
-	def computePhi(self, ID):
-		return 0
+	def computePhi(self, Dprec, TotalDs):
+		if(self.congestionState == 0): #FREE FLOW
+			self.phi=Dprec
+		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
+			self.phi=self.SBig-TotalDs
+		elif(self.congestionState == 2): #CONGESTED SERVICE
+			self.phi=Dprec
+		elif(self.congestionState == 3): #CONGESTED ALL
+			self.phi=self.SBig*self.p
+
 
 	def computePhiPlus(self, Rs):
 		#DA RIVEDERE PER L'1 TRASPOSTO
-		self.phi_plus=self.computePhi(self.ID)+self.r+Rs
+		self.phi_plus=self.phi+self.r+Rs
 		return self.phi_plus
 
-	def computePhiMinus(self, Ss):
-		self.phi_minus=self.computePhi(int(self.ID)+1)+self.s+Ss
+	def computePhiMinus(self, Ss, NextPhi):
+		self.phi_minus=NextPhi+self.s+Ss
 		return self.phi_minus
 
-	def computeRho(self, TimeLength, Ss):
-		phi_meno=self.computePhiMinus(Ss)
+	def computeRho(self, TimeLength, Ss, NextPhi):
+		phi_meno=self.computePhiMinus(Ss, NextPhi)
 		phi_piu=self.computePhiPlus(Ss)
 		self.rho=self.rho+(TimeLength/self.length*(phi_piu-phi_meno))
 		

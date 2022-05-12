@@ -17,6 +17,7 @@ stretch2.stations[1].createService(99,999)
 # print("**********\nStretch 2\n**********")
 #print(stretch2.n_cells)
 #print()
+stretch2.toString()
 stretch2.update()
 
 for cell in stretch2.cells:

@@ -10,6 +10,23 @@ class Stretch:
 		self.n_cells = 0
 		self.n_stations = 0
 		self.timeLength = timeLength
+		self.TTT = 0
+		self.delta_big = 0
+		self.pi = 0
+
+	def toString(self):
+		for c in self.cells:
+			c.toString()
+		for s in self.stations:
+			s.toString()
+		print("N_cells: "+str(self.n_cells))
+		print("N_stations: "+str(self.n_stations))
+		print("timeLength: "+str(self.timeLength))
+		print("TTT: "+str(self.TTT))
+		print("delta_big: "+str(self.delta_big))
+		print("pi: "+str(self.pi))
+		print()
+
 
 	def computeDelta(self):
 		pass
@@ -34,7 +51,7 @@ class Stretch:
 		#aggiornamento delle stazioni
 		for s in self.stations:
 			for c in self.cells:
-					if(s.i==c.ID):
+					if(s.i==c.ID_cell):
 						s.computeSs(c.phi_minus)
 
 			s.computeRs()
@@ -54,14 +71,23 @@ class Stretch:
 					beta_tot=beta_tot+s.computeTotalBeta()
 				else:
 					ss=0
-			c.computeRho(self.timeLength, ss)
+
+			if((i+1) < (len(self.cells))):
+				c.computeRho(self.timeLength, ss, self.cells[i+1].phi) 
+			else:
+				c.computeRho(self.timeLength, ss, 0) #come gestire la cella i+1 ??? 
 			c.computeDBig(beta_tot)
 			c.computeSBig()
 			for s in self.stations:
 				if(s.j==i):
 					ds=ds+s.d_s_big	
-			c.updateCongestionState(self.cells[i-1].DBig, ds)
-
+			if(i != 0):
+				c.updateCongestionState(self.cells[i-1].DBig, ds)
+				c.computePhi(self.cells[i-1].DBig, ds)
+			else:
+				c.updateCongestionState(0, ds) #come gestire la cella 0 ??? 
+				c.computePhi(0, ds)
+			
 			
 			
 
