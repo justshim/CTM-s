@@ -26,6 +26,10 @@ class Cell:
 		print("Length: "+str(self.length))
 		print("r: "+str(self.r))
 		print("s: "+str(self.s))
+		print("v: "+str(self.v))
+		print("w: "+str(self.w))
+		print("rho_max: "+str(self.rho_max))
+		print("q_max: "+str(self.q_max))
 		print()
 
 	def computePhi(self, Dprec, TotalDs):

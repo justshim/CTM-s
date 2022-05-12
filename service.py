@@ -7,10 +7,11 @@ class Service:
 		self.l = 0
 
 	def toString(self):
-		print("Service ID: "+str(self.ID))
+		print("Service ID: "+str(self.ID_service))
 		print("Time delay: "+str(self.delta))
 		print("Split ratio: "+str(self.beta_s))
 		print("Vehicles number: "+str(self.l))
+	
 	def computeL(self, TimeLength, Ss, Rs):
 		# ATTENZIONE DA RIVEDERE: Ss e Rs sono riferiti alla stazione e non al servizio
 		self.l=self.l+ TimeLength*(Ss*self.beta_s-Rs*self.beta_s)

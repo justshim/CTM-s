@@ -1,26 +1,26 @@
 import cell as c
 import supervisor as s
+import factory as f
+import xlrd 
 
-stretch2 = s.Stretch(1)
-stretch2.createCell(20, 21, 22, 23, 24, 25, 26, 27, 28, 29)
-stretch2.createCell(30, 31, 32, 33, 34, 35, 36, 37, 38, 39)
-stretch2.createCell(40, 41, 42, 43, 44, 45, 46, 47, 48, 49)
+loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+wb = xlrd.open_workbook(loc)
+sh = wb.sheet_by_index(0)
 
-stretch2.createStation(1, 2, 3)
-stretch2.createStation(11, 22, 33)
+sh.cell_value(0,0)
 
-stretch2.stations[0].createService(1,2)
-stretch2.stations[0].createService(88,888)
-stretch2.stations[1].createService(99,999)
+fac = f.Factory()
 
-# print("**********\nStretch 2\n**********")
-#print(stretch2.n_cells)
-#print()
-stretch2.toString()
-stretch2.update()
+fac.createStretch(10)
 
-for cell in stretch2.cells:
+for i in range(1, sh.nrows):
+	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), 0, sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0)	
+
+fac.addStationToStretch(0, 231, 1, 3) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addServiceToStation(0, 0, 890, 0.05)
+
+for cell in fac.stretches[0].cells:
 	cell.toString()
-	print()
 
-	
+fac.stretches[0].stations[0].toString()
+fac.stretches[0].stations[0].services[0].toString()
