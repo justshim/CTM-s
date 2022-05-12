@@ -19,8 +19,10 @@ for i in range(1, sh.nrows):
 fac.addStationToStretch(0, 231, 1, 3) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 fac.addServiceToStation(0, 0, 890, 0.05)
 
-for cell in fac.stretches[0].cells:
-	cell.toString()
+#for cell in fac.stretches[0].cells:
+#	cell.toString()
 
-fac.stretches[0].stations[0].toString()
-fac.stretches[0].stations[0].services[0].toString()
+#fac.stretches[0].stations[0].toString()
+#fac.stretches[0].stations[0].services[0].toString()
+
+fac.stretches[0].update()

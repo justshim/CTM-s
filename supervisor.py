@@ -49,12 +49,15 @@ class Stretch:
 
 	def update(self):
 		#aggiornamento delle stazioni
+		cong = 0
 		for s in self.stations:
 			for c in self.cells:
 					if(s.i==c.ID_cell):
 						s.computeSs(c.phi_minus)
+					if(s.j==c.ID_cell):
+						cong=c.congestionState
 
-			s.computeRs()
+			s.computeRs(cong)
 			s.updateService(self.timeLength)
 			s.computeE(self.timeLength)
 			s.computeDsBig()

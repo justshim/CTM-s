@@ -59,7 +59,7 @@ class Station:
 		for serv in self.services:
 			serv.computeL(TimeLength, self.Ss, self.Rs)
 
-	def computeTotalBeta():
+	def computeTotalBeta(self):
 		beta=0
 		for serv in self.services:
 			beta=beta+serv.beta_s
