@@ -15,9 +15,9 @@ fac = f.Factory()
 fac.createStretch(10)
 
 for i in range(1, sh.nrows):
-	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), 0, sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0)	
+	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), 0, sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 1)	
 
-fac.addStationToStretch(0, 231, 1, 3, 890, 0.05) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 231, 1, 3, 890, 0.05, 0) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 #	cell.toString()

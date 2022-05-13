@@ -47,12 +47,18 @@ class Station:
 		else:
 			self.E = self.oldE + self.l[-self.delta] - (TimeLength * self.Rs)
 
-	def computeDsBig(self):
-		#DA VERIFICARE SE RS è CORRETTO
-		if(self.Rs > self.r_s_max):
+	def computeDsBig(self, TimeLength):
+		app = 0
+		
+		if len(self.l) < self.delta:
+			app = (0 + self.oldE) / TimeLength
+		else:
+			app = (self.l[-self.delta] + self.oldE) / TimeLength
+
+		if(app > self.r_s_max):
 			self.d_s_big = self.r_s_max
 		else:
-			self.d_s_big = self.Rs
+			self.d_s_big = app
 
 	def computeL(self, TimeLength):
 		new_l = self.l[-1] + TimeLength * (self.Ss-self.Rs)

@@ -1,12 +1,13 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
-	def __init__(self, ID, length, v, w, q, q_max, s, r, rho_max, beta, p):
+	def __init__(self, ID, length, v, w, q, q_max, s, r, rho_max, beta, p_ms):
 		self.ID_cell = ID
 		self.length = length
 		self.v = v
 		self.w = w
 		self.q = q
-		self.p = p
+		self.p_ms = p_ms
+		### Attenzione: p vettore?
 		self.q_max = q_max
 		self.s = s
 		self.r = r
@@ -40,7 +41,7 @@ class Cell:
 		elif(self.congestionState == 2): #CONGESTED SERVICE
 			self.phi=Dprec
 		elif(self.congestionState == 3): #CONGESTED ALL
-			self.phi=self.SBig*self.p
+			self.phi=self.SBig*self.p_ms
 
 
 	def computePhiPlus(self, Rs):
@@ -75,12 +76,11 @@ class Cell:
 	def updateCongestionState(self, Dprec, TotalDs):
 		if(Dprec+TotalDs<=self.SBig): 
 			self.congestionState=0 #FREE FLOW
-		#CONTROLLARE PMS O SOLO P
-		elif((Dprec > self.p*self.SBig) and (TotalDs <= (1-self.p))):
+		elif((Dprec > self.p_ms*self.SBig) and (TotalDs <= (1-self.p_ms))):
 			self.congestionState=1 #CONGESTED MAINSTREAM
-		elif((Dprec <= self.p*self.SBig) and (TotalDs > (1-self.p))):
+		elif((Dprec <= self.p_ms*self.SBig) and (TotalDs > (1-self.p_ms))):
 			self.congestionState=2 #CONGESTED SERVICE
-		elif((Dprec > self.p*self.SBig) and (TotalDs > (1-self.p))):
+		elif((Dprec > self.p_ms*self.SBig) and (TotalDs > (1-self.p_ms))):
 			self.congestionState=3 #CONGESTED ALL
 		else:
 			print("Congestion Error")

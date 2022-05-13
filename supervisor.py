@@ -60,7 +60,7 @@ class Stretch:
 			s.computeRs(cong)
 			s.computeL(self.timeLength)
 			s.computeE(self.timeLength)
-			s.computeDsBig()
+			s.computeDsBig(self.timeLength)
 
 
 		#aggiornamento celle
@@ -78,7 +78,7 @@ class Stretch:
 			if((i+1) < (len(self.cells))):
 				c.computeRho(self.timeLength, ss, self.cells[i+1].phi) 
 			else:
-				c.computeRho(self.timeLength, ss, 0) #come gestire la cella i+1 ??? 
+				c.computeRho(self.timeLength, ss, 0) # Gestione statica da dati 
 			c.computeDBig(beta)
 			c.computeSBig()
 			for s in self.stations:
@@ -88,7 +88,7 @@ class Stretch:
 				c.updateCongestionState(self.cells[i-1].DBig, ds)
 				c.computePhi(self.cells[i-1].DBig, ds)
 			else:
-				c.updateCongestionState(0, ds) #come gestire la cella 0 ??? 
+				c.updateCongestionState(0, ds) # Gestione statica da dati
 				c.computePhi(0, ds)
 			
 			
