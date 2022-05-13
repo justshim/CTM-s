@@ -3,7 +3,8 @@ import supervisor as s
 import factory as f
 import xlrd 
 
-loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
 
