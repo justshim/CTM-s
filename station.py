@@ -1,9 +1,8 @@
-import service as ser
 import supervisor as su
 
 class Station:
 	"""Class modeling the service stations on an highway stretch in the CTM-s model"""
-	def __init__(self, ID, r_s_max, i, j, delta, beta_s):
+	def __init__(self, ID, r_s_max, i, j, delta, beta_s, p):
 		self.ID_station = ID
 		self.r_s_max = r_s_max
 		self.i = i
@@ -16,6 +15,7 @@ class Station:
 		self.delta = delta
 		self.beta_s = beta_s
 		self.l = [0]
+		self.p = p
 
 	def toString(self):
 		print("Station ID: "+str(self.ID_station))
@@ -49,7 +49,7 @@ class Station:
 
 	def computeDsBig(self, TimeLength):
 		app = 0
-		
+
 		if len(self.l) < self.delta:
 			app = (0 + self.oldE) / TimeLength
 		else:

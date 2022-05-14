@@ -43,18 +43,17 @@ class Cell:
 			self.phi=self.SBig*self.p_ms
 
 
-	def computePhiPlus(self, Rs):
-		#DA RIVEDERE PER L'1 TRASPOSTO
-		self.phi_plus=self.phi+self.r+Rs
+	def computePhiPlus(self, Rs_total):
+		self.phi_plus=self.phi+self.r+Rs_total
 		return self.phi_plus
 
 	def computePhiMinus(self, Ss, NextPhi):
 		self.phi_minus=NextPhi+self.s+Ss
 		return self.phi_minus
 
-	def computeRho(self, TimeLength, Ss, NextPhi):
+	def computeRho(self, TimeLength, Ss, NextPhi, Rs_total):
 		phi_meno=self.computePhiMinus(Ss, NextPhi)
-		phi_piu=self.computePhiPlus(Ss)
+		phi_piu=self.computePhiPlus(Rs_total)
 		self.rho=self.rho+(TimeLength/self.length*(phi_piu-phi_meno))
 		
 

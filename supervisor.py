@@ -4,7 +4,7 @@ import station as st
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
 
-	def __init__(self, timeLength):
+	def __init__(self, timeLength, lastPhi, first_DBig):
 		self.cells = []
 		self.stations = []
 		self.n_cells = 0
@@ -13,6 +13,8 @@ class Stretch:
 		self.TTT = 0
 		self.delta_big = 0
 		self.pi = 0
+		self.lastPhi = lastPhi
+		self.first_DBig = first_DBig
 
 	def toString(self):
 		for c in self.cells:
@@ -39,8 +41,8 @@ class Stretch:
 		self.cells.append(cell)
 		self.n_cells = self.n_cells + 1
 
-	def createStation(self, r_s_max, i, j, delta, beta_s):
-		station = st.Station(self.n_stations, r_s_max, i, j, delta, beta_s) 
+	def createStation(self, r_s_max, i, j, delta, beta_s, p):
+		station = st.Station(self.n_stations, r_s_max, i, j, delta, beta_s, p) 
 		self.stations.append(station)
 		self.n_stations = self.n_stations + 1
 
@@ -67,21 +69,24 @@ class Stretch:
 		beta=0
 		total_beta=0
 		total_Rs = 0 
-		ds=0
+		total_Ds=0
 		next_phi = 0
-		prev_DBig
+		prev_DBig = 0
 
 		for i in range (len(self.cells)):
 			
-			### CONTROLLARE CORRISPONDENZA INFLOW E OUTFLOW ###
 			# loop to fetch information from inflowing and outflowing stations for the considered cell
+			
 			for s in self.stations:
+			# outflow
 				if(s.j==i):
+					total_Rs = total_Rs + s.Rs
+					total_Ds=total_Ds+s.d_s_big
+			# inflow
+				if(s.i==i):
 					ss=s.Ss
 					beta=s.beta_s
-					total_beta = total_beta + beta
-					total_Rs = total_Rs + s.Rs
-					ds=ds+s.d_s_big
+					total_beta = total_beta + s.beta_s
 				else:
 					ss=0
 
@@ -89,16 +94,16 @@ class Stretch:
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
 			else:
-				next_phi = 0 		# Static assignment from data for last cell
+				next_phi = self.lastPhi 		# Static assignment from data for last cell
 
 			# special treatment for first cell
 			if(i != 0):
-				prev_DBig = self.cells[i-1]
+				prev_DBig = self.cells[i-1].DBig
 			else:
-				prev_DBig = 0 		# Static assignment from data for first cell
+				prev_DBig = self.first_DBig		# Static assignment from data for first cell
 
-			c.updateCongestionState(prev_DBig, ds)
-			c.computePhi(prev_DBig, ds)
+			c.updateCongestionState(prev_DBig, total_Ds)
+			c.computePhi(prev_DBig, total_Ds)
 			c.computeRho(self.timeLength, ss, next_phi, total_Rs)
 			c.computeDBig(total_beta)
 			c.computeSBig()

@@ -12,7 +12,7 @@ sh.cell_value(0,0)
 
 fac = f.Factory()
 
-fac.createStretch(10)
+fac.createStretch(10, 0, 0)
 
 for i in range(1, sh.nrows):
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), 0, sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 1)	
