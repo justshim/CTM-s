@@ -50,22 +50,23 @@ class Stretch:
 		self.timeLength=newT
 
 	def update(self):
-		#Station update
-		cong = 0
-		for s in self.stations:
-			for c in self.cells:
-					if(s.i==c.ID_cell):
-						s.computeSs(c.phi_minus)
-					if(s.j==c.ID_cell):
-						cong=c.congestionState
-
-			s.computeRs(cong)
-			s.computeL(self.timeLength)
-			s.computeE(self.timeLength)
-			s.computeDsBig(self.timeLength)
+		##Station update
+		#cong = 0
+		#for s in self.stations:
+		#	for c in self.cells:
+		#			if(s.i==c.ID_cell):
+		#				s.computeSs(c.phi_minus)
+		#			if(s.j==c.ID_cell):
+		#				cong=c.congestionState
+		#
+		#	s.computeRs(cong)
+		#	s.computeL(self.timeLength)
+		#	s.computeE(self.timeLength)
+		#	s.computeDsBig(self.timeLength)
 
 
 		#Cell update
+		cong = 0
 		beta=0
 		total_beta=0
 		total_Rs = 0 
@@ -75,21 +76,6 @@ class Stretch:
 
 		for i in range (len(self.cells)):
 			
-			# loop to fetch information from inflowing and outflowing stations for the considered cell
-			
-			for s in self.stations:
-			# outflow
-				if(s.j==i):
-					total_Rs = total_Rs + s.Rs
-					total_Ds=total_Ds+s.d_s_big
-			# inflow
-				if(s.i==i):
-					ss=s.Ss
-					beta=s.beta_s
-					total_beta = total_beta + s.beta_s
-				else:
-					ss=0
-
 			# special treatment for last cell
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
@@ -102,11 +88,43 @@ class Stretch:
 			else:
 				prev_DBig = self.first_DBig		# Static assignment from data for first cell
 
-			c.updateCongestionState(prev_DBig, total_Ds)
-			c.computePhi(prev_DBig, total_Ds)
-			c.computeRho(self.timeLength, ss, next_phi, total_Rs)
-			c.computeDBig(total_beta)
-			c.computeSBig()
+			# first total_Ds needs to be updated for the computation of the congestion state
+			for s in self.stations:
+				if(s.j==i):
+					total_Ds=total_Ds+s.d_s_big
+					#### ATTENZIONE: Ds DA RIFERIRE A USCITA DELLA STAZIONE?
+
+			self.cells[i].computePhi(prev_DBig, total_Ds) # calls cell.updateCongestionState
+
+			# if cell has stations entering or exiting, those stations are updated
+			for s in self.stations:
+				if(s.i==i):
+					s.computeSs(self.cells[i].phi_minus)
+					ss=s.Ss
+					beta=s.beta_s
+					total_beta = total_beta + s.beta_s
+				else:
+					ss=0
+
+				if(s.j==i) or (s.i==i):
+					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
+						s.computeRs(self.cells[i].congestionState)
+					elif self.cells[i].congestionState == 2:
+						self.iterativeProcedure(i)
+					elif self.cells[i].congestionState == 3:
+						#self.iterativeProcedure2(i)
+						pass
+
+					s.computeL(self.timeLength)
+					s.computeE(self.timeLength)
+					s.computeDsBig(self.timeLength)
+				
+				if(s.j==i):
+					total_Rs = total_Rs + s.Rs			
+
+			self.cells[i].computeRho(self.timeLength, ss, next_phi, total_Rs)
+			self.cells[i].computeDBig(total_beta)
+			self.cells[i].computeSBig()
 					
 
 		def iterativeProcedure(self, i):
@@ -115,9 +133,10 @@ class Stretch:
 			prev_D = self.cells[i-1].DBig
 			supply = self.cells[i].SBig
 			supply_cap = supply
-			good = []
+			good = [0]
 			sum_D_good = 0
 			tol = 0.1 ### CHIEDERE QUALE TOLLERANZA USARE
+			sum_p = 0
 
 			for s in self.stations:
 				 if(s.j==i):
@@ -125,17 +144,34 @@ class Stretch:
 
 			bad = demands
 			
-			#first iteration
-			while len(bad)
-				if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad)
-					bad.remove(d)
-					good.append(d)
-					Rs_vector[d.ID_station] = d.d_s_big
-					sum_D_good = sum_D_good + d.d_s_big
-					supply_cap = supply_cap - d.d_s_big
+			# compute E_cal_overline and E_cal_underline
+			while len(good) != 0:
+				good.clear()
+				for d in demands:
+					if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad):
+						bad.remove(d)
+						good.append(d)
+						Rs_vector.append((d.ID_station, d.d_s_big))
+						sum_D_good = sum_D_good + d.d_s_big
+						supply_cap = supply_cap - d.d_s_big
+				
+			# compute sum of priorities for all involved stations
+			for b in bad:
+				sum_p = sum_p + b.p
 
-				if supply_cap <= tol
-					break
+			# compute remaining Rs
+			for b in bad:
+				Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_cap))
+
+			# update all Rs of all stations involved
+			for k in range(len(Rs_vector)):
+				for station in self.stations:
+					if Rs_vector[k(0)] == station.ID_station:
+						station.Rs = Rs_vector[k(1)]
+
+
+
+
 
 
 

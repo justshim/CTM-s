@@ -33,6 +33,8 @@ class Cell:
 		print()
 
 	def computePhi(self, Dprec, TotalDs):
+		self.updateCongestionState(Dprec, TotalDs)
+
 		if(self.congestionState == 0): #FREE FLOW
 			self.phi=Dprec
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
