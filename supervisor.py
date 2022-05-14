@@ -50,22 +50,6 @@ class Stretch:
 		self.timeLength=newT
 
 	def update(self):
-		##Station update
-		#cong = 0
-		#for s in self.stations:
-		#	for c in self.cells:
-		#			if(s.i==c.ID_cell):
-		#				s.computeSs(c.phi_minus)
-		#			if(s.j==c.ID_cell):
-		#				cong=c.congestionState
-		#
-		#	s.computeRs(cong)
-		#	s.computeL(self.timeLength)
-		#	s.computeE(self.timeLength)
-		#	s.computeDsBig(self.timeLength)
-
-
-		#Cell update
 		cong = 0
 		beta=0
 		total_beta=0
@@ -80,13 +64,13 @@ class Stretch:
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
 			else:
-				next_phi = self.lastPhi 		# Static assignment from data for last cell
+				next_phi = self.lastPhi 		## Static assignment from data for last cell
 
 			# special treatment for first cell
 			if(i != 0):
 				prev_DBig = self.cells[i-1].DBig
 			else:
-				prev_DBig = self.first_DBig		# Static assignment from data for first cell
+				prev_DBig = self.first_DBig		## Static assignment from data for first cell
 
 			# first total_Ds needs to be updated for the computation of the congestion state
 			for s in self.stations:
@@ -94,7 +78,7 @@ class Stretch:
 					total_Ds=total_Ds+s.d_s_big
 					#### ATTENZIONE: Ds DA RIFERIRE A USCITA DELLA STAZIONE?
 
-			self.cells[i].computePhi(prev_DBig, total_Ds) # calls cell.updateCongestionState
+			self.cells[i].computePhi(prev_DBig, total_Ds) ## calls cell.updateCongestionState
 
 			# if cell has stations entering or exiting, those stations are updated
 			for s in self.stations:
@@ -110,10 +94,9 @@ class Stretch:
 					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
 						s.computeRs(self.cells[i].congestionState)
 					elif self.cells[i].congestionState == 2:
-						self.iterativeProcedure(i)
+						self.iterativeProcedure(i, 2)
 					elif self.cells[i].congestionState == 3:
-						#self.iterativeProcedure2(i)
-						pass
+						self.iterativeProcedure(i, 3)
 
 					s.computeL(self.timeLength)
 					s.computeE(self.timeLength)
@@ -127,15 +110,14 @@ class Stretch:
 			self.cells[i].computeSBig()
 					
 
-		def iterativeProcedure(self, i):
-			demands = [] # contains whole stations for convenience
+		def iterativeProcedure(self, i, t):
+			demands = [] ## contains whole stations for convenience
 			Rs_vector = []
 			prev_D = self.cells[i-1].DBig
 			supply = self.cells[i].SBig
-			supply_cap = supply
+			supply_res = supply
 			good = [0]
 			sum_D_good = 0
-			tol = 0.1 ### CHIEDERE QUALE TOLLERANZA USARE
 			sum_p = 0
 
 			for s in self.stations:
@@ -153,7 +135,11 @@ class Stretch:
 						good.append(d)
 						Rs_vector.append((d.ID_station, d.d_s_big))
 						sum_D_good = sum_D_good + d.d_s_big
-						supply_cap = supply_cap - d.d_s_big
+						if t == 2:
+							supply_res = supply_res - d.d_s_big
+						elif t == 3:
+							supply_res = (1 - self.cells[i].p_ms)*supply_res - d.d_s_big
+							## VERIFICARE CHE SIA DAVVERO Pms
 				
 			# compute sum of priorities for all involved stations
 			for b in bad:
@@ -161,13 +147,15 @@ class Stretch:
 
 			# compute remaining Rs
 			for b in bad:
-				Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_cap))
+				Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
 
 			# update all Rs of all stations involved
 			for k in range(len(Rs_vector)):
 				for station in self.stations:
 					if Rs_vector[k(0)] == station.ID_station:
 						station.Rs = Rs_vector[k(1)]
+
+		
 
 
 
