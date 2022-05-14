@@ -32,7 +32,7 @@ r = []
 while k<=1000:
 	fac.stretches[0].update()
 	#print (k)
-	#print(fac.stretches[0].cells[-1].rho)
+	print(fac.stretches[0].cells[-1].DBig)
 	k = k + 1
 	#r.append(fac.stretches[0].cells[-2].phi)
 
