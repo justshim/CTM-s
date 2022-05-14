@@ -7,7 +7,6 @@ class Cell:
 		self.w = w
 		self.q = q
 		self.p_ms = p_ms
-		### Attenzione: p vettore?
 		self.q_max = q_max
 		self.s = s
 		self.r = r
@@ -59,8 +58,8 @@ class Cell:
 		self.rho=self.rho+(TimeLength/self.length*(phi_piu-phi_meno))
 		
 
-	def computeDBig(self, betaStation):
-		a = (1-self.beta-betaStation)*self.v*self.rho
+	def computeDBig(self, total_beta):
+		a = (1-self.beta-total_beta)*self.v*self.rho
 		if(a > self.q_max):
 			self.DBig=self.q_max
 		else:

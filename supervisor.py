@@ -48,7 +48,7 @@ class Stretch:
 		self.timeLength=newT
 
 	def update(self):
-		#aggiornamento delle stazioni
+		#Station update
 		cong = 0
 		for s in self.stations:
 			for c in self.cells:
@@ -63,33 +63,47 @@ class Stretch:
 			s.computeDsBig(self.timeLength)
 
 
-		#aggiornamento celle
+		#Cell update
 		beta=0
+		total_beta=0
+		total_Rs = 0 
 		ds=0
+		next_phi = 0
+		prev_DBig
 
 		for i in range (len(self.cells)):
+			
+			### CONTROLLARE CORRISPONDENZA INFLOW E OUTFLOW ###
+			# loop to fetch information from inflowing and outflowing stations for the considered cell
 			for s in self.stations:
 				if(s.j==i):
 					ss=s.Ss
 					beta=s.beta_s
+					total_beta = total_beta + beta
+					total_Rs = total_Rs + s.Rs
+					ds=ds+s.d_s_big
 				else:
 					ss=0
 
+			# special treatment for last cell
 			if((i+1) < (len(self.cells))):
-				c.computeRho(self.timeLength, ss, self.cells[i+1].phi) 
+				next_phi = self.cells[i+1].phi
 			else:
-				c.computeRho(self.timeLength, ss, 0) # Gestione statica da dati 
-			c.computeDBig(beta)
-			c.computeSBig()
-			for s in self.stations:
-				if(s.j==i):
-					ds=ds+s.d_s_big
+				next_phi = 0 		# Static assignment from data for last cell
+
+			# special treatment for first cell
 			if(i != 0):
-				c.updateCongestionState(self.cells[i-1].DBig, ds)
-				c.computePhi(self.cells[i-1].DBig, ds)
+				prev_DBig = self.cells[i-1]
 			else:
-				c.updateCongestionState(0, ds) # Gestione statica da dati
-				c.computePhi(0, ds)
+				prev_DBig = 0 		# Static assignment from data for first cell
+
+			c.updateCongestionState(prev_DBig, ds)
+			c.computePhi(prev_DBig, ds)
+			c.computeRho(self.timeLength, ss, next_phi, total_Rs)
+			c.computeDBig(total_beta)
+			c.computeSBig()
+					
+			
 			
 			
 			
