@@ -27,16 +27,16 @@ class Station:
 		print()
 
 	def computeSs(self, phiMeno):
-		return self.beta_s*phiMeno
+		self.Ss = self.beta_s*phiMeno
 
 	def computeRs(self, congestionState):
 		if(congestionState == 0): #FREE FLOW
 			self.Rs=self.d_s_big
-		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
+		elif(congestionState == 1): #CONGESTED MAINSTREAM
 			self.Rs=self.d_s_big
-		elif(self.congestionState == 2): #CONGESTED SERVICE
+		elif(congestionState == 2): #CONGESTED SERVICE
 			self.Rs=0 #da capire le e_call sotto e sovralineate
-		elif(self.congestionState == 3): #CONGESTED ALL
+		elif(congestionState == 3): #CONGESTED ALL
 			self.Rs=0 #da capire le e_call sotto e sovralineate
 
 	def computeE(self, TimeLength):

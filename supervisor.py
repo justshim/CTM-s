@@ -110,50 +110,50 @@ class Stretch:
 			self.cells[i].computeSBig()
 					
 
-		def iterativeProcedure(self, i, t):
-			demands = [] ## contains whole stations for convenience
-			Rs_vector = []
-			prev_D = self.cells[i-1].DBig
-			supply = self.cells[i].SBig
-			supply_res = supply
-			good = [0]
-			sum_D_good = 0
-			sum_p = 0
+	def iterativeProcedure(self, i, t):
+		demands = [] ## contains whole stations for convenience
+		Rs_vector = []
+		prev_D = self.cells[i-1].DBig
+		supply = self.cells[i].SBig
+		supply_res = supply
+		good = [0]
+		sum_D_good = 0
+		sum_p = 0
 
-			for s in self.stations:
-				 if(s.j==i):
-				 	demands.append(s)
+		for s in self.stations:
+			if(s.j==i):
+			 	demands.append(s)
 
-			bad = demands
+		bad = demands
 			
-			# compute E_cal_overline and E_cal_underline
-			while len(good) != 0:
-				good.clear()
-				for d in demands:
-					if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad):
-						bad.remove(d)
-						good.append(d)
-						Rs_vector.append((d.ID_station, d.d_s_big))
-						sum_D_good = sum_D_good + d.d_s_big
-						if t == 2:
-							supply_res = supply_res - d.d_s_big
-						elif t == 3:
-							supply_res = (1 - self.cells[i].p_ms)*supply_res - d.d_s_big
-							## VERIFICARE CHE SIA DAVVERO Pms
+		# compute E_cal_overline and E_cal_underline
+		while len(good) != 0:
+			good.clear()
+			for d in demands:
+				if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad):
+					bad.remove(d)
+					good.append(d)
+					Rs_vector.append([d.ID_station, d.d_s_big])
+					sum_D_good = sum_D_good + d.d_s_big
+					if t == 2:
+						supply_res = supply_res - d.d_s_big
+					elif t == 3:
+						supply_res = (1 - self.cells[i].p_ms)*supply_res - d.d_s_big
+						## VERIFICARE CHE SIA DAVVERO Pms
 				
-			# compute sum of priorities for all involved stations
-			for b in bad:
-				sum_p = sum_p + b.p
+		# compute sum of priorities for all involved stations
+		for b in bad:
+			sum_p = sum_p + b.p
 
-			# compute remaining Rs
-			for b in bad:
-				Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
+		# compute remaining Rs
+		for b in bad:
+			Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
 
-			# update all Rs of all stations involved
-			for k in range(len(Rs_vector)):
-				for station in self.stations:
-					if Rs_vector[k(0)] == station.ID_station:
-						station.Rs = Rs_vector[k(1)]
+		# update all Rs of all stations involved
+		for k in range(len(Rs_vector)):
+			for station in self.stations:
+				if Rs_vector[[k][0]] == station.ID_station:
+					station.Rs = Rs_vector[[k][1]]
 
 		
 

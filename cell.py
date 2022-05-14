@@ -57,7 +57,7 @@ class Cell:
 		phi_meno=self.computePhiMinus(Ss, NextPhi)
 		phi_piu=self.computePhiPlus(Rs_total)
 		self.rho=self.rho+(TimeLength/self.length*(phi_piu-phi_meno))
-		
+
 
 	def computeDBig(self, total_beta):
 		a = (1-self.beta-total_beta)*self.v*self.rho
