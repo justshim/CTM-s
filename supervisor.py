@@ -108,9 +108,40 @@ class Stretch:
 			c.computeDBig(total_beta)
 			c.computeSBig()
 					
+
+		def iterativeProcedure(self, i):
+			demands = [] # contains whole stations for convenience
+			Rs_vector = []
+			prev_D = self.cells[i-1].DBig
+			supply = self.cells[i].SBig
+			supply_cap = supply
+			good = []
+			sum_D_good = 0
+			tol = 0.1 ### CHIEDERE QUALE TOLLERANZA USARE
+
+			for s in self.stations:
+				 if(s.j==i):
+				 	demands.append(s)
+
+			bad = demands
 			
-			
-			
+			#first iteration
+			while len(bad)
+				if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad)
+					bad.remove(d)
+					good.append(d)
+					Rs_vector[d.ID_station] = d.d_s_big
+					sum_D_good = sum_D_good + d.d_s_big
+					supply_cap = supply_cap - d.d_s_big
+
+				if supply_cap <= tol
+					break
+
+
+
+
+
+					
 			
 
 		
