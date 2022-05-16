@@ -29,15 +29,9 @@ class Station:
 	def computeSs(self, phiMeno):
 		self.Ss = self.beta_s*phiMeno
 
-	def computeRs(self, congestionState):
-		if(congestionState == 0): #FREE FLOW
+	def computeRs(self):
 			self.Rs=self.d_s_big
-		elif(congestionState == 1): #CONGESTED MAINSTREAM
-			self.Rs=self.d_s_big
-		elif(congestionState == 2): #CONGESTED SERVICE
-			self.Rs=0 #da capire le e_call sotto e sovralineate
-		elif(congestionState == 3): #CONGESTED ALL
-			self.Rs=0 #da capire le e_call sotto e sovralineate
+			print("d_s_big " + str(self.d_s_big))
 
 	def computeE(self, TimeLength):
 		self.oldE = self.E
@@ -49,7 +43,6 @@ class Station:
 
 	def computeDsBig(self, TimeLength):
 		app = 0
-
 		if len(self.l) < self.delta:
 			app = (0 + self.oldE) / TimeLength
 		else:

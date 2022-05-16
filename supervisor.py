@@ -52,14 +52,14 @@ class Stretch:
 	def update(self):
 		cong = 0
 		beta=0
-		total_beta=0
 		total_Rs = 0 
 		total_Ds=0
 		next_phi = 0
 		prev_DBig = 0
 
 		for i in range (len(self.cells)):
-			
+			total_beta=0
+			print("Cell " + str(i))
 			# special treatment for last cell
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
@@ -91,19 +91,19 @@ class Stretch:
 					ss=0
 
 				if(s.j==i) or (s.i==i):
+					s.computeL(self.timeLength)
+					s.computeE(self.timeLength)
+					s.computeDsBig(self.timeLength)
+
 					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-						s.computeRs(self.cells[i].congestionState)
+						s.computeRs()
 					elif self.cells[i].congestionState == 2:
 						self.iterativeProcedure(i, 2)
 					elif self.cells[i].congestionState == 3:
 						self.iterativeProcedure(i, 3)
-
-					s.computeL(self.timeLength)
-					s.computeE(self.timeLength)
-					s.computeDsBig(self.timeLength)
 				
 				if(s.j==i):
-					total_Rs = total_Rs + s.Rs			
+					total_Rs = total_Rs + s.Rs	
 
 			self.cells[i].computeRho(self.timeLength, ss, next_phi, total_Rs)
 			self.cells[i].computeDBig(total_beta)
@@ -111,6 +111,7 @@ class Stretch:
 					
 
 	def iterativeProcedure(self, i, t):
+		print("Itero")
 		demands = [] ## contains whole stations for convenience
 		Rs_vector = []
 		prev_D = self.cells[i-1].DBig
