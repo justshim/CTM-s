@@ -5,8 +5,8 @@ import xlrd
 import matplotlib.pyplot as plt
 import numpy as np
 
-#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
 
@@ -14,7 +14,8 @@ sh.cell_value(0,0)
 
 fac = f.Factory()
 
-fac.createStretch(10, 500, 1500)
+### T[h]
+fac.createStretch(10/3600, 500, 150)
 
 for i in range(1, sh.nrows):
 	           #ID stretch   length,             v,                   w,                q,   q_max,               s,    r, rho_max,          beta, p
@@ -30,10 +31,12 @@ fac.addStationToStretch(0, 231, 1, 3, 890, 0.05, 1) #Note: q_max was statically 
 k=0
 r = []
 while k<=100:
-	fac.stretches[0].update()
-	#print (k)
+	print()
+	#print("Time instant: " + str(k))
+	fac.stretches[0].update(k)
+	
 	k = k + 1
-	r.append(fac.stretches[0].cells[-2].rho)
+	r.append(fac.stretches[0].cells[-2].rho[k])
 
 #plt.plot(r)
 #plt.show()
