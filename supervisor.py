@@ -4,7 +4,7 @@ import station as st
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
 
-	def __init__(self, timeLength, lastPhi, first_DBig):
+	def __init__(self, timeLength, lastPhi, phi_zero):
 		self.cells = []
 		self.stations = []
 		self.n_cells = 0
@@ -14,7 +14,7 @@ class Stretch:
 		self.delta_big = 0
 		self.pi = 0
 		self.lastPhi = lastPhi
-		self.first_DBig = first_DBig
+		self.phi_zero = phi_zero
 
 	def toString(self):
 		for c in self.cells:
@@ -55,7 +55,7 @@ class Stretch:
 		for i in range (len(self.cells)):
 			next_phi = 0
 			prev_DBig = 0
-			print("Cell: " + str(i))
+			#print("Cell: " + str(i))
 			self.cells[i].updateK(k)
 			
 			#special treatment for last cell
@@ -68,7 +68,7 @@ class Stretch:
 			if(i != 0):
 				prev_DBig = self.cells[i-1].DBig
 			else:
-				prev_DBig = self.first_DBig		## Static assignment from data for first cell
+				prev_DBig = self.phi_zero[k]		## Static assignment from data for first cell
 
 			self.cells[i].computeDBig(0)
 			self.cells[i].computeSBig()

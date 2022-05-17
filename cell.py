@@ -40,35 +40,35 @@ class Cell:
 
 		if(self.congestionState == 0): #FREE FLOW
 			self.phi=Dprec
-			print("Free flow")
-			print("Dprec " + str(Dprec))
+			#print("Free flow")
+			#print("Dprec " + str(Dprec))
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
 			#self.phi=self.SBig-TotalDs
 			self.phi=self.SBig
-			print("Congested 1")
+			#print("Congested 1")
 			#print("TotalDs " + str(TotalDs))
-			print("SBig " + str(self.SBig))
+			#print("SBig " + str(self.SBig))
 		elif(self.congestionState == 2): #CONGESTED SERVICE
 			self.phi=Dprec
 			print("Congested 2")
 		elif(self.congestionState == 3): #CONGESTED ALL
 			self.phi=self.SBig*self.p_ms
 			print("Congested 3")
-		print("Phi: " + str(self.phi))
+		#print("Phi: " + str(self.phi))
 
 	def computePhiPlus(self, Rs_total):
 		self.phi_plus = self.phi + 0 + 0
 		#self.phi_plus = self.phi + self.r + Rs_total
-		print("phi +: " + str(self.phi_plus)) 
+		#print("phi +: " + str(self.phi_plus)) 
 		
 	def computePhiMinus(self, Ss, NextPhi):
 		self.phi_minus = NextPhi + 0 + 0
 		#self.phi_minus = NextPhi + self.s + Ss
-		print("phi -: " + str(self.phi_minus))
+		#print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
 		self.rho.append(self.rho[self.k]+(TimeLength/self.length*(self.phi_plus-self.phi_minus)))
-		print("rho:  " + str(self.rho[self.k+1]))
+		#print("rho:  " + str(self.rho[self.k+1]))
 
 
 	def computeDBig(self, total_beta):
