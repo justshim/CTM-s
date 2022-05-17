@@ -72,7 +72,8 @@ while k<8640: # k=24h=8640 , k=1h=360
 plt.figure(0)
 plt.grid(True)
 #plt.plot(r0)
-plt.scatter(np.linspace(0, 8640, 8640), r0, marker="x")
+plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
+
 
 # plt.figure(1)
 # plt.grid(True)
@@ -105,8 +106,6 @@ plt.scatter(np.linspace(0, 8640, 8640), r0, marker="x")
 # plt.figure(8)
 # plt.grid(True)
 # plt.plot(r8)
-
-
 
 x = np.linspace(0, 8640, 8640)
 y = r0
