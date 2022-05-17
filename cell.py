@@ -68,21 +68,21 @@ class Cell:
 	def computePhiMinus(self, Ss, NextPhi):
 		self.phi_minus = NextPhi + 0 + 0
 		#self.phi_minus = NextPhi + self.s + Ss
-		print("phi -: " + str(self.phi_minus))
+		#print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
 		self.rho.append(self.rho[self.k]+(TimeLength/self.length*(self.phi_plus-self.phi_minus)))
-		print("rho[k+1]:  " + str(self.rho[self.k+1]))
+		#print("rho[k+1]:  " + str(self.rho[self.k+1]))
 
 
 	def computeDBig(self, total_beta):
 		#a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
-		a = self.v * self.rho[self.k] #k o k-1?????????
+		a = self.v * self.rho[self.k]
 		if(a > self.q_max):
 			self.DBig=self.q_max
 		else:
 			self.DBig=a
-		print("DBig:  " + str(self.DBig))
+		#print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
 		a = self.w*(self.rho_max-self.rho[self.k])
@@ -107,12 +107,12 @@ class Cell:
 			self.congestionState=3 #CONGESTED ALL
 		
 		else:
-			print("update")
-			print(Dprec)
+			#print("update")
+			#print(Dprec)
 			#print(TotalDs)
 			#print(self.SBig)
-			#print("Congestion Error")
+			print("Congestion Error")
 
 	def setPhiPlus(self, phi_uno):
 		self.phi_plus=phi_uno
-		print("phi +: " + str(self.phi_plus)) 
+		#print("phi +: " + str(self.phi_plus)) 

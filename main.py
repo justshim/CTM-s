@@ -6,14 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # read file CTM_data
-loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
 sh.cell_value(0,0)
 
 #read phi first cell 
-loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+
 wb_phi = xlrd.open_workbook(loc_phi)
 sh_phi = wb_phi.sheet_by_index(0)
 sh_phi.cell_value(0,0)
@@ -51,9 +53,8 @@ r7 = []
 r8 = []
 
 
-while k<100: # k=24h=8640 , k=1h=360
-	print()
-	#print("Time instant: " + str(k))
+while k<8640: # k=24h=8640 , k=1h=360
+	#print("Time instant: " + str(k) + "\n")
 	fac.stretches[0].update(k)
 	
 	k = k + 1
@@ -70,42 +71,48 @@ while k<100: # k=24h=8640 , k=1h=360
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 plt.figure(0)
 plt.grid(True)
-plt.plot(r0)
+#plt.plot(r0)
+plt.scatter(np.linspace(0, 8640, 8640), r0, marker="x")
 
-plt.figure(1)
-plt.grid(True)
-plt.plot(r1)
+# plt.figure(1)
+# plt.grid(True)
+# plt.plot(r1)
 
-plt.figure(2)
-plt.grid(True)
-plt.plot(r2)
+# plt.figure(2)
+# plt.grid(True)
+# plt.plot(r2)
 
-plt.figure(3)
-plt.grid(True)
-plt.plot(r3)
+# plt.figure(3)
+# plt.grid(True)
+# plt.plot(r3)
 
-plt.figure(4)
-plt.grid(True)
-plt.plot(r4)
+# plt.figure(4)
+# plt.grid(True)
+# plt.plot(r4)
 
-plt.figure(5)
-plt.grid(True)
-plt.plot(r5)
+# plt.figure(5)
+# plt.grid(True)
+# plt.plot(r5)
 
-plt.figure(6)
-plt.grid(True)
-plt.plot(r6)
+# plt.figure(6)
+# plt.grid(True)
+# plt.plot(r6)
 
-plt.figure(7)
-plt.grid(True)
-plt.plot(r7)
+# plt.figure(7)
+# plt.grid(True)
+# plt.plot(r7)
 
-plt.figure(8)
-plt.grid(True)
-plt.plot(r8)
+# plt.figure(8)
+# plt.grid(True)
+# plt.plot(r8)
+
+
+
+x = np.linspace(0, 8640, 8640)
+y = r0
+z = np.polyfit(x, y, 10)
+p = np.poly1d(z)
+
+plt.plot(x,p(x),"r--")
 
 plt.show()
-
-
-
-# ATTENZIONE Ss SEMPRE 0

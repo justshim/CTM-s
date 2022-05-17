@@ -50,7 +50,7 @@ class Stretch:
 		self.timeLength=newT
 
 	def update(self, k):
-		print("Time instant: " + str(k))
+		#print("Time instant: " + str(k))
 
 		for i in range (len(self.cells)):
 			self.cells[i].updateK(k)
@@ -58,24 +58,24 @@ class Stretch:
 		
 		
 		for i in range (len(self.cells)):
-			print("Cell: " + str(i))
+			#print("Cell: " + str(i))
+			self.cells[i].computeDBig(0)
 			prev_DBig = 0
 			# special treatment for first cell
 			if(i != 0):
 
 				prev_DBig = self.cells[i-1].DBig # non arriva il DBig giusto
-				print("prev_DBig: " + str(self.cells[i-1].DBig))
+				#print("prev_DBig: " + str(self.cells[i-1].DBig))
 			else:
 				prev_DBig = self.phi_zero[k]		## Static assignment from data for first cell
-				print("prev_DBig: " + str(prev_DBig))
+				#print("prev_DBig: " + str(prev_DBig))
 			
 			self.cells[i].computePhi(prev_DBig, 0)
-			print("Phi: " + str(self.cells[i].phi))
+			#print("Phi: " + str(self.cells[i].phi))
 
-		print()
 		for i in range (len(self.cells)):
 			next_phi = 0
-			print("Cell: " + str(i))
+			#print("Cell: " + str(i))
 			
 			
 			#special treatment for last cell
@@ -84,9 +84,9 @@ class Stretch:
 			else:
 				next_phi = self.lastPhi	## Static assignment from data for last cell
 			
-			print("next_phi: " + str(next_phi))
+			#print("next_phi: " + str(next_phi))
 			
-			self.cells[i].computeDBig(0)
+			#self.cells[i].computeDBig(0)
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(0, next_phi)
 			
