@@ -12,8 +12,8 @@ class Factory:
 		self.stretches.append(stretch)
 		self.n_stretches = self.n_stretches+1
 
-	def addCellToStretch(self, ID_stretch, length, v, w, q, q_max, s, r, rho_max, beta, p):
-		self.stretches[ID_stretch].createCell(length, v, w, q, q_max, s, r, rho_max, beta, p)
+	def addCellToStretch(self, ID_stretch, length, v, w, q_max, s, r, rho_max, beta, p):
+		self.stretches[ID_stretch].createCell(length, v, w, q_max, s, r, rho_max, beta, p)
 
 	def addStationToStretch(self, ID_stretch, r_s_max, i, j, delta, beta_s, p):
 		self.stretches[ID_stretch].createStation(r_s_max, i, j, delta, beta_s, p)

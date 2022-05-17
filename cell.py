@@ -1,11 +1,11 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
-	def __init__(self, ID, length, v, w, q, q_max, s, r, rho_max, beta, p_ms):
+	def __init__(self, ID, length, v, w, q_max, s, r, rho_max, beta, p_ms):
 		self.ID_cell = ID
 		self.length = length
 		self.v = v
 		self.w = w
-		self.q = q
+		self.q = [1500] # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
 		self.q_max = q_max
 		self.s = s
@@ -14,7 +14,7 @@ class Cell:
 		self.phi = 0
 		self.phi_minus = 0
 		self.phi_plus = 0
-		self.rho = [6]
+		self.rho = [0]
 		self.beta = beta
 		self.DBig = 0 
 		self.SBig = 0
@@ -35,17 +35,21 @@ class Cell:
 	def updateK(self, k):
 		self.k=k
 
+	def computeQ(self):
+		#Q is a vector for capacity drop modelling
+		pass
+
 	def computePhi(self, Dprec, TotalDs):
 		self.updateCongestionState(Dprec, TotalDs)
 
 		if(self.congestionState == 0): #FREE FLOW
 			self.phi=Dprec
 			#print("Free flow")
-			#print("Dprec " + str(Dprec))
+			#print("Compute phi: Dprec " + str(Dprec))
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
 			#self.phi=self.SBig-TotalDs
 			self.phi=self.SBig
-			#print("Congested 1")
+			print("Congested 1")
 			#print("TotalDs " + str(TotalDs))
 			#print("SBig " + str(self.SBig))
 		elif(self.congestionState == 2): #CONGESTED SERVICE
@@ -64,21 +68,21 @@ class Cell:
 	def computePhiMinus(self, Ss, NextPhi):
 		self.phi_minus = NextPhi + 0 + 0
 		#self.phi_minus = NextPhi + self.s + Ss
-		#print("phi -: " + str(self.phi_minus))
+		print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
 		self.rho.append(self.rho[self.k]+(TimeLength/self.length*(self.phi_plus-self.phi_minus)))
-		#print("rho:  " + str(self.rho[self.k+1]))
+		print("rho[k+1]:  " + str(self.rho[self.k+1]))
 
 
 	def computeDBig(self, total_beta):
 		#a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
-		a = self.v * self.rho[self.k]
+		a = self.v * self.rho[self.k] #k o k-1?????????
 		if(a > self.q_max):
 			self.DBig=self.q_max
-		
 		else:
 			self.DBig=a
+		print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
 		a = self.w*(self.rho_max-self.rho[self.k])
