@@ -72,8 +72,8 @@ class Cell:
 
 
 	def computeDBig(self, total_beta):
-		a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
-		
+		#a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
+		a = self.v * self.rho[self.k]
 		if(a > self.q_max):
 			self.DBig=self.q_max
 		

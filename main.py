@@ -36,10 +36,10 @@ while k<=100:
 	fac.stretches[0].update(k)
 	
 	k = k + 1
-	r.append(fac.stretches[0].cells[-2].rho[k])
+	r.append(fac.stretches[0].cells[0].rho[k])
 
-#plt.plot(r)
-#plt.show()
+plt.plot(r)
+plt.show()
 
 
 # ATTENZIONE Ss SEMPRE 0
