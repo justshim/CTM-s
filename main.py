@@ -29,7 +29,7 @@ for i in range(0, sh_phi.nrows):
 
 fac = f.Factory()
 
-	# timeLength [hourss],   lastPhi,  phi_zero
+	# timeLength [h],   lastPhi,  phi_zero
 fac.createStretch(10/3600, 5000, phi_zero) 
 
 for i in range(1, sh.nrows):
