@@ -14,10 +14,13 @@ sh.cell_value(0,0)
 
 #read phi first cell 
 #loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s-debug/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
-sh_phi = wb_phi.sheet_by_index(0)
+#sh_phi = wb_phi.sheet_by_index(0) 		#sheet 0 is a "realistic" input
+sh_phi = wb_phi.sheet_by_index(1)		#sheet 1 is a "synthetic" input with 2 equal peaks
+#sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak
+
 sh_phi.cell_value(0,0)
 
 phi_zero=[]
@@ -71,8 +74,12 @@ while k<8640: # k=24h=8640 , k=1h=360
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 plt.figure(0)
 plt.grid(True)
-#plt.plot(r0)
-plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
+plt.plot(r0)
+
+plt.figure(99)
+plt.grid(True)
+plt.plot(phi_zero)
+#plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
 
 
 # plt.figure(1)
@@ -112,6 +119,6 @@ y = r0
 z = np.polyfit(x, y, 10)
 p = np.poly1d(z)
 
-plt.plot(x,p(x),"r--")
+#plt.plot(x,p(x),"r--")
 
 plt.show()
