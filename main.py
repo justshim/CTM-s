@@ -35,16 +35,16 @@ fac = f.Factory()
 fac.createStretch(10/3600, 5000, phi_zero) 
 
 for i in range(1, sh.nrows):
-	           #ID stretch   length,             v,                   w,              ,   q_max,               s,  r, rho_max,         beta, p
-	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 2500, 0, sh.cell_value(i,5), 0, 0.95)	
+	           #ID stretch   length,             v,                   w,              ,   q_max,           s,  r, rho_max,         beta, p
+	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0.95)	
 			#ID station, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 231, 3, 6, 890, 0.05, 1) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 3, 6, 89, 0.01, 1) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
 
 #fac.stretches[0].stations[0].toString()
-
+l0 = []
 r0 = []
 r1 = []
 r2 = []
@@ -56,11 +56,12 @@ r7 = []
 r8 = []
 
 k=0
-while k<1080: 						# k=24h=8640 , k=1h=360, k=3h=1080
-	#print("Time instant: " + str(k) + "\n")
+while k<208: 						# k=24h=8640 , k=1h=360, k=3h=1080
+	print("Time instant: " + str(k) + "\n")
 	
 	fac.stretches[0].update(k)
 	k = k + 1
+	l0.append(fac.stretches[0].stations[0].l[k])
 	r0.append(fac.stretches[0].cells[0].rho[k])
 	r1.append(fac.stretches[0].cells[1].rho[k])
 	r2.append(fac.stretches[0].cells[2].rho[k])
@@ -73,15 +74,17 @@ while k<1080: 						# k=24h=8640 , k=1h=360, k=3h=1080
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
-x = np.linspace(0, 3, 1080)
+x = np.linspace(0, 3, 208)
 
 plt.figure(0)
 plt.grid(True)
-plt.plot(x, r7)
+plt.xlabel('hours')
+plt.ylabel('rho')
+plt.plot(x, r3)
 
-plt.figure(99)
-plt.grid(True)
-plt.plot(x, phi_zero)
+# plt.figure(99)
+# plt.grid(True)
+# plt.plot(x, phi_zero)
 #plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
 
 

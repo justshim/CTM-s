@@ -41,7 +41,7 @@ class Cell:
 
 		if(self.congestionState == 0): #FREE FLOW
 			self.phi=Dprec
-			#print("Free flow")
+			print("Free flow")
 			#print("Compute phi: Dprec " + str(Dprec))
 		
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
@@ -94,6 +94,7 @@ class Cell:
 			self.SBig=a
 
 	def updateCongestionState(self, Dprec, TotalDs):
+		print("TotalDs: "+ str(TotalDs))
 		if(Dprec+TotalDs<=self.SBig): 
 			self.congestionState=0 #FREE FLOW
 		

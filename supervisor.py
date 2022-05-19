@@ -63,7 +63,7 @@ class Stretch:
 		for s in range (len(self.stations)):
 			self.stations[s].updateK(k)
 			self.stations[s].computeDsBig(self.timeLength)
-			self.stations[s].computeRs()
+			#self.stations[s].computeRs()
 		
 		## First stock of cell value updates, with special case for cell 0
 		for i in range (len(self.cells)):
@@ -87,7 +87,7 @@ class Stretch:
 			# special treatment for first cell
 			if(i != 0):
 
-				prev_DBig = self.cells[i-1].DBig # non arriva il DBig giusto
+				prev_DBig = self.cells[i-1].DBig
 				#print("prev_DBig: " + str(self.cells[i-1].DBig))
 			else:
 				prev_DBig = self.phi_zero[k]		## Static assignment from data for first cell
@@ -104,6 +104,16 @@ class Stretch:
 			
 			for s in range (len(self.stations)):
 				if self.stations[s].j == i:
+					
+					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
+	 					self.stations[s].computeRs()
+					
+					elif self.cells[i].congestionState == 2:
+	 					self.iterativeProcedure(i, 2)
+					
+					elif self.cells[i].congestionState == 3:
+	 					self.iterativeProcedure(i, 3)
+					
 					totalRs += self.stations[s].Rs
 			
 			#special treatment for last cell
@@ -118,6 +128,7 @@ class Stretch:
 			for s in range (len(self.stations)):
 				self.stations[s].computeSs(next_phi)
 				Ss += self.stations[s].Ss
+				#print("Ss: "+ str(Ss))
 
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(Ss, next_phi)
@@ -125,9 +136,9 @@ class Stretch:
 			self.cells[i].computePhiPlus(totalRs)
 			self.cells[i].computeRho(self.timeLength)
 
-		for i in range (len(self.stations)):
-			self.stations[i].computeL(self.timeLength)
-			self.stations[i].computeE(self.timeLength)
+		for s in range (len(self.stations)):
+			self.stations[s].computeL(self.timeLength)
+			self.stations[s].computeE(self.timeLength)
 
 		
 

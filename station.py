@@ -35,17 +35,21 @@ class Station:
 
 	def computeE(self, TimeLength):
 		if len(self.l) < self.delta:
-			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs))
+			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs)) #TimeLength in h o s?
 		else:
-			self.E.append(self.E[self.k] + self.l[-self.delta] - (TimeLength * self.Rs))
+			self.E.append(self.E[self.k] + self.l[-self.delta] - (TimeLength * self.Rs)) #TimeLength in h o s?
 
 	def computeDsBig(self, TimeLength):
 		app = 0
 		if len(self.l) < self.delta:
 			app = (0 + self.E[self.k]) / TimeLength
+			
 		else:
-			app = (self.l[-self.delta] + self.E[self.k]) / TimeLength
-
+			print("self.l[self.k]" + str(self.l[self.k]))
+			print("self.E[self.k]" + str(self.E[self.k]))
+			app = (self.l[-self.delta] + self.E[self.k]) / TimeLength #TimeLength in h o s?
+			
+		print("app: "+str(app))
 		if(app > self.r_s_max):
 			self.d_s_big = self.r_s_max
 		else:
