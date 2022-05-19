@@ -52,14 +52,38 @@ class Stretch:
 	def update(self, k):
 		#print("Time instant: " + str(k))
 		prev_DBig = 0
+		totalDs = 0
+		Ss = 0
+
+		## First of all update time instant for all cells
 		for i in range (len(self.cells)):
 			self.cells[i].updateK(k)
+
+		## For stations, first update time instant and compute preliminary values
+		for s in range (len(self.stations)):
+			self.stations[s].updateK(k)
+			self.stations[s].computeDsBig(self.timeLength)
+			self.stations[s].computeRs()
 		
-		
+		## First stock of cell value updates, with special case for cell 0
 		for i in range (len(self.cells)):
 			#print("Cell: " + str(i))
-			self.cells[i].computeDBig(0)
+			totalBeta = 0
+			totalDs = 0
+			
+			## For each cell, check if any station stems from it, and sum all betas
+			for s in range (len(self.stations)):
+				if self.stations[s].i == i:
+					totalBeta += self.stations[s].beta_s
+
+			## For each cell, check if any station merges in it, and sum all Ds's
+			for s in range (len(self.stations)):
+				if self.stations[s].j == i:
+					totalDs += self.stations[s].d_s_big
+
+			self.cells[i].computeDBig(totalBeta)
 			prev_DBig = 0
+			
 			# special treatment for first cell
 			if(i != 0):
 
@@ -69,28 +93,42 @@ class Stretch:
 				prev_DBig = self.phi_zero[k]		## Static assignment from data for first cell
 				#print("prev_DBig: " + str(prev_DBig))
 			
-			self.cells[i].computePhi(prev_DBig, 0)
+			self.cells[i].computePhi(prev_DBig, totalDs)
 			#print("Phi: " + str(self.cells[i].phi))
 
+		## Second stock of cell value updates, with special case for cell 0
 		for i in range (len(self.cells)):
 			next_phi = 0
+			totalRs = 0
 			#print("Cell: " + str(i))
 			
+			for s in range (len(self.stations)):
+				if self.stations[s].j == i:
+					totalRs += self.stations[s].Rs
 			
 			#special treatment for last cell
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
+			
 			else:
 				next_phi = self.lastPhi	## Static assignment from data for last cell
 			
 			#print("next_phi: " + str(next_phi))
 			
-			#self.cells[i].computeDBig(0)
+			for i in range (len(self.stations)):
+				self.stations[i].computeSs(next_phi)
+				Ss += self.stations[i].Ss
+
 			self.cells[i].computeSBig()
-			self.cells[i].computePhiMinus(0, next_phi)
+			self.cells[i].computePhiMinus(Ss, next_phi)
 			
-			self.cells[i].computePhiPlus(0)
+			self.cells[i].computePhiPlus(totalRs)
 			self.cells[i].computeRho(self.timeLength)
+
+		for i in range (len(self.stations)):
+			self.stations[i].computeL(self.timeLength)
+			self.stations[i].computeE(self.timeLength)
+
 		
 
 

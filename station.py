@@ -9,13 +9,13 @@ class Station:
 		self.j = j
 		self.Ss = 0
 		self.Rs = 0
-		self.E = 0
-		self.oldE = 0
+		self.E = [0]
 		self.d_s_big = 0
 		self.delta = delta
 		self.beta_s = beta_s
 		self.l = [0]
 		self.p = p
+		self.k = 0
 
 	def toString(self):
 		print("Station ID: "+str(self.ID_station))
@@ -26,27 +26,25 @@ class Station:
 		print("Vehicles number: "+str(self.l))
 		print()
 
-	def computeSs(self, phiMeno):
-		self.Ss = self.beta_s*phiMeno
+	def computeSs(self, nextPhi):
+		self.Ss = (self.beta_s / (1 - self.beta_s)) * nextPhi ### ATTENZIONE: SOMMA DEI BETA?
 
 	def computeRs(self):
 			self.Rs=self.d_s_big
-			print("d_s_big " + str(self.d_s_big))
+			#print("d_s_big " + str(self.d_s_big))
 
 	def computeE(self, TimeLength):
-		self.oldE = self.E
-		
 		if len(self.l) < self.delta:
-			self.E = self.oldE + 0 - (TimeLength * self.Rs)
+			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs))
 		else:
-			self.E = self.oldE + self.l[-self.delta] - (TimeLength * self.Rs)
+			self.E.append(self.E[self.k] + self.l[-self.delta] - (TimeLength * self.Rs))
 
 	def computeDsBig(self, TimeLength):
 		app = 0
 		if len(self.l) < self.delta:
-			app = (0 + self.oldE) / TimeLength
+			app = (0 + self.E[self.k]) / TimeLength
 		else:
-			app = (self.l[-self.delta] + self.oldE) / TimeLength
+			app = (self.l[-self.delta] + self.E[self.k]) / TimeLength
 
 		if(app > self.r_s_max):
 			self.d_s_big = self.r_s_max
@@ -54,6 +52,9 @@ class Station:
 			self.d_s_big = app
 
 	def computeL(self, TimeLength):
-		new_l = self.l[-1] + TimeLength * (self.Ss-self.Rs)
-		self.l.append(new_l)
+		self.l.append(self.l[self.k] + TimeLength * (self.Ss-self.Rs))
+
+	def updateK(self, kappa):
+		self.k=kappa
+		print("K stazione " + str(self.k))
 

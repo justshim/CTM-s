@@ -32,9 +32,6 @@ class Cell:
 		print("q_max: "+str(self.q_max))
 		print()
 
-	def updateK(self, k):
-		self.k=k
-
 	def computeQ(self):
 		#Q is a vector for capacity drop modelling
 		pass
@@ -46,28 +43,29 @@ class Cell:
 			self.phi=Dprec
 			#print("Free flow")
 			#print("Compute phi: Dprec " + str(Dprec))
+		
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
-			#self.phi=self.SBig-TotalDs
-			self.phi=self.SBig
+			self.phi=self.SBig-TotalDs
 			print("Congested 1")
 			#print("TotalDs " + str(TotalDs))
 			#print("SBig " + str(self.SBig))
+		
 		elif(self.congestionState == 2): #CONGESTED SERVICE
 			self.phi=Dprec
 			print("Congested 2")
+		
 		elif(self.congestionState == 3): #CONGESTED ALL
 			self.phi=self.SBig*self.p_ms
 			print("Congested 3")
+		
 		#print("Phi: " + str(self.phi))
 
 	def computePhiPlus(self, Rs_total):
-		self.phi_plus = self.phi + 0 + 0
-		#self.phi_plus = self.phi + self.r + Rs_total
+		self.phi_plus = self.phi + self.r + Rs_total
 		#print("phi +: " + str(self.phi_plus)) 
 		
 	def computePhiMinus(self, Ss, NextPhi):
-		self.phi_minus = NextPhi + 0 + 0
-		#self.phi_minus = NextPhi + self.s + Ss
+		self.phi_minus = NextPhi + self.s + Ss
 		#print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
@@ -76,12 +74,15 @@ class Cell:
 
 
 	def computeDBig(self, total_beta):
-		#a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
-		a = self.v * self.rho[self.k]
+		print(self.k)
+		a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
+
 		if(a > self.q_max):
 			self.DBig=self.q_max
+		
 		else:
 			self.DBig=a
+		
 		#print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
@@ -107,12 +108,13 @@ class Cell:
 			self.congestionState=3 #CONGESTED ALL
 		
 		else:
-			#print("update")
-			#print(Dprec)
-			#print(TotalDs)
-			#print(self.SBig)
 			print("Congestion Error")
 
-	def setPhiPlus(self, phi_uno):
-		self.phi_plus=phi_uno
-		#print("phi +: " + str(self.phi_plus)) 
+
+	def updateK(self, kappa):
+		self.k=kappa
+		print("K cella " + str(self.k))
+
+	# def setPhiPlus(self, phi_uno):
+	# 	self.phi_plus=phi_uno
+	# 	#print("phi +: " + str(self.phi_plus)) 
