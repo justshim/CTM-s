@@ -56,5 +56,5 @@ class Station:
 
 	def updateK(self, kappa):
 		self.k=kappa
-		print("K stazione " + str(self.k))
+		
 

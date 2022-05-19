@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # read file CTM_data
-#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
 sh.cell_value(0,0)
 
 #read phi first cell 
-#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
 
@@ -37,8 +37,8 @@ fac.createStretch(10/3600, 5000, phi_zero)
 for i in range(1, sh.nrows):
 	           #ID stretch   length,             v,                   w,              ,   q_max,               s,  r, rho_max,         beta, p
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 2500, 0, sh.cell_value(i,5), 0, 0.95)	
-
-fac.addStationToStretch(0, 231, 6, 7, 890, 0.05, 1) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+			#ID station, r_s_max, i, j, delta, beta_s, p
+fac.addStationToStretch(0, 231, 3, 6, 890, 0.05, 1) #Note: q_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
@@ -58,18 +58,18 @@ r8 = []
 k=0
 while k<1080: 						# k=24h=8640 , k=1h=360, k=3h=1080
 	#print("Time instant: " + str(k) + "\n")
-	print("Main " + str(k))
+	
 	fac.stretches[0].update(k)
 	k = k + 1
-	# r0.append(fac.stretches[0].cells[0].rho[k])
-	# r1.append(fac.stretches[0].cells[1].rho[k])
-	# r2.append(fac.stretches[0].cells[2].rho[k])
-	# r3.append(fac.stretches[0].cells[3].rho[k])
-	# r4.append(fac.stretches[0].cells[4].rho[k])
-	# r5.append(fac.stretches[0].cells[5].rho[k])
-	# r6.append(fac.stretches[0].cells[6].rho[k])
-	# r7.append(fac.stretches[0].cells[7].rho[k])
-	# r8.append(fac.stretches[0].cells[8].rho[k])
+	r0.append(fac.stretches[0].cells[0].rho[k])
+	r1.append(fac.stretches[0].cells[1].rho[k])
+	r2.append(fac.stretches[0].cells[2].rho[k])
+	r3.append(fac.stretches[0].cells[3].rho[k])
+	r4.append(fac.stretches[0].cells[4].rho[k])
+	r5.append(fac.stretches[0].cells[5].rho[k])
+	r6.append(fac.stretches[0].cells[6].rho[k])
+	r7.append(fac.stretches[0].cells[7].rho[k])
+	r8.append(fac.stretches[0].cells[8].rho[k])
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 

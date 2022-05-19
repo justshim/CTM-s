@@ -115,9 +115,9 @@ class Stretch:
 			
 			#print("next_phi: " + str(next_phi))
 			
-			for i in range (len(self.stations)):
-				self.stations[i].computeSs(next_phi)
-				Ss += self.stations[i].Ss
+			for s in range (len(self.stations)):
+				self.stations[s].computeSs(next_phi)
+				Ss += self.stations[s].Ss
 
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(Ss, next_phi)
