@@ -51,10 +51,9 @@ class Stretch:
 
 	def update(self, k):
 		#print("Time instant: " + str(k))
-
+		prev_DBig = 0
 		for i in range (len(self.cells)):
 			self.cells[i].updateK(k)
-		
 		
 		
 		for i in range (len(self.cells)):

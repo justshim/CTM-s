@@ -14,12 +14,14 @@ sh.cell_value(0,0)
 
 #read phi first cell 
 #loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s-debug/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
+
 #sh_phi = wb_phi.sheet_by_index(0) 		#sheet 0 is a "realistic" input
-sh_phi = wb_phi.sheet_by_index(1)		#sheet 1 is a "synthetic" input with 2 equal peaks
-#sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak
+#sh_phi = wb_phi.sheet_by_index(1)		#sheet 1 is a "synthetic" input with 2 equal peaks
+#sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak (24h)
+sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
 
 sh_phi.cell_value(0,0)
 
@@ -56,7 +58,7 @@ r7 = []
 r8 = []
 
 
-while k<8640: # k=24h=8640 , k=1h=360
+while k<1080: # k=24h=8640 , k=1h=360, k=3h=1080
 	#print("Time instant: " + str(k) + "\n")
 	fac.stretches[0].update(k)
 	
@@ -72,13 +74,16 @@ while k<8640: # k=24h=8640 , k=1h=360
 	r8.append(fac.stretches[0].cells[8].rho[k])
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
+
+x = np.linspace(0, 3, 1080)
+
 plt.figure(0)
 plt.grid(True)
-plt.plot(r0)
+plt.plot(x, r7)
 
 plt.figure(99)
 plt.grid(True)
-plt.plot(phi_zero)
+plt.plot(x, phi_zero)
 #plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
 
 
@@ -114,10 +119,10 @@ plt.plot(phi_zero)
 # plt.grid(True)
 # plt.plot(r8)
 
-x = np.linspace(0, 8640, 8640)
-y = r0
-z = np.polyfit(x, y, 10)
-p = np.poly1d(z)
+# x = np.linspace(0, 8640, 8640)
+# y = r0
+# z = np.polyfit(x, y, 10)
+# p = np.poly1d(z)
 
 #plt.plot(x,p(x),"r--")
 
