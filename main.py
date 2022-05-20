@@ -38,7 +38,7 @@ for i in range(1, sh.nrows):
 	           #ID stretch   length,             v,                   w,              ,   q_max,           s,  r, rho_max,         beta, p
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0.95)	
 			#ID station, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 500, 3, 6, 89, 0.01, 1) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 3, 6, 5, 0.01, 1) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
@@ -56,7 +56,7 @@ r7 = []
 r8 = []
 
 k=0
-while k<200: 						# k=24h=8640 , k=1h=360, k=3h=1080
+while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	print("Time instant: " + str(k) + "\n")
 	
 	fac.stretches[0].update(k)
@@ -74,7 +74,7 @@ while k<200: 						# k=24h=8640 , k=1h=360, k=3h=1080
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
-x = np.linspace(0, 3, 200)
+x = np.linspace(0, 3, 1080)
 
 plt.figure(0)
 plt.grid(True)

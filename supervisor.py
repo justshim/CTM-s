@@ -129,7 +129,7 @@ class Stretch:
 				
 				if self.stations[s].i == i:
 					self.stations[s].computeSs(next_phi)
-					Ss_tot += self.stations[s].Ss
+					Ss_tot += self.stations[s].Ss[k]
 		
 			#print("next_phi: " + str(next_phi))
 

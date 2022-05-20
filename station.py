@@ -7,7 +7,7 @@ class Station:
 		self.r_s_max = r_s_max
 		self.i = i
 		self.j = j
-		self.Ss = 0
+		self.Ss = [0]
 		self.Rs = 0
 		self.E = [0]
 		self.d_s_big = 0
@@ -27,8 +27,8 @@ class Station:
 		print()
 
 	def computeSs(self, nextPhi):
-		self.Ss = (self.beta_s / (1 - self.beta_s)) * nextPhi ### ATTENZIONE: SOMMA DEI BETA?
-		print("Ss: "+str(self.Ss))
+		self.Ss.append((self.beta_s / (1 - self.beta_s)) * nextPhi)
+		print("Ss: "+str(self.Ss[self.k]))
 
 	def computeRs(self):
 		self.Rs=self.d_s_big
@@ -38,17 +38,18 @@ class Station:
 		if len(self.l) < self.delta:
 			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs)) # TimeLength in h o s?
 		else:
-			self.E.append(self.E[self.k] + self.l[self.k-self.delta] - (TimeLength * self.Rs)) #TimeLength in h o s?
+			self.E.append(self.E[self.k] + TimeLength*(self.Ss[self.k-self.delta] - (self.Rs))) #TimeLength in h o s?
 
 	def computeDsBig(self, TimeLength):
 		app = 0
-		if len(self.l) < self.delta:
+		if len(self.Ss) < self.delta:
 			app = (0 + self.E[self.k]) / TimeLength
 			
 		else:
 			print("self.l[self.k]" + str(self.l[self.k]))
 			print("self.E[self.k]" + str(self.E[self.k]))
-			app = (self.l[self.k-self.delta] + self.E[self.k]) / TimeLength #TimeLength in h o s?
+			print("self.Ss[self.k-self.delta]" + str(self.Ss[self.k-self.delta]))
+			app = (self.Ss[self.k-self.delta] + self.E[self.k]/TimeLength)
 			
 		print("app: "+str(app))
 		if(app > self.r_s_max):
@@ -57,7 +58,7 @@ class Station:
 			self.d_s_big = app
 
 	def computeL(self, TimeLength):
-		self.l.append(self.l[self.k] + TimeLength * (self.Ss-self.Rs))
+		self.l.append(self.l[self.k] + TimeLength * (self.Ss[self.k]-self.Rs))
 		print("l: " +str(self.l[self.k]))
 
 	def updateK(self, kappa):
