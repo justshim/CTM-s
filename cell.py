@@ -94,7 +94,7 @@ class Cell:
 			self.SBig=a
 
 	def updateCongestionState(self, Dprec, TotalDs):
-		print("TotalDs: "+ str(TotalDs))
+		#print("TotalDs: "+ str(TotalDs))
 		if(Dprec+TotalDs<=self.SBig): 
 			self.congestionState=0 #FREE FLOW
 		

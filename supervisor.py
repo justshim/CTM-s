@@ -53,7 +53,7 @@ class Stretch:
 		#print("Time instant: " + str(k))
 		prev_DBig = 0
 		totalDs = 0
-		Ss = 0
+		Ss_tot = 0
 
 		## First of all update time instant for all cells
 		for i in range (len(self.cells)):
@@ -100,11 +100,20 @@ class Stretch:
 		for i in range (len(self.cells)):
 			next_phi = 0
 			totalRs = 0
+			Ss_tot = 0
 			#print("Cell: " + str(i))
 			
+			#special treatment for last cell
+			if((i+1) < (len(self.cells))):
+				next_phi = self.cells[i+1].phi
+			
+			else:
+				next_phi = self.lastPhi	## Static assignment from data for last cell
+			
 			for s in range (len(self.stations)):
+				
 				if self.stations[s].j == i:
-					
+					#print("i: "+str(i)+"	self.stations[s].j: "+str(self.stations[s].j))
 					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
 	 					self.stations[s].computeRs()
 					
@@ -115,24 +124,18 @@ class Stretch:
 	 					self.iterativeProcedure(i, 3)
 					
 					totalRs += self.stations[s].Rs
-			
-			#special treatment for last cell
-			if((i+1) < (len(self.cells))):
-				next_phi = self.cells[i+1].phi
-			
-			else:
-				next_phi = self.lastPhi	## Static assignment from data for last cell
-			
+				
+					print("Rs: "+str(self.stations[s].Rs))
+				
+				if self.stations[s].i == i:
+					self.stations[s].computeSs(next_phi)
+					Ss_tot += self.stations[s].Ss
+		
 			#print("next_phi: " + str(next_phi))
-			
-			for s in range (len(self.stations)):
-				self.stations[s].computeSs(next_phi)
-				Ss += self.stations[s].Ss
-				#print("Ss: "+ str(Ss))
 
 			self.cells[i].computeSBig()
-			self.cells[i].computePhiMinus(Ss, next_phi)
-			
+			self.cells[i].computePhiMinus(Ss_tot, next_phi)
+			print("Total RS: "+str(totalRs))
 			self.cells[i].computePhiPlus(totalRs)
 			self.cells[i].computeRho(self.timeLength)
 
@@ -140,75 +143,6 @@ class Stretch:
 			self.stations[s].computeL(self.timeLength)
 			self.stations[s].computeE(self.timeLength)
 
-		
-
-
-	# def update(self):
-	# 	cong = 0
-	# 	beta=0
-	# 	total_Rs = 0 
-	# 	total_Ds=0
-	# 	next_phi = 0
-	# 	prev_DBig = 0
-
-	# 	for i in range (len(self.cells)):
-	# 		total_beta=0
-	# 		print("Cell: " + str(i))
-	# 		# special treatment for last cell
-	# 		if((i+1) < (len(self.cells))):
-	# 			next_phi = self.cells[i+1].phi
-	# 		else:
-	# 			next_phi = 0	## Static assignment from data for last cell
-
-	# 		# special treatment for first cell
-	# 		if(i != 0):
-	# 			prev_DBig = self.cells[i-1].DBig
-	# 		else:
-	# 			prev_DBig = self.first_DBig		## Static assignment from data for first cell
-
-	# 		# first total_Ds needs to be updated for the computation of the congestion state
-	# 		for s in self.stations:
-	# 			if(s.j==i):
-	# 				total_Ds=total_Ds+s.d_s_big
-	# 				#### ATTENZIONE: Ds DA RIFERIRE A USCITA DELLA STAZIONE?
-
-	# 		self.cells[i].computePhi(prev_DBig, total_Ds) ## calls cell.updateCongestionState
-
-	# 		# if cell has stations entering or exiting, those stations are updated
-	# 		for s in self.stations:
-	# 			if(s.i==i):
-	# 				s.computeSs(self.cells[i].phi_minus)
-	# 				ss=s.Ss
-	# 				beta=s.beta_s
-	# 				total_beta = total_beta + s.beta_s
-	# 			else:
-	# 				ss=0
-
-	# 			if(s.j==i) or (s.i==i):
-	# 				s.computeL(self.timeLength)
-	# 				s.computeE(self.timeLength)
-	# 				s.computeDsBig(self.timeLength)
-
-	# 				if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-	# 					s.computeRs()
-	# 				elif self.cells[i].congestionState == 2:
-	# 					self.iterativeProcedure(i, 2)
-	# 				elif self.cells[i].congestionState == 3:
-	# 					self.iterativeProcedure(i, 3)
-				
-	# 			if(s.j==i):
-	# 				total_Rs = total_Rs + s.Rs	
-			
-			
-
-	# 		self.cells[i].computePhiPlus(total_Rs)
-	# 		if(i == 0):
-	# 			self.cells[i].setPhiPlus(600)
-	# 		self.cells[i].computePhiMinus(ss, next_phi)
-	# 		self.cells[i].computeRho(self.timeLength)
-	# 		self.cells[i].computeDBig(total_beta)
-	# 		self.cells[i].computeSBig()
-					
 
 	def iterativeProcedure(self, i, t):
 		print("Itero")
