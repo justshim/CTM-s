@@ -18,6 +18,8 @@ class Station:
 		self.k = 0
 
 	def toString(self):
+		## Utility method to print some information about the service station
+
 		print("Station ID: "+str(self.ID_station))
 		print("From cell "+str(self.i))
 		print("To cell "+str(self.j))
@@ -27,22 +29,31 @@ class Station:
 		print()
 
 	def computeSs(self, nextPhi):
+		## Computation of the flow leaving the mainstream to enter this service station at time instant k
+
 		self.Ss.append((self.beta_s / (1 - self.beta_s)) * nextPhi)
 		print("Ss: "+str(self.Ss[self.k]))
 
 	def computeRs(self):
+		## Computation of the flow merging into the mainstream from this service station at time instant k
+
 		self.Rs=self.d_s_big
 		#print("d_s_big " + str(self.d_s_big))
 
 	def computeE(self, TimeLength):
+		## Computation of the number of vehicles queueing at this service station at time instant k (due to the impossibility of merging back into the mainstream)
+
 		if len(self.l) < self.delta:
 			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs)) # TimeLength in h o s?
 		else:
 			self.E.append(self.E[self.k] + TimeLength*(self.Ss[self.k-self.delta] - (self.Rs))) #TimeLength in h o s?
 
 	def computeDsBig(self, TimeLength):
-		app = 0
-		if len(self.Ss) < self.delta:
+		## Computation of the demand of the ramp exiting this service station at time instant k
+
+		app = 0		# this is a support variable used to simplify the syntax later
+		
+		if len(self.Ss) < self.delta:  # for the first delta time instants we skip the computation of s_s(k-delta), as it would send the index out of bounds, and s_s is zero in this period anyways
 			app = (0 + self.E[self.k]) / TimeLength
 			
 		else:
@@ -52,16 +63,21 @@ class Station:
 			app = (self.Ss[self.k-self.delta] + self.E[self.k]/TimeLength)
 			
 		print("app: "+str(app))
+		
 		if(app > self.r_s_max):
 			self.d_s_big = self.r_s_max
 		else:
 			self.d_s_big = app
 
 	def computeL(self, TimeLength):
+		## Computation of the number of vehicles at this service station at time instant k + 1
+
 		self.l.append(self.l[self.k] + TimeLength * (self.Ss[self.k]-self.Rs))
 		print("l: " +str(self.l[self.k]))
 
 	def updateK(self, kappa):
+		## Each iteration starts with the update of the time instant
+		
 		self.k=kappa
 		
 

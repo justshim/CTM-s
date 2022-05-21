@@ -37,6 +37,9 @@ class Cell:
 		pass
 
 	def computePhi(self, Dprec, TotalDs):
+		## Computation of the flow entering this cell from the previous one at time instant k
+		## The computation of phi varies according to the congestion state of the cell, hence we update it first
+ 
 		self.updateCongestionState(Dprec, TotalDs)
 
 		if(self.congestionState == 0): #FREE FLOW
@@ -61,19 +64,27 @@ class Cell:
 		#print("Phi: " + str(self.phi))
 
 	def computePhiPlus(self, Rs_total):
+		## Computation of the total flow entering this cell at time instant k
+
 		self.phi_plus = self.phi + self.r + Rs_total
 		#print("phi +: " + str(self.phi_plus)) 
 		
 	def computePhiMinus(self, Ss, NextPhi):
+		## Computation of the total flow exiting this cell at time instant k
+
 		self.phi_minus = NextPhi + self.s + Ss
 		#print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
+		## Computation of the traffic density of this cell at time instant k + 1
+
 		self.rho.append(self.rho[self.k]+(TimeLength/self.length*(self.phi_plus-self.phi_minus)))
 		#print("rho[k+1]:  " + str(self.rho[self.k+1]))
 
 
 	def computeDBig(self, total_beta):
+		## Computation of the demand of this cell at time instant k
+
 		a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
 
 		if(a > self.q_max):
@@ -85,7 +96,9 @@ class Cell:
 		#print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
-		a = self.w*(self.rho_max-self.rho[self.k])
+		## Computation of the supply of this cell at time instant k
+
+		a = self.w*(self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
 		
 		if(a > self.q_max):
 			self.SBig=self.q_max
@@ -94,6 +107,8 @@ class Cell:
 			self.SBig=a
 
 	def updateCongestionState(self, Dprec, TotalDs):
+		## Computation of the congestion state of this cell at time instant k
+
 		#print("TotalDs: "+ str(TotalDs))
 		if(Dprec+TotalDs<=self.SBig): 
 			self.congestionState=0 #FREE FLOW
@@ -112,9 +127,6 @@ class Cell:
 
 
 	def updateK(self, kappa):
-		self.k=kappa
-		
+		## Each iteration starts with the update of the time instant
 
-	# def setPhiPlus(self, phi_uno):
-	# 	self.phi_plus=phi_uno
-	# 	#print("phi +: " + str(self.phi_plus)) 
+		self.k=kappa

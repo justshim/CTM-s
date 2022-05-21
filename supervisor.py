@@ -17,6 +17,8 @@ class Stretch:
 		self.phi_zero = phi_zero
 
 	def toString(self):
+		## Utility method to print some information about the highway stretch
+
 		for c in self.cells:
 			c.toString()
 		for s in self.stations:
@@ -31,85 +33,99 @@ class Stretch:
 
 
 	def computeDelta(self):
+		## Computation of the additional TTT (total travel time) due to congestions on this stretch
+
 		pass
 
 	def computePi(self):
+		## Computation of percentage of peak congestion reduction on this stretch
+
 		pass
 		
 	def createCell(self, length, v, w, q_max, s, r, rho_max, beta, p):
+		## Method to create an instance of the object Cell, and add it to this stretch
+
 		cell = c.Cell(self.n_cells, length, v, w, q_max, s, r, rho_max, beta, p) 
 		self.cells.append(cell)
 		self.n_cells = self.n_cells + 1
 
 	def createStation(self, r_s_max, i, j, delta, beta_s, p):
+		## Method to create an instance of the object Station, and add it to this stretch
+
 		station = st.Station(self.n_stations, r_s_max, i, j, delta, beta_s, p) 
 		self.stations.append(station)
 		self.n_stations = self.n_stations + 1
 
 	def setT(self, newT):
+		## Method to externally set the time instant length, mainly for debugging
+
 		self.timeLength=newT
 
 	def update(self, k):
+		## Main method of the calss: at each time instant k updates all the parameters of the cells and service stations on this stretch
+
 		#print("Time instant: " + str(k))
-		prev_DBig = 0
+		prev_DBig = 0		# initialization of support variables used later
 		totalDs = 0
 		Ss_tot = 0
 
-		## First of all update time instant for all cells
+		## First of all update time instant for all cells with current k
 		for i in range (len(self.cells)):
 			self.cells[i].updateK(k)
 
-		## For stations, first update time instant and compute preliminary values
+		## Samefor stations, plus computation of some preliminary values
 		for s in range (len(self.stations)):
 			self.stations[s].updateK(k)
 			self.stations[s].computeDsBig(self.timeLength)
 			#self.stations[s].computeRs()
 		
-		## First stock of cell value updates, with special case for cell 0
+		## First batch of cell value updates, with special case for cell 0
 		for i in range (len(self.cells)):
 			#print("Cell: " + str(i))
-			totalBeta = 0
+			totalBeta = 0		# initialization of support variables
 			totalDs = 0
-			
-			## For each cell, check if any station stems from it, and sum all betas
+			prev_DBig = 0
+
+			## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
 			for s in range (len(self.stations)):
 				if self.stations[s].i == i:
 					totalBeta += self.stations[s].beta_s
 
-			## For each cell, check if any station merges in it, and sum all Ds's
+			## For each cell, check if any station merges in it, and sum all Ds's (needed for the computation of phi_i)
 			for s in range (len(self.stations)):
 				if self.stations[s].j == i:
 					totalDs += self.stations[s].d_s_big
 
 			self.cells[i].computeDBig(totalBeta)
-			prev_DBig = 0
 			
-			# special treatment for first cell
+			# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
 			if(i != 0):
-
 				prev_DBig = self.cells[i-1].DBig
 				#print("prev_DBig: " + str(self.cells[i-1].DBig))
+			
 			else:
-				prev_DBig = self.phi_zero[k]		## Static assignment from data for first cell
+				prev_DBig = self.phi_zero[k]		
 				#print("prev_DBig: " + str(prev_DBig))
 			
 			self.cells[i].computePhi(prev_DBig, totalDs)
 			#print("Phi: " + str(self.cells[i].phi))
 
-		## Second stock of cell value updates, with special case for cell 0
+		## Second batch of cell value updates, with special case for last cell
 		for i in range (len(self.cells)):
-			next_phi = 0
+			next_phi = 0		# initialization of support variables
 			totalRs = 0
 			Ss_tot = 0
 			#print("Cell: " + str(i))
 			
-			#special treatment for last cell
+			# Last cell does not have a "next" cell, hence phi_(i+1) is given as input
 			if((i+1) < (len(self.cells))):
 				next_phi = self.cells[i+1].phi
 			
 			else:
-				next_phi = self.lastPhi	## Static assignment from data for last cell
+				next_phi = self.lastPhi
 			
+			## For each cell, check if any stations merge into it, and compute their r_s; 
+			## then check if any stations stem from it, and compute their s_s. These are then summed up for use, respectively, in the computation of Phi- and Phi+
 			for s in range (len(self.stations)):
 				
 				if self.stations[s].j == i:
@@ -139,19 +155,23 @@ class Stretch:
 			self.cells[i].computePhiPlus(totalRs)
 			self.cells[i].computeRho(self.timeLength)
 
+		## As a final step, all stations have their l and e updated
 		for s in range (len(self.stations)):
 			self.stations[s].computeL(self.timeLength)
 			self.stations[s].computeE(self.timeLength)
 
 
 	def iterativeProcedure(self, i, t):
-		print("Itero")
-		demands = [] ## contains whole stations for convenience
+		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
+
+		print("Iterative procedure in process")
+
+		demands = []		# initialization of support variables
 		Rs_vector = []
 		prev_D = self.cells[i-1].DBig
 		supply = self.cells[i].SBig
 		supply_res = supply
-		good = [0]
+		good = [0]			# list to contain "good" demands, i.e. the ones that do not saturate the flow
 		sum_D_good = 0
 		sum_p = 0
 
@@ -159,9 +179,9 @@ class Stretch:
 			if(s.j==i):
 			 	demands.append(s)
 
-		bad = demands
+		bad = demands		# list to contain "bad" demands, i.e. the ones that do saturate the flow
 			
-		# compute E_cal_overline and E_cal_underline
+		# Recursively compute "bad" (E_cal_overline in the paper) and "good" (E_cal_underline in the paper)
 		while len(good) != 0:
 			good.clear()
 			for d in demands:
@@ -176,15 +196,15 @@ class Stretch:
 						supply_res = (1 - self.cells[i].p_ms)*supply_res - d.d_s_big
 						## VERIFICARE CHE SIA DAVVERO Pms
 				
-		# compute sum of priorities for all involved stations
+		# Compute sum of priorities for all involved stations
 		for b in bad:
 			sum_p = sum_p + b.p
 
-		# compute remaining Rs
+		# Compute remaining Rs
 		for b in bad:
 			Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
 
-		# update all Rs of all stations involved
+		# Update all Rs of all stations involved
 		for k in range(len(Rs_vector)):
 			for station in self.stations:
 				if Rs_vector[[k][0]] == station.ID_station:
