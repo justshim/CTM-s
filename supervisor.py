@@ -134,18 +134,19 @@ class Stretch:
 	 					self.stations[s].computeRs()
 					
 					elif self.cells[i].congestionState == 2:
-	 					self.iterativeProcedure(i, 2)
+	 					self.iterativeProcedure(i, 2, k)
 					
 					elif self.cells[i].congestionState == 3:
-	 					self.iterativeProcedure(i, 3)
+	 					self.iterativeProcedure(i, 3, k)
 					
-					totalRs += self.stations[s].Rs
+					totalRs += self.stations[s].Rs[k]
 				
-					print("Rs: "+str(self.stations[s].Rs))
+					print("Rs: "+str(self.stations[s].Rs[k]))
 				
 				if self.stations[s].i == i:
 					self.stations[s].computeSs(next_phi)
 					Ss_tot += self.stations[s].Ss[k]
+					
 		
 			#print("next_phi: " + str(next_phi))
 
@@ -161,13 +162,13 @@ class Stretch:
 			self.stations[s].computeE(self.timeLength)
 
 
-	def iterativeProcedure(self, i, t):
+	def iterativeProcedure(self, i, t, k):
 		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
 
 		print("Iterative procedure in process")
 
 		demands = []		# initialization of support variables
-		Rs_vector = []
+		#Rs_vector = []
 		prev_D = self.cells[i-1].DBig
 		supply = self.cells[i].SBig
 		supply_res = supply - prev_D
@@ -189,28 +190,46 @@ class Stretch:
 					bad.remove(d)
 					good.append(d)
 					
-					Rs_vector.append([d.ID_station, d.d_s_big])
+					#update RS for "good"
+					for station in self.stations: 
+						if d.ID_station == int(station.ID_station):
+							station.Rs.append (d.d_s_big)
+
+					#Rs_vector.append([d.ID_station, d.d_s_big])
+					
 					sum_D_good = sum_D_good + d.d_s_big
 					if t == 2:
 						supply_res = supply_res - d.d_s_big
 					elif t == 3:
-						supply_res = (1 - d.p)*supply_res - d.d_s_big
-						## VERIFICARE CHE SIA DAVVERO Pms	
+						supply_res = (1 - d.p)*supply_res - d.d_s_big  ## VERIFICARE FORMULA
+																		
 		
 		# Compute sum of priorities for all involved stations
 		for b in bad:
 			sum_p = sum_p + b.p
 
-		# Compute remaining Rs
-		for b in bad:
-			Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
+		#update RS for "bad"
+		for b in bad:	
+			for station in self.stations: 
+				if b.ID_station == int(station.ID_station):
+					station.Rs.append((b.p/sum_p)*supply_res)
+					print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
+		
 
-		# Update all Rs of all stations involved
-		for k in range(len(Rs_vector)):
-			for station in self.stations:
-				print (station.ID_station)
-				if Rs_vector[k][0] == int(station.ID_station):
-					station.Rs = Rs_vector[k][1]
+
+		# # Compute remaining Rs
+		# for b in bad:
+		# 	Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
+
+		# # Update all Rs of all stations involved
+		# for j in range(len(Rs_vector)):
+		# 	for station in self.stations:
+		# 		#print (station.ID_station)
+		# 		if Rs_vector[j][0] == int(station.ID_station):
+		# 			station.Rs = Rs_vector[j][1] 
+
+
+					
 
 		
 
