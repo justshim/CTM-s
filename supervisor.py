@@ -151,7 +151,7 @@ class Stretch:
 
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(Ss_tot, next_phi)
-			print("Total RS: "+str(totalRs))
+			#print("Total RS: "+str(totalRs))
 			self.cells[i].computePhiPlus(totalRs)
 			self.cells[i].computeRho(self.timeLength)
 
@@ -170,7 +170,7 @@ class Stretch:
 		Rs_vector = []
 		prev_D = self.cells[i-1].DBig
 		supply = self.cells[i].SBig
-		supply_res = supply
+		supply_res = supply - prev_D
 		good = [0]			# list to contain "good" demands, i.e. the ones that do not saturate the flow
 		sum_D_good = 0
 		sum_p = 0
@@ -185,17 +185,18 @@ class Stretch:
 		while len(good) != 0:
 			good.clear()
 			for d in demands:
-				if d.d_s_big <= (supply - prev_D - sum_D_good)/len(bad):
+				if d.d_s_big <= (supply - sum_D_good)/len(bad):
 					bad.remove(d)
 					good.append(d)
+					
 					Rs_vector.append([d.ID_station, d.d_s_big])
 					sum_D_good = sum_D_good + d.d_s_big
 					if t == 2:
 						supply_res = supply_res - d.d_s_big
 					elif t == 3:
-						supply_res = (1 - self.cells[i].p_ms)*supply_res - d.d_s_big
-						## VERIFICARE CHE SIA DAVVERO Pms
-				
+						supply_res = (1 - d.p)*supply_res - d.d_s_big
+						## VERIFICARE CHE SIA DAVVERO Pms	
+		
 		# Compute sum of priorities for all involved stations
 		for b in bad:
 			sum_p = sum_p + b.p
@@ -207,8 +208,9 @@ class Stretch:
 		# Update all Rs of all stations involved
 		for k in range(len(Rs_vector)):
 			for station in self.stations:
-				if Rs_vector[[k][0]] == station.ID_station:
-					station.Rs = Rs_vector[[k][1]]
+				print (station.ID_station)
+				if Rs_vector[k][0] == int(station.ID_station):
+					station.Rs = Rs_vector[k][1]
 
 		
 

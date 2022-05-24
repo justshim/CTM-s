@@ -22,6 +22,8 @@ class Cell:
 		self.k = 0
 
 	def toString(self):
+		## Utility method to print some information about the cell
+
 		print("Cell ID: "+str(self.ID_cell))
 		print("Length: "+str(self.length))
 		print("r: "+str(self.r))
@@ -38,28 +40,28 @@ class Cell:
 
 	def computePhi(self, Dprec, TotalDs):
 		## Computation of the flow entering this cell from the previous one at time instant k
-		## The computation of phi varies according to the congestion state of the cell, hence we update it first
+		## (the computation of phi varies according to the congestion state of the cell, hence we update it first)
  
 		self.updateCongestionState(Dprec, TotalDs)
 
 		if(self.congestionState == 0): #FREE FLOW
 			self.phi=Dprec
-			print("Free flow")
+			#print("Free flow, cell " + str(self.ID_cell))
 			#print("Compute phi: Dprec " + str(Dprec))
 		
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
 			self.phi=self.SBig-TotalDs
-			print("Congested 1")
+			print("Congested 1, cell " + str(self.ID_cell))
 			#print("TotalDs " + str(TotalDs))
 			#print("SBig " + str(self.SBig))
 		
 		elif(self.congestionState == 2): #CONGESTED SERVICE
 			self.phi=Dprec
-			print("Congested 2")
+			print("Congested 2, cell " + str(self.ID_cell))
 		
 		elif(self.congestionState == 3): #CONGESTED ALL
 			self.phi=self.SBig*self.p_ms
-			print("Congested 3")
+			print("Congested 3, cell " + str(self.ID_cell))
 		
 		#print("Phi: " + str(self.phi))
 
