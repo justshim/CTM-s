@@ -158,8 +158,8 @@ class Stretch:
 
 		## As a final step, all stations have their l and e updated
 		for s in range (len(self.stations)):
-			self.stations[s].computeL(self.timeLength)
 			self.stations[s].computeE(self.timeLength)
+			self.stations[s].computeL(self.timeLength)
 
 
 	def iterativeProcedure(self, i, t, k):

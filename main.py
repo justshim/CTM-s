@@ -55,7 +55,7 @@ for i in range(1, sh.nrows):
 			
 ## create the stations via the factory
 			#ID station, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 500, 3, 6, 89, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 3, 6, 89, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
@@ -146,45 +146,5 @@ plt.plot(e0)
 # plt.grid(True)
 # plt.plot(phi_zero)
 # plt.scatter(np.linspace(0, 8640, 8640), l0, 4, marker="x")
-
-
-# plt.figure(1)
-# plt.grid(True)
-# plt.plot(r1)
-
-# plt.figure(2)
-# plt.grid(True)
-# plt.plot(r2)
-
-# plt.figure(3)
-# plt.grid(True)
-# plt.plot(r3)
-
-# plt.figure(4)
-# plt.grid(True)
-# plt.plot(r4)
-
-# plt.figure(5)
-# plt.grid(True)
-# plt.plot(r5)
-
-# plt.figure(6)
-# plt.grid(True)
-# plt.plot(r6)
-
-# plt.figure(7)
-# plt.grid(True)
-# plt.plot(r7)
-
-# plt.figure(8)
-# plt.grid(True)
-# plt.plot(r8)
-
-# x = np.linspace(0, 8640, 8640)
-# y = r0
-# z = np.polyfit(x, y, 10)
-# p = np.poly1d(z)
-
-#plt.plot(x,p(x),"r--")
 
 plt.show()

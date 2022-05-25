@@ -45,22 +45,22 @@ class Cell:
 		self.updateCongestionState(Dprec, TotalDs)
 
 		if(self.congestionState == 0): #FREE FLOW
-			self.phi=Dprec
+			self.phi = Dprec
 			#print("Free flow, cell " + str(self.ID_cell))
 			#print("Compute phi: Dprec " + str(Dprec))
 		
 		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
-			self.phi=self.SBig-TotalDs
+			self.phi = self.SBig-TotalDs
 			print("Congested 1, cell " + str(self.ID_cell))
 			#print("TotalDs " + str(TotalDs))
 			#print("SBig " + str(self.SBig))
 		
 		elif(self.congestionState == 2): #CONGESTED SERVICE
-			self.phi=Dprec
+			self.phi = Dprec
 			print("Congested 2, cell " + str(self.ID_cell))
 		
 		elif(self.congestionState == 3): #CONGESTED ALL
-			self.phi=self.SBig*self.p_ms
+			self.phi = self.SBig  * self.p_ms
 			print("Congested 3, cell " + str(self.ID_cell))
 		
 		#print("Phi: " + str(self.phi))
@@ -80,7 +80,7 @@ class Cell:
 	def computeRho(self, TimeLength):
 		## Computation of the traffic density of this cell at time instant k + 1
 
-		self.rho.append(self.rho[self.k]+(TimeLength/self.length*(self.phi_plus-self.phi_minus)))
+		self.rho.append(self.rho[self.k] + (TimeLength/self.length * (self.phi_plus - self.phi_minus)))
 		#print("rho[k+1]:  " + str(self.rho[self.k+1]))
 
 
@@ -90,23 +90,23 @@ class Cell:
 		a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
 
 		if(a > self.q_max):
-			self.DBig=self.q_max
+			self.DBig = self.q_max
 		
 		else:
-			self.DBig=a
+			self.DBig = a
 		
 		#print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
 		## Computation of the supply of this cell at time instant k
 
-		a = self.w*(self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
+		a = self.w * (self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
 		
 		if(a > self.q_max):
-			self.SBig=self.q_max
+			self.SBig = self.q_max
 		
 		else:
-			self.SBig=a
+			self.SBig = a
 
 	def updateCongestionState(self, Dprec, TotalDs):
 		## Computation of the congestion state of this cell at time instant k

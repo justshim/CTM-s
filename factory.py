@@ -4,15 +4,15 @@ import supervisor as s
 class Factory:
 	"""Class for the creation of instances of cells and stations""" 
 	def __init__(self):
-		self.stretches=[]
-		self.n_stretches=0
+		self.stretches = []
+		self.n_stretches = 0
 
 	def createStretch(self, TimeLength, last_phi, first_DBig):
 		## Method for the creation of instances of the object Stretch
 
 		stretch = s.Stretch(TimeLength, last_phi, first_DBig)
 		self.stretches.append(stretch)
-		self.n_stretches = self.n_stretches+1
+		self.n_stretches = self.n_stretches + 1
 
 	def addCellToStretch(self, ID_stretch, length, v, w, q_max, s, r, rho_max, beta, p):
 		## Call to supervisors's method for the creation of instances of the object Cell
