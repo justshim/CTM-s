@@ -55,7 +55,7 @@ for i in range(1, sh.nrows):
 			
 ## create the stations via the factory
 			#ID station, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 500, 3, 6, 5, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 3, 6, 89, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
@@ -128,7 +128,7 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 # Plot management section:  #
 #############################
 
-#x = np.linspace(0, 3, 1080)
+# x = np.linspace(0, 3, 1080)
 
 plt.figure(0)
 plt.grid(True)
@@ -145,7 +145,7 @@ plt.plot(e0)
 # plt.figure(99)
 # plt.grid(True)
 # plt.plot(phi_zero)
-# plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
+# plt.scatter(np.linspace(0, 8640, 8640), l0, 4, marker="x")
 
 
 # plt.figure(1)
