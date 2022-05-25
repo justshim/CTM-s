@@ -57,11 +57,6 @@ for i in range(1, sh.nrows):
 			#ID station, r_s_max, i, j, delta, beta_s, p
 fac.addStationToStretch(0, 500, 3, 6, 89, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
-#for cell in fac.stretches[0].cells:
-	#cell.toString()
-
-#fac.stretches[0].stations[0].toString()
-
 ## support variables to save various parameters during execution, and possibly plot them
 l0 = []
 e0 = []
@@ -128,17 +123,15 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 # Plot management section:  #
 #############################
 
-# x = np.linspace(0, 3, 1080)
-
 plt.figure(0)
 plt.grid(True)
-plt.xlabel('hours')
+plt.xlabel('k')
 plt.ylabel('l')
 plt.plot(l0)
 
-plt.figure(1)
+#plt.figure(1)
 plt.grid(True)
-plt.xlabel('hours')
+plt.xlabel('k')
 plt.ylabel('e')
 plt.plot(e0)
 

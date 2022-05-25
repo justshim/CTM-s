@@ -165,7 +165,7 @@ class Stretch:
 	def iterativeProcedure(self, i, t, k):
 		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
 
-		print("Iterative procedure in process")
+		#print("Iterative procedure in process")
 
 		demands = []		# initialization of support variables
 		#Rs_vector = []
@@ -228,7 +228,7 @@ class Stretch:
 			for station in self.stations: 
 				if b.ID_station == int(station.ID_station):
 					station.Rs.append((b.p/sum_p)*supply_res)
-					print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
+					#print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
 		
 
 

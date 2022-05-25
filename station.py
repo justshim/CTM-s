@@ -32,7 +32,7 @@ class Station:
 		## Computation of the flow leaving the mainstream to enter this service station at time instant k
 
 		self.Ss.append((self.beta_s / (1 - self.beta_s)) * nextPhi)
-		print("Ss: "+str(self.Ss[self.k]))
+		print("Ss: " + str(self.Ss[self.k]))
 
 	def computeRs(self):
 		## Computation of the flow merging into the mainstream from this service station at time instant k
@@ -45,11 +45,11 @@ class Station:
 
 		if len(self.Ss) < self.delta:
 			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs[self.k]))
-			print("IF")
+			#print("IF")
 			#self.E.append(0)
 		else:
-			self.E.append(self.E[self.k] + (TimeLength * self.Ss[self.k-self.delta]) - (TimeLength * self.Rs[self.k]))
-			print("ELSE // Ss= " + str(self.Ss[self.k-self.delta]))
+			self.E.append(self.E[self.k] + (TimeLength * self.Ss[self.k - self.delta]) - (TimeLength * self.Rs[self.k]))
+			#print("ELSE // Ss= " + str(self.Ss[self.k-self.delta]))
 
 	def computeDsBig(self, TimeLength):
 		## Computation of the demand of the ramp exiting this service station at time instant k
@@ -65,7 +65,7 @@ class Station:
 			print("self.l[self.k]" + str(self.l[self.k]))
 			print("self.E[self.k]" + str(self.E[self.k]))
 			#print("self.Ss[self.k-self.delta]" + str(self.Ss[self.k-self.delta]))
-			app = (self.Ss[self.k-self.delta] + self.E[self.k]/TimeLength)
+			app = (self.Ss[self.k - self.delta] + self.E[self.k] / TimeLength)
 			
 		#print("app: "+str(app))
 		
@@ -76,9 +76,9 @@ class Station:
 
 	def computeL(self, TimeLength):
 		## Computation of the number of vehicles at this service station at time instant k + 1
-
-		self.l.append(self.l[self.k] + (TimeLength * self.Ss[self.k]) - (TimeLength * self.Rs[self.k]))
-		#print("l: " +str(self.l[self.k]))
+		
+		self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - TimeLength * self.Rs[self.k])
+	
 
 	def updateK(self, kappa):
 		## Each iteration starts with the update of the time instant
