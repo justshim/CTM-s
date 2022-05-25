@@ -11,8 +11,8 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
@@ -20,8 +20,8 @@ sh.cell_value(0,0)
 
 ## read phi first cell from xls file
 
-loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
 
@@ -50,12 +50,12 @@ fac.createStretch(10/3600, 5000, phi_zero)
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
-	           #ID stretch   length,             v,                   w,              ,   q_max,           s,  r, rho_max,         beta, p
+	           #ID stretch   length,             v,                   w,              ,   q_max,           s,  r, rho_max,         beta, p_ms
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0.95)	
-			#ID station, r_s_max, i, j, delta, beta_s, p
-
+			
 ## create the stations via the factory
-fac.addStationToStretch(0, 500, 3, 6, 5, 0.01, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+			#ID station, r_s_max, i, j, delta, beta_s, p
+fac.addStationToStretch(0, 500, 3, 6, 5, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 #for cell in fac.stretches[0].cells:
 	#cell.toString()
@@ -142,10 +142,10 @@ plt.xlabel('hours')
 plt.ylabel('e')
 plt.plot(e0)
 
-plt.figure(99)
-plt.grid(True)
-plt.plot(phi_zero)
-#plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
+# plt.figure(99)
+# plt.grid(True)
+# plt.plot(phi_zero)
+# plt.scatter(np.linspace(0, 8640, 8640), r0, 4, marker="x")
 
 
 # plt.figure(1)

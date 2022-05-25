@@ -171,7 +171,6 @@ class Stretch:
 		#Rs_vector = []
 		prev_D = self.cells[i-1].DBig
 		supply = self.cells[i].SBig
-		supply_res = supply - prev_D
 		good = [0]			# list to contain "good" demands, i.e. the ones that do not saturate the flow
 		sum_D_good = 0
 		sum_p = 0
@@ -180,30 +179,46 @@ class Stretch:
 			if(s.j==i):
 			 	demands.append(s)
 
+		if t == 2:
+			supply_res = supply - prev_D
+
+		elif t == 3:
+			supply_res = (1 - self.cells[i].p_ms)*supply
+
 		bad = demands		# list to contain "bad" demands, i.e. the ones that do saturate the flow
 			
 		# Recursively compute "bad" (E_cal_overline in the paper) and "good" (E_cal_underline in the paper)
 		while len(good) != 0:
 			good.clear()
-			for d in demands:
-				if d.d_s_big <= (supply - sum_D_good)/len(bad):
-					bad.remove(d)
-					good.append(d)
-					
-					#update RS for "good"
-					for station in self.stations: 
-						if d.ID_station == int(station.ID_station):
-							station.Rs.append (d.d_s_big)
+			if t == 2:
+				for d in demands:
+					if d.d_s_big <= (supply_res - sum_D_good)/len(bad):
+						bad.remove(d)
+						good.append(d)
+						
+						#update RS for "good"
+						for station in self.stations: 
+							if d.ID_station == int(station.ID_station):
+								station.Rs.append (d.d_s_big)
 
-					#Rs_vector.append([d.ID_station, d.d_s_big])
-					
-					sum_D_good = sum_D_good + d.d_s_big
-					if t == 2:
+						sum_D_good = sum_D_good + d.d_s_big
+
 						supply_res = supply_res - d.d_s_big
-					elif t == 3:
-						supply_res = (1 - d.p)*supply_res - d.d_s_big  ## VERIFICARE FORMULA
-																		
-		
+			elif t == 3:
+				for d in demands:
+					if d.d_s_big <= (((1 - self.cells[i].p_ms) * supply_res) - sum_D_good)/len(bad):
+						bad.remove(d)
+						good.append(d)
+						
+						#update RS for "good"
+						for station in self.stations: 
+							if d.ID_station == int(station.ID_station):
+								station.Rs.append (d.d_s_big)
+						
+						sum_D_good = sum_D_good + d.d_s_big
+
+						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.d_s_big  ## VERIFICARE FORMULA
+
 		# Compute sum of priorities for all involved stations
 		for b in bad:
 			sum_p = sum_p + b.p

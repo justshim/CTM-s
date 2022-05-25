@@ -112,16 +112,16 @@ class Cell:
 		## Computation of the congestion state of this cell at time instant k
 
 		#print("TotalDs: "+ str(TotalDs))
-		if(Dprec+TotalDs<=self.SBig): 
+		if(Dprec + TotalDs <= self.SBig): 
 			self.congestionState=0 #FREE FLOW
 		
-		elif((Dprec > self.p_ms*self.SBig) and (TotalDs <= (1-self.p_ms))):
+		elif((Dprec > self.p_ms * self.SBig) and (TotalDs <= (1 - self.p_ms) * self.SBig)):
 			self.congestionState=1 #CONGESTED MAINSTREAM
 		
-		elif((Dprec <= self.p_ms*self.SBig) and (TotalDs > (1-self.p_ms))):
+		elif((Dprec <= self.p_ms * self.SBig) and (TotalDs > (1 - self.p_ms) * self.SBig)):
 			self.congestionState=2 #CONGESTED SERVICE
 		
-		elif((Dprec > self.p_ms*self.SBig) and (TotalDs > (1-self.p_ms))):
+		elif((Dprec > self.p_ms * self.SBig) and (TotalDs > (1 - self.p_ms) * self.SBig)):
 			self.congestionState=3 #CONGESTED ALL
 		
 		else:

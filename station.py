@@ -77,7 +77,7 @@ class Station:
 	def computeL(self, TimeLength):
 		## Computation of the number of vehicles at this service station at time instant k + 1
 
-		self.l.append(self.l[self.k] + (self.Ss[self.k]-self.Rs[self.k]))
+		self.l.append(self.l[self.k] + TimeLength*(self.Ss[self.k]-self.Rs[self.k]))
 		#print("l: " +str(self.l[self.k]))
 
 	def updateK(self, kappa):
