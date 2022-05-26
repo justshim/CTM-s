@@ -139,16 +139,13 @@ class Stretch:
 					elif self.cells[i].congestionState == 3:
 	 					self.iterativeProcedure(i, 3, k)
 					
-					totalRs += self.stations[s].Rs[k]
+					totalRs += self.stations[s].Rs
 				
-					print("Rs: "+str(self.stations[s].Rs[k]))
+					#print("Rs: "+str(self.stations[s].Rs[k]))
 				
 				if self.stations[s].i == i:
 					self.stations[s].computeSs(next_phi)
 					Ss_tot += self.stations[s].Ss[k]
-					
-		
-			#print("next_phi: " + str(next_phi))
 
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(Ss_tot, next_phi)
@@ -165,10 +162,7 @@ class Stretch:
 	def iterativeProcedure(self, i, t, k):
 		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
 
-		#print("Iterative procedure in process")
-
 		demands = []		# initialization of support variables
-		#Rs_vector = []
 		prev_D = self.cells[i-1].DBig
 		supply = self.cells[i].SBig
 		good = [0]			# list to contain "good" demands, i.e. the ones that do not saturate the flow
@@ -199,7 +193,7 @@ class Stretch:
 						#update RS for "good"
 						for station in self.stations: 
 							if d.ID_station == int(station.ID_station):
-								station.Rs.append (d.d_s_big)
+								station.Rs = d.d_s_big
 
 						sum_D_good = sum_D_good + d.d_s_big
 
@@ -213,7 +207,7 @@ class Stretch:
 						#update RS for "good"
 						for station in self.stations: 
 							if d.ID_station == int(station.ID_station):
-								station.Rs.append (d.d_s_big)
+								station.Rs = d.d_s_big
 						
 						sum_D_good = sum_D_good + d.d_s_big
 
@@ -227,38 +221,5 @@ class Stretch:
 		for b in bad:	
 			for station in self.stations: 
 				if b.ID_station == int(station.ID_station):
-					station.Rs.append((b.p/sum_p)*supply_res)
+					station.Rs = (b.p/sum_p)*supply_res
 					#print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
-		
-
-
-		# # Compute remaining Rs
-		# for b in bad:
-		# 	Rs_vector.append((b.ID_station, (b.p/sum_p)*supply_res))
-
-		# # Update all Rs of all stations involved
-		# for j in range(len(Rs_vector)):
-		# 	for station in self.stations:
-		# 		#print (station.ID_station)
-		# 		if Rs_vector[j][0] == int(station.ID_station):
-		# 			station.Rs = Rs_vector[j][1] 
-
-
-					
-
-		
-
-
-
-
-
-
-
-
-
-					
-			
-
-		
-
-
