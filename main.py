@@ -50,7 +50,7 @@ fac.createStretch(10/3600, 5000, phi_zero)
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
-	           #ID stretch   length,             v,                   w,              ,   q_max,           rho_max,         	p_ms
+	           #ID stretch   length,             v_free,                   w,              ,   q_max,           rho_max,         	p_ms
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), sh.cell_value(i,5), 0.95)	
 			
 ## create the stations via the factory

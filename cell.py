@@ -1,9 +1,9 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
-	def __init__(self, id_cell, length, v, w, q_max, rho_max, p_ms):
+	def __init__(self, id_cell, length, v_free, w, q_max, rho_max, p_ms):
 		self.id_cell = id_cell
 		self.length = length
-		self.v = v
+		self.v_free = v_free
 		self.w = w
 		self.q = [1500] # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
@@ -25,7 +25,7 @@ class Cell:
 		print("Length: "+str(self.length))
 		print("r: "+str(self.r))
 		print("s: "+str(self.s))
-		print("v: "+str(self.v))
+		print("v_free: "+str(self.v_free))
 		print("w: "+str(self.w))
 		print("rho_max: "+str(self.rho_max))
 		print("q_max: "+str(self.q_max))
@@ -74,7 +74,7 @@ class Cell:
 	def computeDBig(self, total_beta):
 		## Computation of the demand of this cell at time instant k
 
-		supp = (1 - total_beta) * self.v * self.rho[self.k]	# this is a support variable used to simplify the syntax later
+		supp = (1 - total_beta) * self.v_free * self.rho[self.k]	# this is a support variable used to simplify the syntax later
 
 		if(supp > self.q_max):
 			self.d_big = self.q_max

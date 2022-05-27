@@ -14,10 +14,10 @@ class Factory:
 		self.stretches.append(stretch)
 		self.n_stretches = self.n_stretches + 1
 
-	def addCellToStretch(self, id_stretch, length, v, w, q_max, rho_max, p):
+	def addCellToStretch(self, id_stretch, length, v_free, w, q_max, rho_max, p):
 		## Call to supervisors's method for the creation of instances of the object Cell
 
-		self.stretches[id_stretch].createCell(length, v, w, q_max, rho_max, p)
+		self.stretches[id_stretch].createCell(length, v_free, w, q_max, rho_max, p)
 
 	def addStationToStretch(self, id_stretch, r_s_max, i, j, delta, beta_s, p):
 		## Call to supervisors's method for the creation of instances of the object Station

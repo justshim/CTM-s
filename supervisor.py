@@ -41,7 +41,7 @@ class Stretch:
 	def computeTTT(self):
 		total_ell = 0
 		for i in range(len(self.cells)):
-			total_ell +=  self.cells[i].length/self.cells[i].v
+			total_ell +=  self.cells[i].length/self.cells[i].v_free
 
 		self.ttt = total_ell*3600
 		print("TTT: " + str(self.ttt))
@@ -56,10 +56,10 @@ class Stretch:
 
 		pass
 		
-	def createCell(self, length, v, w, q_max, rho_max, p):
+	def createCell(self, length, v_free, w, q_max, rho_max, p):
 		## Method to create an instance of the object Cell, and add it to this stretch
 
-		cell = c.Cell(self.n_cells, length, v, w, q_max, rho_max, p) 
+		cell = c.Cell(self.n_cells, length, v_free, w, q_max, rho_max, p) 
 		self.cells.append(cell)
 		self.n_cells = self.n_cells + 1
 
