@@ -87,26 +87,26 @@ class Cell:
 	def computeDBig(self, total_beta):
 		## Computation of the demand of this cell at time instant k
 
-		a = (1 - self.beta - total_beta) * self.v * self.rho[self.k]
+		supp = (1 - self.beta - total_beta) * self.v * self.rho[self.k]	# this is a support variable used to simplify the syntax later
 
-		if(a > self.q_max):
+		if(supp > self.q_max):
 			self.DBig = self.q_max
 		
 		else:
-			self.DBig = a
+			self.DBig = supp
 		
 		#print("DBig:  " + str(self.DBig))
 
 	def computeSBig(self):
 		## Computation of the supply of this cell at time instant k
 
-		a = self.w * (self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
+		supp = self.w * (self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
 		
-		if(a > self.q_max):
+		if(supp > self.q_max):
 			self.SBig = self.q_max
 		
 		else:
-			self.SBig = a
+			self.SBig = supp
 
 	def updateCongestionState(self, Dprec, TotalDs):
 		## Computation of the congestion state of this cell at time instant k

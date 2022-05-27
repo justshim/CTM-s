@@ -23,4 +23,9 @@ class Factory:
 		## Call to supervisors's method for the creation of instances of the object Station
 
 		self.stretches[ID_stretch].createStation(r_s_max, i, j, delta, beta_s, p)
+
+	def addOnRampToStretch(self, ID_stretch, d_r, r_r_max, j, p_r):
+		## Call to supervisors's method for the creation of instances of the object Station
+
+		self.stretches[ID_stretch].createOnRamp(d_r, r_r_max, j, p_r)
 		

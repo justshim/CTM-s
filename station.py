@@ -1,5 +1,3 @@
-import supervisor as su
-
 class Station:
 	"""Class modeling the service stations on an highway stretch in the CTM-s model"""
 	def __init__(self, ID, r_s_max, i, j, delta, beta_s, p):
@@ -25,7 +23,7 @@ class Station:
 		print("To cell "+str(self.j))
 		print("Time delay: "+str(self.delta))
 		print("Split ratio: "+str(self.beta_s))
-		print("Vehicles number: "+str(self.l))
+		print("Number of vehicles: "+str(self.l))
 		print()
 
 	def computeSs(self, nextPhi):
@@ -34,10 +32,13 @@ class Station:
 		self.Ss.append((self.beta_s / (1 - self.beta_s)) * nextPhi)
 		#print("Ss: " + str(self.Ss[self.k]))
 
-	def computeRs(self):
+	def computeRs(self, rs, t):
 		## Computation of the flow merging into the mainstream from this service station at time instant k
+		if t == 0 or t == 1:
+			self.Rs = self.d_s_big
 
-		self.Rs = self.d_s_big
+		elif t == 2 or t == 3:
+			self.Rs = rs
 		#print("d_s_big " + str(self.d_s_big))
 
 	def computeE(self, TimeLength):
@@ -54,10 +55,10 @@ class Station:
 	def computeDsBig(self, TimeLength):
 		## Computation of the demand of the ramp exiting this service station at time instant k
 
-		app = 0		# this is a support variable used to simplify the syntax later
+		supp = 0		# this is a support variable used to simplify the syntax later
 		
 		if len(self.Ss) < self.delta:  # for the first delta time instants we skip the computation of s_s(k-delta), as it would send the index out of bounds, and s_s is zero in this period anyways
-			app = (0 + self.E[self.k]) / TimeLength
+			supp = (0 + self.E[self.k]) / TimeLength
 			# print("self.l[self.k]" + str(self.l[self.k]))
 			# print("self.E[self.k]" + str(self.E[self.k]))
 
@@ -65,22 +66,22 @@ class Station:
 			# print("self.l[self.k]" + str(self.l[self.k]))
 			# print("self.E[self.k]" + str(self.E[self.k]))
 			#print("self.Ss[self.k-self.delta]" + str(self.Ss[self.k-self.delta]))
-			app = (self.Ss[self.k - self.delta] + self.E[self.k] / TimeLength)
+			supp = (self.Ss[self.k - self.delta] + self.E[self.k] / TimeLength)
 			
-		#print("app: "+str(app))
+		#print("supp: "+str(supp))
 		
-		if(app > self.r_s_max):
+		if(supp > self.r_s_max):
 			self.d_s_big = self.r_s_max
 		else:
-			self.d_s_big = app
+			self.d_s_big = supp
 
 	def computeL(self, TimeLength):
 		## Computation of the number of vehicles at this service station at time instant k + 1
 		
-		## L ed E insieme: 
-		#self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - TimeLength * self.Rs)
+		## L and E together: 
+		# self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - TimeLength * self.Rs)
 		
-		## L ed E separati: 
+		## L and E separated: 
 		if len(self.Ss) < self.delta: 
 			self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - 0)
 		else:

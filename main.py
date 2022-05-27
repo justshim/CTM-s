@@ -11,8 +11,8 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
@@ -20,15 +20,15 @@ sh.cell_value(0,0)
 
 ## read phi first cell from xls file
 
-loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
 
-sh_phi = wb_phi.sheet_by_index(0) 		#sheet 0 is a "realistic" input (24h)
+#sh_phi = wb_phi.sheet_by_index(0) 		#sheet 0 is a "realistic" input (24h)
 #sh_phi = wb_phi.sheet_by_index(1)		#sheet 1 is a "synthetic" input with 2 equal peaks (24h)
 #sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak (24h)
-#sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
+sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
 #sh_phi = wb_phi.sheet_by_index(4)		#sheet 4 is a flat input (24h)
 
 sh_phi.cell_value(0,0)
@@ -54,8 +54,12 @@ for i in range(1, sh.nrows):
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0.95)	
 			
 ## create the stations via the factory
-			#ID station, r_s_max, i, j, delta, beta_s, p
+			#ID stretch, r_s_max, i, j, delta, beta_s, p
 fac.addStationToStretch(0, 500, 3, 6, 60, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+
+## create the on-ramps via the factory
+			#ID stretch, d_r, r_r_max, j, p_r
+fac.addOnRampToStretch(0, 200, 500, 7, 0.05)
 
 ## support variables to save various parameters during execution, and possibly plot them
 l0 = []
@@ -87,7 +91,7 @@ cong8 = []
 ##################################
 
 k=0
-while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
+while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	print("\nTime instant: " + str(k))
 	
 	fac.stretches[0].update(k)
@@ -129,11 +133,22 @@ plt.xlabel('k')
 plt.ylabel('l')
 plt.plot(l0)
 
-#plt.figure(1)
 plt.grid(True)
 plt.xlabel('k')
 plt.ylabel('e')
 plt.plot(e0)
+
+plt.figure(1)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('rho6')
+plt.plot(r6)
+
+plt.figure(2)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('rho7')
+plt.plot(r7)
 
 # plt.figure(99)
 # plt.grid(True)
