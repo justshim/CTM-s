@@ -38,6 +38,13 @@ class Stretch:
 		print("pi: "+str(self.pi))
 		print()
 
+	def computeTTT(self):
+		total_ell = 0
+		for i in range(len(self.cells)):
+			total_ell +=  self.cells[i].length/self.cells[i].v
+
+		self.ttt = total_ell*3600
+		print("TTT: " + str(self.ttt))
 
 	def computeDelta(self):
 		## Computation of the additional TTT (total travel time) due to congestions on this stretch
