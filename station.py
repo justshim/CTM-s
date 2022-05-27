@@ -5,9 +5,9 @@ class Station:
 		self.r_s_max = r_s_max
 		self.i = i
 		self.j = j
-		self.Ss = []
-		self.Rs = 0
-		self.E = [0]
+		self.s_s = []
+		self.r_s = 0
+		self.e = [0]
 		self.d_s_big = 0
 		self.delta = delta
 		self.beta_s = beta_s
@@ -26,72 +26,58 @@ class Station:
 		print("Number of vehicles: "+str(self.l))
 		print()
 
-	def computeSs(self, nextPhi):
+	def computeSs(self, next_phi):
 		## Computation of the flow leaving the mainstream to enter this service station at time instant k
-
-		self.Ss.append((self.beta_s / (1 - self.beta_s)) * nextPhi)
-		#print("Ss: " + str(self.Ss[self.k]))
-
+		self.s_s.append((self.beta_s / (1 - self.beta_s)) * next_phi)
+		
 	def computeRs(self, rs, t):
 		## Computation of the flow merging into the mainstream from this service station at time instant k
 		if t == 0 or t == 1:
-			self.Rs = self.d_s_big
+			self.r_s = self.d_s_big
 
 		elif t == 2 or t == 3:
-			self.Rs = rs
-		#print("d_s_big " + str(self.d_s_big))
+			self.r_s = rs
 
-	def computeE(self, TimeLength):
+	def computeE(self, time_length):
 		## Computation of the number of vehicles queueing at this service station at time instant k (due to the impossibility of merging back into the mainstream)
 
-		if len(self.Ss) < self.delta:
-			self.E.append(self.E[self.k] + 0 - (TimeLength * self.Rs))
-			#print("IF")
-			#self.E.append(0)
+		if len(self.s_s) < self.delta:
+			self.e.append(self.e[self.k] + 0 - (time_length * self.r_s))
+
 		else:
-			self.E.append(self.E[self.k] + (TimeLength * self.Ss[self.k - self.delta]) - (TimeLength * self.Rs))
-			#print("ELSE // Ss= " + str(self.Ss[self.k-self.delta]))
+			self.e.append(self.e[self.k] + (time_length * self.s_s[self.k - self.delta]) - (time_length * self.r_s))
 
-	def computeDsBig(self, TimeLength):
+	def computeDsBig(self, time_length):
 		## Computation of the demand of the ramp exiting this service station at time instant k
-
 		supp = 0		# this is a support variable used to simplify the syntax later
 		
-		if len(self.Ss) < self.delta:  # for the first delta time instants we skip the computation of s_s(k-delta), as it would send the index out of bounds, and s_s is zero in this period anyways
-			supp = (0 + self.E[self.k]) / TimeLength
-			# print("self.l[self.k]" + str(self.l[self.k]))
-			# print("self.E[self.k]" + str(self.E[self.k]))
-
-		else:
-			# print("self.l[self.k]" + str(self.l[self.k]))
-			# print("self.E[self.k]" + str(self.E[self.k]))
-			#print("self.Ss[self.k-self.delta]" + str(self.Ss[self.k-self.delta]))
-			supp = (self.Ss[self.k - self.delta] + self.E[self.k] / TimeLength)
-			
-		#print("supp: "+str(supp))
+		if len(self.s_s) < self.delta:  # for the first delta time instants we skip the computation of s_s(k-delta), as it would send the index out of bounds, and s_s is zero in this period anyways
+			supp = (0 + self.e[self.k]) / time_length
 		
+		else:
+			supp = (self.s_s[self.k - self.delta] + self.e[self.k] / time_length)
+			
 		if(supp > self.r_s_max):
 			self.d_s_big = self.r_s_max
 		else:
 			self.d_s_big = supp
 
-	def computeL(self, TimeLength):
+	def computeL(self, time_length):
 		## Computation of the number of vehicles at this service station at time instant k + 1
 		
-		## L and E together: 
-		# self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - TimeLength * self.Rs)
+		## L and e together: 
+		# self.l.append(self.l[self.k] + time_length * self.s_s[self.k] - time_length * self.r_s)
 		
-		## L and E separated: 
-		if len(self.Ss) < self.delta: 
-			self.l.append(self.l[self.k] + TimeLength * self.Ss[self.k] - 0)
+		## L and e separated: 
+		if len(self.s_s) < self.delta: 
+			self.l.append(self.l[self.k] + time_length * self.s_s[self.k] - 0)
 		else:
-			self.l.append(self.l[self.k] + TimeLength * (self.Ss[self.k] - self.Ss[self.k - self.delta]))
+			self.l.append(self.l[self.k] + time_length * (self.s_s[self.k] - self.s_s[self.k - self.delta]))
 
 
 
 	def updateK(self, kappa):
 		## Each iteration starts with the update of the time instant
-		
 		self.k=kappa
 		
 

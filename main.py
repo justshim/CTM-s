@@ -103,7 +103,7 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	
 	# save the various parameters in the previously created variables
 	l0.append(fac.stretches[0].stations[0].l[k])
-	e0.append(fac.stretches[0].stations[0].E[k])
+	e0.append(fac.stretches[0].stations[0].e[k])
 
 	r0.append(fac.stretches[0].cells[0].rho[k])
 	r1.append(fac.stretches[0].cells[1].rho[k])
