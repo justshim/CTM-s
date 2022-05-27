@@ -11,8 +11,8 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_index(0)
@@ -20,8 +20,8 @@ sh.cell_value(0,0)
 
 ## read phi first cell from xls file
 
-loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
 
@@ -115,15 +115,15 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	r7.append(fac.stretches[0].cells[7].rho[k])
 	r8.append(fac.stretches[0].cells[8].rho[k])
 
-	cong0.append(fac.stretches[0].cells[0].congestionState)
-	cong1.append(fac.stretches[0].cells[1].congestionState)
-	cong2.append(fac.stretches[0].cells[2].congestionState)
-	cong3.append(fac.stretches[0].cells[3].congestionState)
-	cong4.append(fac.stretches[0].cells[4].congestionState)
-	cong5.append(fac.stretches[0].cells[5].congestionState)
-	cong6.append(fac.stretches[0].cells[6].congestionState)
-	cong7.append(fac.stretches[0].cells[7].congestionState)
-	cong8.append(fac.stretches[0].cells[8].congestionState)
+	cong0.append(fac.stretches[0].cells[0].congestion_state)
+	cong1.append(fac.stretches[0].cells[1].congestion_state)
+	cong2.append(fac.stretches[0].cells[2].congestion_state)
+	cong3.append(fac.stretches[0].cells[3].congestion_state)
+	cong4.append(fac.stretches[0].cells[4].congestion_state)
+	cong5.append(fac.stretches[0].cells[5].congestion_state)
+	cong6.append(fac.stretches[0].cells[6].congestion_state)
+	cong7.append(fac.stretches[0].cells[7].congestion_state)
+	cong8.append(fac.stretches[0].cells[8].congestion_state)
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 

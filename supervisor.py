@@ -6,7 +6,7 @@ import off_ramp as offr
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
 
-	def __init__(self, timeLength, lastPhi, phi_zero):
+	def __init__(self, time_length, last_phi, phi_zero):
 		self.cells = []
 		self.stations = []
 		self.on_ramps = []
@@ -15,11 +15,11 @@ class Stretch:
 		self.n_stations = 0
 		self.n_on_ramps = 0
 		self.n_off_ramps = 0
-		self.timeLength = timeLength ### T[h]
-		self.TTT = 0
+		self.time_length = time_length ### T[h]
+		self.ttt = 0
 		self.delta_big = 0
 		self.pi = 0
-		self.lastPhi = lastPhi
+		self.last_phi = last_phi
 		self.phi_zero = phi_zero
 		self.k = 0
 
@@ -32,8 +32,8 @@ class Stretch:
 			s.toString()
 		print("N_cells: "+str(self.n_cells))
 		print("N_stations: "+str(self.n_stations))
-		print("timeLength: "+str(self.timeLength))
-		print("TTT: "+str(self.TTT))
+		print("Time Length: "+str(self.time_length))
+		print("TTT: "+str(self.ttt))
 		print("delta_big: "+str(self.delta_big))
 		print("pi: "+str(self.pi))
 		print()
@@ -123,7 +123,7 @@ class Stretch:
 			self.cells[i].computeSBig()
 			self.cells[i].computePhiMinus(total_ss, next_phi)
 			self.cells[i].computePhiPlus(total_rs)
-			self.cells[i].computeRho(self.timeLength)
+			self.cells[i].computeRho(self.time_length)
 			
 		self.finalUpdates()
 		
@@ -132,10 +132,10 @@ class Stretch:
 		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
 
 		demands = []		# initialization of support variables
-		prev_D = self.cells[i-1].DBig
-		supply = self.cells[i].SBig
+		prev_d = self.cells[i-1].d_big
+		supply = self.cells[i].s_big
 		good = [0]			# list to contain "good" demands, i.e. the ones that do not saturate the flow
-		sum_D_good = 0
+		sum_d_good = 0
 		sum_p = 0
 
 		for s in self.stations:
@@ -143,7 +143,7 @@ class Stretch:
 			 	demands.append(s)
 
 		if t == 2:
-			supply_res = supply - prev_D
+			supply_res = supply - prev_d
 
 		elif t == 3:
 			supply_res = (1 - self.cells[i].p_ms) * supply
@@ -155,27 +155,27 @@ class Stretch:
 			good.clear()
 			if t == 2:
 				for d in demands:
-					if d.d_s_big <= (supply_res - sum_D_good)/len(bad):
+					if d.d_s_big <= (supply_res - sum_d_good)/len(bad):
 						bad.remove(d)
 						good.append(d)
 						
 						#update RS for "good"
 						for station in self.stations: 
-							if d.ID_station == int(station.ID_station):
+							if d.id_station == int(station.id_station):
 								station.computeRs(d.d_s_big, t)
 
-						sum_D_good = sum_D_good + d.d_s_big
+						sum_d_good = sum_d_good + d.d_s_big
 
 						supply_res = supply_res - d.d_s_big
 			elif t == 3:
 				for d in demands:
-					if d.d_s_big <= (((1 - self.cells[i].p_ms) * supply_res) - sum_D_good)/len(bad):
+					if d.d_s_big <= (((1 - self.cells[i].p_ms) * supply_res) - sum_d_good)/len(bad):
 						bad.remove(d)
 						good.append(d)
 						
 						#update RS for "good"
 						for station in self.stations: 
-							if d.ID_station == int(station.ID_station):
+							if d.id_station == int(station.id_station):
 								station.computeRs(d.d_s_big, t)
 						
 						sum_D_good = sum_D_good + d.d_s_big
@@ -189,10 +189,8 @@ class Stretch:
 		# Update RS for "bad"
 		for b in bad:	
 			for station in self.stations: 
-				if b.ID_station == int(station.ID_station):
+				if b.id_station == int(station.id_station):
 					station.computeRs((b.p/sum_p) * supply_res, t)
-					#print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
-
 
 	def preliminary_updates(self): 
 		## First of all update time instant for all cells with current k
@@ -202,12 +200,12 @@ class Stretch:
 		## Same for stations, plus computation of some preliminary values
 		for s in range (len(self.stations)):
 			self.stations[s].updateK(self.k)
-			self.stations[s].computeDsBig(self.timeLength)
+			self.stations[s].computeDsBig(self.time_length)
 
 		## Same for on-ramps, plus computation of some preliminary values
 		for r_on in range (len(self.on_ramps)):
 			self.on_ramps[r_on].updateK(self.k)
-			self.on_ramps[r_on].computeDrBig(self.timeLength)
+			self.on_ramps[r_on].computeDrBig(self.time_length)
 
 	def computeTotalBeta(self, i):
 		total_beta = 0
@@ -243,14 +241,14 @@ class Stretch:
 		for s in range (len(self.stations)):	
 			if self.stations[s].j == i:
 				#print("i: "+str(i)+"	self.stations[s].j: "+str(self.stations[s].j))
-				if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-	 				self.stations[s].computeRs(0, self.cells[i].congestionState)
+				if self.cells[i].congestion_state == 0 or self.cells[i].congestion_state == 1:
+	 				self.stations[s].computeRs(0, self.cells[i].congestion_state)
 					
-				elif self.cells[i].congestionState == 2:
-	 				self.iterativeProcedure(i, self.cells[i].congestionState)
+				elif self.cells[i].congestion_state == 2:
+	 				self.iterativeProcedure(i, self.cells[i].congestion_state)
 					
-				elif self.cells[i].congestionState == 3:
-	 				self.iterativeProcedure(i, self.cells[i].congestionState)
+				elif self.cells[i].congestion_state == 3:
+	 				self.iterativeProcedure(i, self.cells[i].congestion_state)
 					
 				total_rs += self.stations[s].r_s
 				
@@ -272,16 +270,16 @@ class Stretch:
 
 			if self.on_ramps[r_on].j == i:
 					
-				if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-	 				self.on_ramps[r_on].computeRr(0, self.cells[i].congestionState)
+				if self.cells[i].congestion_state == 0 or self.cells[i].congestion_state == 1:
+	 				self.on_ramps[r_on].computeRr(0, self.cells[i].congestion_state)
 				
-				elif self.cells[i].congestionState == 2:
-	 				rr = self.cells[i].SBig - self.cells[i-1].DBig
-	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
+				elif self.cells[i].congestion_state == 2:
+	 				rr = self.cells[i].s_big - self.cells[i-1].d_big
+	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestion_state)
 				
-				elif self.cells[i].congestionState == 3:
-	 				rr = self.cells[i].SBig * self.on_ramps[r_on].p_r
-	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
+				elif self.cells[i].congestion_state == 3:
+	 				rr = self.cells[i].s_big * self.on_ramps[r_on].p_r
+	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestion_state)
 				
 				total_rs += self.on_ramps[r_on].r_r
 
@@ -300,18 +298,18 @@ class Stretch:
 	def finalUpdates(self):
 		## As a final step, all stations have their l and e updated
 		for s in range (len(self.stations)):
-			self.stations[s].computeE(self.timeLength)
-			self.stations[s].computeL(self.timeLength)
+			self.stations[s].computeE(self.time_length)
+			self.stations[s].computeL(self.time_length)
 
 		## And all ramps have their l updated
 		for r_on in range (len(self.on_ramps)):
-			self.on_ramps[r_on].computeL(self.timeLength)
+			self.on_ramps[r_on].computeL(self.time_length)
 
 	def computeDPrec(self, i):
 		prev_d_big = 0
 		# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
 		if(i != 0):
-			prev_d_big = self.cells[i-1].DBig
+			prev_d_big = self.cells[i-1].d_big
 		
 		else:
 			prev_d_big = self.phi_zero[self.k]		
@@ -325,6 +323,6 @@ class Stretch:
 			next_phi = self.cells[i+1].phi
 		
 		else:
-			next_phi = self.lastPhi
+			next_phi = self.last_phi
 
 		return next_phi

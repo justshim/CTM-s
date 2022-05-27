@@ -1,7 +1,7 @@
 class OffRamp:
 	"""Class modeling the off-ramps on an highway stretch in the CTM-s model"""
-	def __init__(self, ID, i, beta_r):
-		self.ID_offramp = ID
+	def __init__(self, id_offramp, i, beta_r):
+		self.id_offramp = id_offramp
 		self.i = i
 		self.beta_r = beta_r
 		self.s_r = 0
@@ -10,7 +10,7 @@ class OffRamp:
 	def toString(self):
 		## Utility method to print some information about the off-ramp
 
-		print("Off-Ramp ID: "+str(self.ID_onramp))
+		print("Off-Ramp ID: "+str(self.id_offramp))
 		print("From cell "+str(self.j))
 		print("Supply: "+str(self.s_r))
 		print()

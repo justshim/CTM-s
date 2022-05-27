@@ -7,30 +7,30 @@ class Factory:
 		self.stretches = []
 		self.n_stretches = 0
 
-	def createStretch(self, TimeLength, last_phi, first_DBig):
+	def createStretch(self, time_length, last_phi, first_d_big):
 		## Method for the creation of instances of the object Stretch
 
-		stretch = s.Stretch(TimeLength, last_phi, first_DBig)
+		stretch = s.Stretch(time_length, last_phi, first_d_big)
 		self.stretches.append(stretch)
 		self.n_stretches = self.n_stretches + 1
 
-	def addCellToStretch(self, ID_stretch, length, v, w, q_max, rho_max, p):
+	def addCellToStretch(self, id_stretch, length, v, w, q_max, rho_max, p):
 		## Call to supervisors's method for the creation of instances of the object Cell
 
-		self.stretches[ID_stretch].createCell(length, v, w, q_max, rho_max, p)
+		self.stretches[id_stretch].createCell(length, v, w, q_max, rho_max, p)
 
-	def addStationToStretch(self, ID_stretch, r_s_max, i, j, delta, beta_s, p):
+	def addStationToStretch(self, id_stretch, r_s_max, i, j, delta, beta_s, p):
 		## Call to supervisors's method for the creation of instances of the object Station
 
-		self.stretches[ID_stretch].createStation(r_s_max, i, j, delta, beta_s, p)
+		self.stretches[id_stretch].createStation(r_s_max, i, j, delta, beta_s, p)
 
-	def addOnRampToStretch(self, ID_stretch, d_r, r_r_max, j, p_r):
+	def addOnRampToStretch(self, id_stretch, d_r, r_r_max, j, p_r):
 		## Call to supervisors's method for the creation of instances of the object OnRamp
 
-		self.stretches[ID_stretch].createOnRamp(d_r, r_r_max, j, p_r)
+		self.stretches[id_stretch].createOnRamp(d_r, r_r_max, j, p_r)
 
-	def addOffRampToStretch(self, ID_stretch, i, beta_r):
+	def addOffRampToStretch(self, id_stretch, i, beta_r):
 		## Call to supervisors's method for the creation of instances of the object OffRamp
 
-		self.stretches[ID_stretch].createOffRamp(i, beta_r)
+		self.stretches[id_stretch].createOffRamp(i, beta_r)
 		

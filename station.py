@@ -1,7 +1,7 @@
 class Station:
 	"""Class modeling the service stations on an highway stretch in the CTM-s model"""
-	def __init__(self, ID, r_s_max, i, j, delta, beta_s, p):
-		self.ID_station = ID
+	def __init__(self, id_station, r_s_max, i, j, delta, beta_s, p):
+		self.id_station = id_station
 		self.r_s_max = r_s_max
 		self.i = i
 		self.j = j
@@ -18,7 +18,7 @@ class Station:
 	def toString(self):
 		## Utility method to print some information about the service station
 
-		print("Station ID: "+str(self.ID_station))
+		print("Station ID: "+str(self.id_station))
 		print("From cell "+str(self.i))
 		print("To cell "+str(self.j))
 		print("Time delay: "+str(self.delta))
@@ -73,8 +73,6 @@ class Station:
 			self.l.append(self.l[self.k] + time_length * self.s_s[self.k] - 0)
 		else:
 			self.l.append(self.l[self.k] + time_length * (self.s_s[self.k] - self.s_s[self.k - self.delta]))
-
-
 
 	def updateK(self, kappa):
 		## Each iteration starts with the update of the time instant
