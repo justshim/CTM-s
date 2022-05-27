@@ -77,8 +77,6 @@ class Stretch:
 		self.off_ramps.append(off_ramp)
 		self.n_off_ramps = self.n_off_ramps + 1
 
-	
-
 	def update(self, kappa):
 		## Main method of the calss: at each time instant k updates all the parameters of the cells and service stations on this stretch
 		# initialization of support variables
@@ -254,7 +252,7 @@ class Stretch:
 				elif self.cells[i].congestionState == 3:
 	 				self.iterativeProcedure(i, self.cells[i].congestionState)
 					
-				total_rs += self.stations[s].Rs
+				total_rs += self.stations[s].r_s
 				
 		return total_rs
 
@@ -264,7 +262,7 @@ class Stretch:
 		for s in range (len(self.stations)):
 			if self.stations[s].i == i:
 				self.stations[s].computeSs(next_phi)
-				total_ss += self.stations[s].Ss[self.k]
+				total_ss += self.stations[s].s_s[self.k]
 
 		return total_ss
 
