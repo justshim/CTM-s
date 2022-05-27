@@ -1,6 +1,7 @@
 import cell as c
 import station as st
 import on_ramp as onr
+import off_ramp as offr
 
 class Stretch:
 	"""Controller class for the model, represents the system at large"""
@@ -47,10 +48,10 @@ class Stretch:
 
 		pass
 		
-	def createCell(self, length, v, w, q_max, s, r, rho_max, beta, p):
+	def createCell(self, length, v, w, q_max, rho_max, p):
 		## Method to create an instance of the object Cell, and add it to this stretch
 
-		cell = c.Cell(self.n_cells, length, v, w, q_max, s, r, rho_max, beta, p) 
+		cell = c.Cell(self.n_cells, length, v, w, q_max, rho_max, p) 
 		self.cells.append(cell)
 		self.n_cells = self.n_cells + 1
 
@@ -68,12 +69,12 @@ class Stretch:
 		self.on_ramps.append(on_ramp)
 		self.n_on_ramps = self.n_on_ramps + 1
 
-	def createOffRamp(self, r_s_max, i, j, delta, beta_s, p):
+	def createOffRamp(self, i, beta_r):
 		## Method to create an instance of the object Station, and add it to this stretch
 
-		station = st.Station(self.n_stations, r_s_max, i, j, delta, beta_s, p) 
-		self.stations.append(station)
-		self.n_stations = self.n_stations + 1
+		off_ramp = offr.OffRamp(self.n_off_ramps, i, beta_r) 
+		self.off_ramps.append(off_ramp)
+		self.n_off_ramps = self.n_off_ramps + 1
 
 	def update(self, k):
 		## Main method of the calss: at each time instant k updates all the parameters of the cells and service stations on this stretch
@@ -110,6 +111,11 @@ class Stretch:
 			for s in range (len(self.stations)):
 				if self.stations[s].i == i:
 					totalBeta += self.stations[s].beta_s
+
+			## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
+			for r_off in range (len(self.off_ramps)):
+				if self.off_ramps[r_off].i == i:
+					totalBeta += self.off_ramps[r_off].beta_r
 
 			## For each cell, check if any station merges in it, and sum all Ds's (needed for the computation of phi_i)
 			for s in range (len(self.stations)):
@@ -171,6 +177,12 @@ class Stretch:
 				if self.stations[s].i == i:
 					self.stations[s].computeSs(next_phi)
 					Ss_tot += self.stations[s].Ss[k]
+
+			for r_off in range (len(self.off_ramps)):
+
+				if self.off_ramps[r_off].i == i:
+					self.off_ramps[r_off].computeSr(next_phi)
+					Ss_tot += self.off_ramps[r_off].s_r
 
 			for r_on in range (len(self.on_ramps)):
 

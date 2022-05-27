@@ -14,10 +14,10 @@ class Factory:
 		self.stretches.append(stretch)
 		self.n_stretches = self.n_stretches + 1
 
-	def addCellToStretch(self, ID_stretch, length, v, w, q_max, s, r, rho_max, beta, p):
+	def addCellToStretch(self, ID_stretch, length, v, w, q_max, rho_max, p):
 		## Call to supervisors's method for the creation of instances of the object Cell
 
-		self.stretches[ID_stretch].createCell(length, v, w, q_max, s, r, rho_max, beta, p)
+		self.stretches[ID_stretch].createCell(length, v, w, q_max, rho_max, p)
 
 	def addStationToStretch(self, ID_stretch, r_s_max, i, j, delta, beta_s, p):
 		## Call to supervisors's method for the creation of instances of the object Station
@@ -25,7 +25,12 @@ class Factory:
 		self.stretches[ID_stretch].createStation(r_s_max, i, j, delta, beta_s, p)
 
 	def addOnRampToStretch(self, ID_stretch, d_r, r_r_max, j, p_r):
-		## Call to supervisors's method for the creation of instances of the object Station
+		## Call to supervisors's method for the creation of instances of the object OnRamp
 
 		self.stretches[ID_stretch].createOnRamp(d_r, r_r_max, j, p_r)
+
+	def addOffRampToStretch(self, ID_stretch, i, beta_r):
+		## Call to supervisors's method for the creation of instances of the object OffRamp
+
+		self.stretches[ID_stretch].createOffRamp(i, beta_r)
 		

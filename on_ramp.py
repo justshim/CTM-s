@@ -1,4 +1,4 @@
-class OnRamp(object):
+class OnRamp:
 	"""Class modeling the on-ramps on an highway stretch in the CTM-s model"""
 	def __init__(self, ID, d_r, r_r_max, j, p_r):
 		self.ID_onramp = ID
@@ -21,7 +21,7 @@ class OnRamp(object):
 
 	def computeDrBig(self, timeLength):
 		## Computation of the demand of this ramp at time instant k
-		print(self.l_r[self.k])
+
 		supp = self.d_r + self.l_r[self.k]/timeLength
 
 		if(supp > self.r_r_max):
@@ -48,5 +48,4 @@ class OnRamp(object):
 		## Each iteration starts with the update of the time instant
 
 		self.k = kappa
-		print(self.k)
 		

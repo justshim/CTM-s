@@ -1,6 +1,6 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
-	def __init__(self, ID, length, v, w, q_max, s, r, rho_max, beta, p_ms):
+	def __init__(self, ID, length, v, w, q_max, rho_max, p_ms):
 		self.ID_cell = ID
 		self.length = length
 		self.v = v
@@ -8,14 +8,11 @@ class Cell:
 		self.q = [1500] # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
 		self.q_max = q_max
-		self.s = s
-		self.r = r
 		self.rho_max = rho_max
 		self.phi = 0
 		self.phi_minus = 0
 		self.phi_plus = 0
 		self.rho = [0]
-		self.beta = beta
 		self.DBig = 0 
 		self.SBig = 0
 		self.congestionState = 0
@@ -68,13 +65,13 @@ class Cell:
 	def computePhiPlus(self, Rs_total):
 		## Computation of the total flow entering this cell at time instant k
 
-		self.phi_plus = self.phi + self.r + Rs_total
+		self.phi_plus = self.phi + Rs_total
 		#print("phi +: " + str(self.phi_plus)) 
 		
 	def computePhiMinus(self, Ss, NextPhi):
 		## Computation of the total flow exiting this cell at time instant k
 
-		self.phi_minus = NextPhi + self.s + Ss
+		self.phi_minus = NextPhi + Ss
 		#print("phi -: " + str(self.phi_minus))
 
 	def computeRho(self, TimeLength):
@@ -87,7 +84,7 @@ class Cell:
 	def computeDBig(self, total_beta):
 		## Computation of the demand of this cell at time instant k
 
-		supp = (1 - self.beta - total_beta) * self.v * self.rho[self.k]	# this is a support variable used to simplify the syntax later
+		supp = (1 - total_beta) * self.v * self.rho[self.k]	# this is a support variable used to simplify the syntax later
 
 		if(supp > self.q_max):
 			self.DBig = self.q_max

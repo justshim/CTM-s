@@ -50,8 +50,8 @@ fac.createStretch(10/3600, 5000, phi_zero)
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
-	           #ID stretch   length,             v,                   w,              ,   q_max,           s,  r, rho_max,         beta, p_ms
-	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), 0, 0, sh.cell_value(i,5), 0, 0.95)	
+	           #ID stretch   length,             v,                   w,              ,   q_max,           rho_max,         	p_ms
+	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), sh.cell_value(i,5), 0.95)	
 			
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
@@ -59,7 +59,11 @@ fac.addStationToStretch(0, 500, 3, 6, 60, 0.1, 0.05) #Note: r_s_max was statical
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
-fac.addOnRampToStretch(0, 200, 500, 7, 0.05)
+fac.addOnRampToStretch(0, 200, 500, 2, 0.05)
+
+## create the off-ramps via the factory
+			#ID_stretch, i, beta_r
+fac.addOffRampToStretch(0, 7, 0.05)
 
 ## support variables to save various parameters during execution, and possibly plot them
 l0 = []
