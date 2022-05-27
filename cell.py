@@ -1,7 +1,7 @@
 class Cell:
 	"""Class describing the cells of the CTM model"""
-	def __init__(self, ID, length, v, w, q_max, rho_max, p_ms):
-		self.ID_cell = ID
+	def __init__(self, id_cell, length, v, w, q_max, rho_max, p_ms):
+		self.id_cell = id_cell
 		self.length = length
 		self.v = v
 		self.w = w
@@ -13,15 +13,15 @@ class Cell:
 		self.phi_minus = 0
 		self.phi_plus = 0
 		self.rho = [0]
-		self.DBig = 0 
-		self.SBig = 0
-		self.congestionState = 0
+		self.d_big = 0 
+		self.s_big = 0
+		self.congestion_state = 0
 		self.k = 0
 
 	def toString(self):
 		## Utility method to print some information about the cell
 
-		print("Cell ID: "+str(self.ID_cell))
+		print("Cell ID: "+str(self.id_cell))
 		print("Length: "+str(self.length))
 		print("r: "+str(self.r))
 		print("s: "+str(self.s))
@@ -35,51 +35,41 @@ class Cell:
 		#Q is a vector for capacity drop modelling
 		pass
 
-	def computePhi(self, Dprec, TotalDs):
+	def computePhi(self, d_prec, total_ds):
 		## Computation of the flow entering this cell from the previous one at time instant k
 		## (the computation of phi varies according to the congestion state of the cell, hence we update it first)
  
-		self.updateCongestionState(Dprec, TotalDs)
+		self.updateCongestionState(d_prec, total_ds)
 
-		if(self.congestionState == 0): #FREE FLOW
-			self.phi = Dprec
-			#print("Free flow, cell " + str(self.ID_cell))
-			#print("Compute phi: Dprec " + str(Dprec))
+		if(self.congestion_state == 0): #FREE FLOW
+			self.phi = d_prec
 		
-		elif(self.congestionState == 1): #CONGESTED MAINSTREAM
-			self.phi = self.SBig-TotalDs
-			print("Congested 1, cell " + str(self.ID_cell))
-			#print("TotalDs " + str(TotalDs))
-			#print("SBig " + str(self.SBig))
-		
-		elif(self.congestionState == 2): #CONGESTED SERVICE
-			self.phi = Dprec
-			print("Congested 2, cell " + str(self.ID_cell))
-		
-		elif(self.congestionState == 3): #CONGESTED ALL
-			self.phi = self.SBig  * self.p_ms
-			print("Congested 3, cell " + str(self.ID_cell))
-		
-		#print("Phi: " + str(self.phi))
+		elif(self.congestion_state == 1): #CONGESTED MAINSTREAM
+			self.phi = self.s_big - total_ds
+			print("Congested 1, cell " + str(self.id_cell))
 
-	def computePhiPlus(self, Rs_total):
+		elif(self.congestion_state == 2): #CONGESTED SERVICE
+			self.phi = d_prec
+			print("Congested 2, cell " + str(self.id_cell))
+		
+		elif(self.congestion_state == 3): #CONGESTED ALL
+			self.phi = self.s_big  * self.p_ms
+			print("Congested 3, cell " + str(self.id_cell))
+
+	def computePhiPlus(self, rs_total):
 		## Computation of the total flow entering this cell at time instant k
 
-		self.phi_plus = self.phi + Rs_total
-		#print("phi +: " + str(self.phi_plus)) 
+		self.phi_plus = self.phi + rs_total 
 		
-	def computePhiMinus(self, Ss, NextPhi):
+	def computePhiMinus(self, ss, next_phi):
 		## Computation of the total flow exiting this cell at time instant k
 
-		self.phi_minus = NextPhi + Ss
-		#print("phi -: " + str(self.phi_minus))
+		self.phi_minus = next_phi + ss
 
-	def computeRho(self, TimeLength):
+	def computeRho(self, time_length):
 		## Computation of the traffic density of this cell at time instant k + 1
 
-		self.rho.append(self.rho[self.k] + (TimeLength/self.length * (self.phi_plus - self.phi_minus)))
-		#print("rho[k+1]:  " + str(self.rho[self.k+1]))
-
+		self.rho.append(self.rho[self.k] + (time_length/self.length * (self.phi_plus - self.phi_minus)))
 
 	def computeDBig(self, total_beta):
 		## Computation of the demand of this cell at time instant k
@@ -87,39 +77,36 @@ class Cell:
 		supp = (1 - total_beta) * self.v * self.rho[self.k]	# this is a support variable used to simplify the syntax later
 
 		if(supp > self.q_max):
-			self.DBig = self.q_max
+			self.d_big = self.q_max
 		
 		else:
-			self.DBig = supp
+			self.d_big = supp
 		
-		#print("DBig:  " + str(self.DBig))
-
 	def computeSBig(self):
 		## Computation of the supply of this cell at time instant k
 
 		supp = self.w * (self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
 		
 		if(supp > self.q_max):
-			self.SBig = self.q_max
+			self.s_big = self.q_max
 		
 		else:
-			self.SBig = supp
+			self.s_big = supp
 
-	def updateCongestionState(self, Dprec, TotalDs):
+	def updateCongestionState(self, d_prec, total_ds):
 		## Computation of the congestion state of this cell at time instant k
 
-		#print("TotalDs: "+ str(TotalDs))
-		if(Dprec + TotalDs <= self.SBig): 
-			self.congestionState=0 #FREE FLOW
+		if(d_prec + total_ds <= self.s_big): 
+			self.congestion_state=0 #FREE FLOW
 		
-		elif((Dprec > self.p_ms * self.SBig) and (TotalDs <= (1 - self.p_ms) * self.SBig)):
-			self.congestionState=1 #CONGESTED MAINSTREAM
+		elif((d_prec > self.p_ms * self.s_big) and (total_ds <= (1 - self.p_ms) * self.s_big)):
+			self.congestion_state=1 #CONGESTED MAINSTREAM
 		
-		elif((Dprec <= self.p_ms * self.SBig) and (TotalDs > (1 - self.p_ms) * self.SBig)):
-			self.congestionState=2 #CONGESTED SERVICE
+		elif((d_prec <= self.p_ms * self.s_big) and (total_ds > (1 - self.p_ms) * self.s_big)):
+			self.congestion_state=2 #CONGESTED SERVICE
 		
-		elif((Dprec > self.p_ms * self.SBig) and (TotalDs > (1 - self.p_ms) * self.SBig)):
-			self.congestionState=3 #CONGESTED ALL
+		elif((d_prec > self.p_ms * self.s_big) and (total_ds > (1 - self.p_ms) * self.s_big)):
+			self.congestion_state=3 #CONGESTED ALL
 		
 		else:
 			print("Congestion Error")
