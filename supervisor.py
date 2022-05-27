@@ -21,6 +21,7 @@ class Stretch:
 		self.pi = 0
 		self.lastPhi = lastPhi
 		self.phi_zero = phi_zero
+		self.k = 0
 
 	def toString(self):
 		## Utility method to print some information about the highway stretch
@@ -76,147 +77,60 @@ class Stretch:
 		self.off_ramps.append(off_ramp)
 		self.n_off_ramps = self.n_off_ramps + 1
 
-	def update(self, k):
+	
+
+	def update(self, kappa):
 		## Main method of the calss: at each time instant k updates all the parameters of the cells and service stations on this stretch
+		# initialization of support variables
+		self.k = kappa
+		total_beta = 0
+		total_ds = 0
+		prev_d_big = 0
+		next_phi = 0
+		total_rs = 0
+		total_ss = 0
+		total_rs_station = 0
+		total_ss_station = 0
+		total_rr_ramp = 0
+		total_sr_ramp = 0
 
-		#print("Time instant: " + str(k))
-		prev_DBig = 0		# initialization of support variables used later
-		totalDs = 0
-		Ss_tot = 0
-
-		## First of all update time instant for all cells with current k
-		for i in range (len(self.cells)):
-			self.cells[i].updateK(k)
-
-		## Same for stations, plus computation of some preliminary values
-		for s in range (len(self.stations)):
-			self.stations[s].updateK(k)
-			self.stations[s].computeDsBig(self.timeLength)
-			#self.stations[s].computeRs()
-
-		## Same for on-ramps, plus computation of some preliminary values
-		for r_on in range (len(self.on_ramps)):
-			self.on_ramps[r_on].updateK(k)
-			self.on_ramps[r_on].computeDrBig(self.timeLength)
-			#self.stations[r_on].computeRs()
+		self.preliminary_updates()
 		
 		## First batch of cell value updates, with special case for cell 0
 		for i in range (len(self.cells)):
-			#print("Cell: " + str(i))
-			totalBeta = 0		# initialization of support variables
-			totalDs = 0
-			prev_DBig = 0
-
-			## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
-			for s in range (len(self.stations)):
-				if self.stations[s].i == i:
-					totalBeta += self.stations[s].beta_s
-
-			## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
-			for r_off in range (len(self.off_ramps)):
-				if self.off_ramps[r_off].i == i:
-					totalBeta += self.off_ramps[r_off].beta_r
-
-			## For each cell, check if any station merges in it, and sum all Ds's (needed for the computation of phi_i)
-			for s in range (len(self.stations)):
-				if self.stations[s].j == i:
-					totalDs += self.stations[s].d_s_big
-
-			## For each cell, check if any on-ramp merges in it, and sum all Dr's (needed for the computation of phi_i)
-			for r_on in range (len(self.on_ramps)):
-				if self.on_ramps[r_on].j == i:
-					totalDs += self.on_ramps[s].d_r_big
-
-			self.cells[i].computeDBig(totalBeta)
 			
-			# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
-			if(i != 0):
-				prev_DBig = self.cells[i-1].DBig
-				#print("prev_DBig: " + str(self.cells[i-1].DBig))
-			
-			else:
-				prev_DBig = self.phi_zero[k]		
-				#print("prev_DBig: " + str(prev_DBig))
-			
-			self.cells[i].computePhi(prev_DBig, totalDs)
-			#print("Phi: " + str(self.cells[i].phi))
+			total_beta = self.computeTotalBeta(i)
+			total_ds = self.computeTotalDs(i)
 
+			self.cells[i].computeDBig(total_beta)
+			
+			prev_d_big = self.computeDPrec(i)
+			
+			self.cells[i].computePhi(prev_d_big, total_ds)
+
+		
 		## Second batch of cell value updates, with special case for last cell
 		for i in range (len(self.cells)):
-			next_phi = 0		# initialization of support variables
-			totalRs = 0
-			Ss_tot = 0
-			#print("Cell: " + str(i))
+			next_phi = self.computeNextPhi(i)
 			
-			# Last cell does not have a "next" cell, hence phi_(i+1) is given as input
-			if((i+1) < (len(self.cells))):
-				next_phi = self.cells[i+1].phi
+			total_rs_station = self.computeRsStation(i)
+			total_ss_station = self.computeSsStation(i, next_phi)
 			
-			else:
-				next_phi = self.lastPhi
+			total_sr_ramp = self.computeSrRamp(i, next_phi)
+			total_rr_ramp = self.computeRrRamp(i)
 			
-			## For each cell, check if any stations merge into it, and compute their r_s; 
-			## then check if any stations stem from it, and compute their s_s. These are then summed up for use, respectively, in the computation of Phi- and Phi+
-			for s in range (len(self.stations)):
-				
-				if self.stations[s].j == i:
-					#print("i: "+str(i)+"	self.stations[s].j: "+str(self.stations[s].j))
-					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-	 					self.stations[s].computeRs(0, self.cells[i].congestionState)
-					
-					elif self.cells[i].congestionState == 2:
-	 					self.iterativeProcedure(i, self.cells[i].congestionState, k)
-					
-					elif self.cells[i].congestionState == 3:
-	 					self.iterativeProcedure(i, self.cells[i].congestionState, k)
-					
-					totalRs += self.stations[s].Rs
-				
-					#print("Rs: "+str(self.stations[s].Rs[k]))
-				
-				if self.stations[s].i == i:
-					self.stations[s].computeSs(next_phi)
-					Ss_tot += self.stations[s].Ss[k]
-
-			for r_off in range (len(self.off_ramps)):
-
-				if self.off_ramps[r_off].i == i:
-					self.off_ramps[r_off].computeSr(next_phi)
-					Ss_tot += self.off_ramps[r_off].s_r
-
-			for r_on in range (len(self.on_ramps)):
-
-				if self.on_ramps[r_on].j == i:
-					
-					if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
-	 					self.on_ramps[r_on].computeRr(0, self.cells[i].congestionState)
-					
-					elif self.cells[i].congestionState == 2:
-	 					rr = self.cells[i].SBig - self.cells[i-1].DBig
-	 					self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
-					
-					elif self.cells[i].congestionState == 3:
-	 					rr = self.cells[i].SBig * self.on_ramps[r_on].p_r
-	 					self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
-					
-					totalRs += self.on_ramps[r_on].r_r
+			total_rs = total_rr_ramp + total_rs_station
+			total_ss = total_sr_ramp + total_ss_station
 
 			self.cells[i].computeSBig()
-			self.cells[i].computePhiMinus(Ss_tot, next_phi)
-			#print("Total RS: "+str(totalRs))
-			self.cells[i].computePhiPlus(totalRs)
+			self.cells[i].computePhiMinus(total_ss, next_phi)
+			self.cells[i].computePhiPlus(total_rs)
 			self.cells[i].computeRho(self.timeLength)
+			
+		self.finalUpdates()
+		
 
-		## As a final step, all stations have their l and e updated
-		for s in range (len(self.stations)):
-			self.stations[s].computeE(self.timeLength)
-			self.stations[s].computeL(self.timeLength)
-
-		## And all ramps have their l updated
-		for r_on in range (len(self.on_ramps)):
-			self.on_ramps[r_on].computeL(self.timeLength)
-
-	def iterativeProcedure(self, i, t, k):
+	def iterativeProcedure(self, i, t):
 		## Method called during the update procedure and used to assign r_s to all stations merging into the same cell in case of congestions of type 2 and 3
 
 		demands = []		# initialization of support variables
@@ -280,3 +194,139 @@ class Stretch:
 				if b.ID_station == int(station.ID_station):
 					station.computeRs((b.p/sum_p) * supply_res, t)
 					#print("Stazione n: "+str(station.ID_station) + " RS:" + str(station.Rs[k]))
+
+
+	def preliminary_updates(self): 
+		## First of all update time instant for all cells with current k
+		for i in range (len(self.cells)):
+			self.cells[i].updateK(self.k)
+
+		## Same for stations, plus computation of some preliminary values
+		for s in range (len(self.stations)):
+			self.stations[s].updateK(self.k)
+			self.stations[s].computeDsBig(self.timeLength)
+
+		## Same for on-ramps, plus computation of some preliminary values
+		for r_on in range (len(self.on_ramps)):
+			self.on_ramps[r_on].updateK(self.k)
+			self.on_ramps[r_on].computeDrBig(self.timeLength)
+
+	def computeTotalBeta(self, i):
+		total_beta = 0
+		## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
+		for s in range (len(self.stations)):
+			if self.stations[s].i == i:
+				total_beta += self.stations[s].beta_s
+
+		## For each cell, check if any station stems from it, and sum all betas (needed for the computation of D_i)
+		for r_off in range (len(self.off_ramps)):
+			if self.off_ramps[r_off].i == i:
+				total_beta += self.off_ramps[r_off].beta_r
+		
+		return total_beta
+
+	def computeTotalDs(self, i):
+		total_ds = 0
+		## For each cell, check if any station merges in it, and sum all Ds's (needed for the computation of phi_i)
+		for s in range (len(self.stations)):
+			if self.stations[s].j == i:
+				total_ds += self.stations[s].d_s_big
+
+		## For each cell, check if any on-ramp merges in it, and sum all Dr's (needed for the computation of phi_i)
+		for r_on in range (len(self.on_ramps)):
+			if self.on_ramps[r_on].j == i:
+				total_ds += self.on_ramps[s].d_r_big
+
+		return total_ds
+	
+	def computeRsStation(self, i):
+		## For each cell, check if any stations merge into it, and compute their r_s; 
+		total_rs = 0
+		for s in range (len(self.stations)):	
+			if self.stations[s].j == i:
+				#print("i: "+str(i)+"	self.stations[s].j: "+str(self.stations[s].j))
+				if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
+	 				self.stations[s].computeRs(0, self.cells[i].congestionState)
+					
+				elif self.cells[i].congestionState == 2:
+	 				self.iterativeProcedure(i, self.cells[i].congestionState)
+					
+				elif self.cells[i].congestionState == 3:
+	 				self.iterativeProcedure(i, self.cells[i].congestionState)
+					
+				total_rs += self.stations[s].Rs
+				
+		return total_rs
+
+	def computeSsStation(self, i, next_phi):
+		##check if any stations stem from it, and compute their s_s. These are then summed up for use, respectively, in the computation of Phi- and Phi+
+		total_ss=0
+		for s in range (len(self.stations)):
+			if self.stations[s].i == i:
+				self.stations[s].computeSs(next_phi)
+				total_ss += self.stations[s].Ss[self.k]
+
+		return total_ss
+
+	def computeRrRamp(self, i):
+		total_rs=0
+		for r_on in range (len(self.on_ramps)):
+
+			if self.on_ramps[r_on].j == i:
+					
+				if self.cells[i].congestionState == 0 or self.cells[i].congestionState == 1:
+	 				self.on_ramps[r_on].computeRr(0, self.cells[i].congestionState)
+				
+				elif self.cells[i].congestionState == 2:
+	 				rr = self.cells[i].SBig - self.cells[i-1].DBig
+	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
+				
+				elif self.cells[i].congestionState == 3:
+	 				rr = self.cells[i].SBig * self.on_ramps[r_on].p_r
+	 				self.on_ramps[r_on].computeRr(rr, self.cells[i].congestionState)
+				
+				total_rs += self.on_ramps[r_on].r_r
+
+		return total_rs
+
+	def computeSrRamp(self, i, next_phi):
+		total_ss=0
+		for r_off in range (len(self.off_ramps)):
+
+			if self.off_ramps[r_off].i == i:
+				self.off_ramps[r_off].computeSr(next_phi)
+				total_ss += self.off_ramps[r_off].s_r
+
+		return total_ss
+
+	def finalUpdates(self):
+		## As a final step, all stations have their l and e updated
+		for s in range (len(self.stations)):
+			self.stations[s].computeE(self.timeLength)
+			self.stations[s].computeL(self.timeLength)
+
+		## And all ramps have their l updated
+		for r_on in range (len(self.on_ramps)):
+			self.on_ramps[r_on].computeL(self.timeLength)
+
+	def computeDPrec(self, i):
+		prev_d_big = 0
+		# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
+		if(i != 0):
+			prev_d_big = self.cells[i-1].DBig
+		
+		else:
+			prev_d_big = self.phi_zero[self.k]		
+			
+		return prev_d_big
+
+	def computeNextPhi(self, i):
+		next_phi=0
+		# Last cell does not have a "next" cell, hence phi_(i+1) is given as input
+		if((i+1) < (len(self.cells))):
+			next_phi = self.cells[i+1].phi
+		
+		else:
+			next_phi = self.lastPhi
+
+		return next_phi
