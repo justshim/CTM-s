@@ -4,6 +4,7 @@ class Cell:
 		self.id_cell = id_cell
 		self.length = length
 		self.v_free = v_free
+		self.v = []
 		self.w = w
 		self.q = [1500] # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
@@ -34,6 +35,17 @@ class Cell:
 	def computeQ(self):
 		#Q is a vector for capacity drop modelling
 		pass
+
+	def computeV(self):
+		#if(self.rho[self.k] == 0 or self.congestion_state == 0 or self.congestion_state == 2):
+		if(self.rho[self.k] == 0):
+		
+			self.v.append(self.v_free)
+		else:
+			phi_avg = (self.phi_minus + self.phi_plus)/2 #si puo fare meglio??
+			self.v.append(phi_avg/self.rho[self.k])
+
+		
 
 	def computePhi(self, d_prec, total_ds):
 		## Computation of the flow entering this cell from the previous one at time instant k

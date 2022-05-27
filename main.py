@@ -55,11 +55,11 @@ for i in range(1, sh.nrows):
 			
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 500, 3, 6, 60, 0.1, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 3, 6, 60, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
-fac.addOnRampToStretch(0, 200, 500, 2, 0.05)
+fac.addOnRampToStretch(0, 100, 500, 2, 0.05)
 
 ## create the off-ramps via the factory
 			#ID_stretch, i, beta_r
@@ -91,6 +91,7 @@ cong6 = []
 cong7 = []
 cong8 = []
 
+d = []
 
 ##################################
 # Exectution of the simulation:  #
@@ -126,6 +127,8 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	cong6.append(fac.stretches[0].cells[6].congestion_state)
 	cong7.append(fac.stretches[0].cells[7].congestion_state)
 	cong8.append(fac.stretches[0].cells[8].congestion_state)
+
+	d.append(fac.stretches[0].delta_big[k-1])
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
@@ -136,25 +139,25 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 plt.figure(0)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('l')
-plt.plot(l0)
+plt.ylabel('delta_big')
+plt.plot(d)
 
-plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('e')
-plt.plot(e0)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('e')
+# plt.plot(e0)
 
-plt.figure(1)
-plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('rho6')
-plt.plot(r6)
+# plt.figure(1)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('rho6')
+# plt.plot(r6)
 
-plt.figure(2)
-plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('rho7')
-plt.plot(r7)
+# plt.figure(2)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('rho7')
+# plt.plot(r7)
 
 # plt.figure(99)
 # plt.grid(True)

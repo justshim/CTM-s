@@ -17,8 +17,7 @@ class Stretch:
 		self.n_off_ramps = 0
 		self.time_length = time_length ### T[h]
 		self.ttt = 0
-		self.delta_big = 0
-		self.pi = 0
+		self.delta_big = []
 		self.last_phi = last_phi
 		self.phi_zero = phi_zero
 		self.k = 0
@@ -46,15 +45,17 @@ class Stretch:
 		self.ttt = total_ell*3600
 		print("TTT: " + str(self.ttt))
 
-	def computeDelta(self):
+	def computeDelta(self): #viene negativo a causa del calcolo della velocità 
+		total_ell = 0
 		## Computation of the additional TTT (total travel time) due to congestions on this stretch
+		for i in range(len(self.cells)-1):
+			total_ell += 3600 * ((self.cells[i].length/self.cells[i].v[self.k]) - (self.cells[i].length/self.cells[i].v_free))
+			
+			if (total_ell<0):
+				total_ell = 0
 
-		pass
+		self.delta_big.append(total_ell)
 
-	def computePi(self):
-		## Computation of percentage of peak congestion reduction on this stretch
-
-		pass
 		
 	def createCell(self, length, v_free, w, q_max, rho_max, p):
 		## Method to create an instance of the object Cell, and add it to this stretch
@@ -311,6 +312,11 @@ class Stretch:
 		## And all ramps have their l updated
 		for r_on in range (len(self.on_ramps)):
 			self.on_ramps[r_on].computeL(self.time_length)
+
+		for i in range(len(self.cells)):
+			self.cells[i].computeV()
+
+		self.computeDelta()
 
 	def computeDPrec(self, i):
 		prev_d_big = 0
