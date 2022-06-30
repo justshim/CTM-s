@@ -6,7 +6,7 @@ class Cell:
 		self.v_free = v_free
 		self.v = []
 		self.w = w
-		self.q = [1500] # Q is a vector for capacity drop modelling
+		self.q = [4000] # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
 		self.q_max = q_max
 		self.rho_max = rho_max

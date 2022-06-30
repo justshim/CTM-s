@@ -11,7 +11,8 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+#loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
+loc = ("C:/A_Tesi/CTM-identification/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
@@ -20,7 +21,8 @@ sh.cell_value(0,0)
 
 ## read phi first cell from xls file
 
-loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+#loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
+loc_phi = ("C:/A_Tesi/CTM-identification/CTM_param_out.xls")
 #loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
@@ -28,8 +30,9 @@ wb_phi = xlrd.open_workbook(loc_phi)
 #sh_phi = wb_phi.sheet_by_index(0) 		#sheet 0 is a "realistic" input (24h)
 #sh_phi = wb_phi.sheet_by_index(1)		#sheet 1 is a "synthetic" input with 2 equal peaks (24h)
 #sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak (24h)
-sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
+#sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
 #sh_phi = wb_phi.sheet_by_index(4)		#sheet 4 is a flat input (24h)
+sh_phi = wb_phi.sheet_by_index(1)
 
 sh_phi.cell_value(0,0)
 
@@ -50,20 +53,20 @@ fac.createStretch(10/3600, 5000, phi_zero)
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
-	           #ID stretch   length,             v_free,                   w,              ,   q_max,           rho_max,         	p_ms
+	           #ID stretch   length,             v_free,                   w,              ,   q_max,           rho_max,         p_ms
 	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), sh.cell_value(i,5), 0.95)	
 			
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 500, 3, 6, 60, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+#fac.addStationToStretch(0, 500, 3, 6, 60, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
-fac.addOnRampToStretch(0, 100, 500, 2, 0.05)
+#fac.addOnRampToStretch(0, 100, 500, 2, 0.05)
 
 ## create the off-ramps via the factory
 			#ID_stretch, i, beta_r
-fac.addOffRampToStretch(0, 7, 0.05)
+#fac.addOffRampToStretch(0, 7, 0.05)
 
 fac.stretches[0].computeTTT()
 
@@ -80,6 +83,9 @@ r5 = []
 r6 = []
 r7 = []
 r8 = []
+r9 = []
+r10 = []
+r11 = []
 
 cong0 = []
 cong1 = []
@@ -98,15 +104,15 @@ d = []
 ##################################
 
 k=0
-while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
+while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	print("\nTime instant: " + str(k))
 	
 	fac.stretches[0].update(k)
 	k = k + 1
 	
 	# save the various parameters in the previously created variables
-	l0.append(fac.stretches[0].stations[0].l[k])
-	e0.append(fac.stretches[0].stations[0].e[k])
+	#l0.append(fac.stretches[0].stations[0].l[k])
+	#e0.append(fac.stretches[0].stations[0].e[k])
 
 	r0.append(fac.stretches[0].cells[0].rho[k])
 	r1.append(fac.stretches[0].cells[1].rho[k])
@@ -117,6 +123,9 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	r6.append(fac.stretches[0].cells[6].rho[k])
 	r7.append(fac.stretches[0].cells[7].rho[k])
 	r8.append(fac.stretches[0].cells[8].rho[k])
+	r9.append(fac.stretches[0].cells[9].rho[k])
+	r10.append(fac.stretches[0].cells[10].rho[k])
+	r11.append(fac.stretches[0].cells[11].rho[k])
 
 	cong0.append(fac.stretches[0].cells[0].congestion_state)
 	cong1.append(fac.stretches[0].cells[1].congestion_state)
@@ -139,25 +148,44 @@ while k<1080: 	# k=24h=8640 , k=1h=360, k=3h=1080
 plt.figure(0)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('delta_big')
-plt.plot(d)
+plt.ylabel('r6')
+plt.plot(r6)
 
-# plt.grid(True)
-# plt.xlabel('k')
-# plt.ylabel('e')
-# plt.plot(e0)
+plt.figure(1)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('r7')
+plt.plot(r7)
 
-# plt.figure(1)
-# plt.grid(True)
-# plt.xlabel('k')
-# plt.ylabel('rho6')
-# plt.plot(r6)
+plt.figure(2)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('r8')
+plt.plot(r8)
 
-# plt.figure(2)
-# plt.grid(True)
-# plt.xlabel('k')
-# plt.ylabel('rho7')
-# plt.plot(r7)
+plt.figure(3)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('r9')
+plt.plot(r9)
+
+plt.figure(4)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('r10')
+plt.plot(r10)
+
+plt.figure(5)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('r11')
+plt.plot(r11)
+
+plt.figure(99)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('cong1')
+plt.plot(cong1)
 
 # plt.figure(99)
 # plt.grid(True)
