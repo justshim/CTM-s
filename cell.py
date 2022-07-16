@@ -58,15 +58,15 @@ class Cell:
 		
 		elif(self.congestion_state == 1): #CONGESTED MAINSTREAM
 			self.phi = self.s_big - total_ds
-			print("Congested 1, cell " + str(self.id_cell))
+			#print("Congested 1, cell " + str(self.id_cell))
 
 		elif(self.congestion_state == 2): #CONGESTED SERVICE
 			self.phi = d_prec
-			print("Congested 2, cell " + str(self.id_cell))
+			#print("Congested 2, cell " + str(self.id_cell))
 		
 		elif(self.congestion_state == 3): #CONGESTED ALL
 			self.phi = self.s_big  * self.p_ms
-			print("Congested 3, cell " + str(self.id_cell))
+			#print("Congested 3, cell " + str(self.id_cell))
 
 	def computePhiPlus(self, rs_total):
 		## Computation of the total flow entering this cell at time instant k
