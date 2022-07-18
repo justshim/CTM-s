@@ -17,11 +17,11 @@ loc = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
-sh = wb.sheet_by_index(3)
+sh = wb.sheet_by_index(0)
 sh.cell_value(0,0)
 
 wbt = xlwt.Workbook()
-ws = wbt.add_sheet('Armando')
+ws = wbt.add_sheet('Sheet1')
 
 ## read phi first cell from xls file
 

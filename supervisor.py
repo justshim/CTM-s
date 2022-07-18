@@ -57,8 +57,7 @@ class Stretch:
 				total_ell = 0
 
 		self.delta_big.append(total_ell)
-
-		
+	
 	def createCell(self, length, v_free, w, q_max, rho_max, p):
 		## Method to create an instance of the object Cell, and add it to this stretch
 

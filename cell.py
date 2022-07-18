@@ -87,7 +87,7 @@ class Cell:
 		## Computation of the demand of this cell at time instant k
 
 		supp = (1 - total_beta) * self.v_free * self.rho[self.k]	# this is a support variable used to simplify the syntax later
-
+		print("Cell " + str(self.id_cell) + " DBig: " +str(supp) )
 		if(supp > self.q_max):
 			self.d_big = self.q_max
 		
@@ -113,12 +113,15 @@ class Cell:
 		
 		elif((d_prec > self.p_ms * self.s_big) and (total_ds <= (1 - self.p_ms) * self.s_big)):
 			self.congestion_state=1 #CONGESTED MAINSTREAM
+			print("Cell " + str(self.id_cell) + " in congestion")
 		
 		elif((d_prec <= self.p_ms * self.s_big) and (total_ds > (1 - self.p_ms) * self.s_big)):
 			self.congestion_state=2 #CONGESTED SERVICE
+			#print("Congestion ")
 		
 		elif((d_prec > self.p_ms * self.s_big) and (total_ds > (1 - self.p_ms) * self.s_big)):
 			self.congestion_state=3 #CONGESTED ALL
+			#print("Congestion ")
 		
 		else:
 			print("Congestion Error")
