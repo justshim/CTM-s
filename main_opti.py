@@ -13,11 +13,11 @@ import numpy as np
 ## read file CTM_data from xls file
 
 #loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-#loc = ("C:/A_Tesi/CTM-identification/CTM_param_out.xls")
-loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+loc = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
+#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
-sh = wb.sheet_by_index(0)
+sh = wb.sheet_by_index(3)
 sh.cell_value(0,0)
 
 wbt = xlwt.Workbook()
@@ -26,8 +26,8 @@ ws = wbt.add_sheet('Armando')
 ## read phi first cell from xls file
 
 #loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-#loc_phi = ("C:/A_Tesi/CTM-identification/CTM_param_out.xls")
-loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
+loc_phi = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
+#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
 
@@ -36,7 +36,7 @@ wb_phi = xlrd.open_workbook(loc_phi)
 #sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak (24h)
 #sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
 #sh_phi = wb_phi.sheet_by_index(4)		#sheet 4 is a flat input (24h)
-sh_phi = wb_phi.sheet_by_index(6)
+sh_phi = wb_phi.sheet_by_index(2)
 
 sh_phi.cell_value(0,0)
 
@@ -44,7 +44,7 @@ phi_zero=[]
 for i in range(0, sh_phi.nrows):
 	phi_zero.append(sh_phi.cell_value(i,0))
 
-arrinza = 0
+cell_in = 0
 row = 0
 duration = 8640 # k=24h=8640 , k=1h=360, k=3h=1080
 
@@ -94,9 +94,10 @@ ws.write(0, 3, delta_max0)
 
 
 
-for arrinza in range(1, 8, 1):
-	arronza = arrinza + 1
-	for delta in range(30, 361, 30):
+for cell_in in range(1, sh.nrows-3, 1):
+	cell_out = cell_in + 2
+	for delta in range(30, 361, 30): #360k = 3600s
+		
 		###################################################
 		# Initialization of all components of the model:  #
 		###################################################
@@ -115,7 +116,7 @@ for arrinza in range(1, 8, 1):
 					
 		## create the stations via the factory
 					#ID stretch, r_s_max, i, j, delta, beta_s, p
-		fac.addStationToStretch(0, 500, arrinza, arronza, delta, 0.05, 0.05) 
+		fac.addStationToStretch(0, 500, cell_in, cell_out, delta, 0.07, 0.05) 
 
 		## create the on-ramps via the factory
 					#ID stretch, d_r, r_r_max, j, p_r
@@ -125,7 +126,8 @@ for arrinza in range(1, 8, 1):
 					#ID_stretch, i, beta_r
 		#fac.addOffRampToStretch(0, 7, 0.05)
 
-		ttt = fac.stretches[0].computeTTT()
+		#ttt = fac.stretches[0].computeTTT()
+
 
 		## support variables to save various parameters during execution, and possibly plot them
 		l0 = []
@@ -197,27 +199,29 @@ for arrinza in range(1, 8, 1):
 		for kkk in d:
 			integ = integ + kkk
 		
-		print("i: " + str(arrinza) + "; j: " + str(arronza))
-		print("Delta :" + str(delta))
-		print(integ)
+		print("i: " + str(cell_in) + "; j: " + str(cell_out))
+		print("delta stazione :" + str(delta))
+		print("Integ :" + str(integ))
 		delta_max = max(d)
 		pi = (delta_max0-delta_max)/delta_max0
-		print(pi)
+		print("Pi :" + str(pi))
 		print()
 
 		row = row + 1
-		ws.write(row, 0, arrinza)
+		ws.write(row, 0, cell_in)
 		ws.write(row, 1, delta)
 		ws.write(row, 2, integ)
 		ws.write(row, 3, delta_max)
 		ws.write(row, 4, pi)
 		
-		# plt.figure(row)
-		# plt.grid(True)
-		# plt.plot(d)
+		plt.figure(row)
+		plt.grid(True)
+		plt.plot(cong8)
 		
+	plt.show()	
 
-wbt.save('C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/delta_cose.xls')		
+#wbt.save('C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/opti_data.xls')	
+wbt.save('C:/A_Tesi/Python/CTM-s/opti_data.xls')	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
 #############################
@@ -231,4 +235,3 @@ wbt.save('C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/delta_cose.xls')
 # plt.plot(d)
 
 
-#plt.show()

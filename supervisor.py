@@ -43,13 +43,15 @@ class Stretch:
 			total_ell +=  self.cells[i].length/self.cells[i].v_free
 
 		self.ttt = total_ell*3600
-		#print("TTT: " + str(self.ttt))
+		print("TTT: " + str(self.ttt))
+		return self.ttt
+		
 
 	def computeDelta(self): #viene negativo a causa del calcolo della velocità 
 		total_ell = 0
 		## Computation of the additional TTT (total travel time) due to congestions on this stretch
 		for i in range(len(self.cells)-1):
-			total_ell += 3600 * ((self.cells[i].length/self.cells[i].v[self.k]) - (self.cells[i].length/self.cells[i].v_free))
+			total_ell += 60 * ((self.cells[i].length/self.cells[i].v[self.k]) - (self.cells[i].length/self.cells[i].v_free))
 			
 			if (total_ell<0):
 				total_ell = 0
