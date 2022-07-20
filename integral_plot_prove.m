@@ -15,13 +15,16 @@ integral = A(:, 4);
 max_delta = A(:,5);
 pi_greco = A(:, 6);
 
-%% Different i, j; same delta (10 min)
+%% Different i, j; delta fixed
+delta = 360;
 x = [];
 y = [];
 z = [];
-
+fit_name=["poly11","poly12","poly21","poly22","poly13","poly31","poly23","poly32","poly33", ...
+          "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
+          "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
 for i=1:length(cell_in)
-    if(A(i,3)==60)
+    if(A(i,3)==delta)
         x=[x A(i,1)];
         y=[y A(i,2)];
         z=[z A(i,4)];
@@ -30,7 +33,8 @@ end
 x=x'; 
 y=y'; 
 z=z';
-n=length(z);
+
+%n=length(z);
 % x_grid=linspace(0, length(unique(x))+1, 50); 
 % y_grid=linspace(1, length(unique(y))+2, 50);
 % 
@@ -50,20 +54,30 @@ n=length(z);
 % Phi1_grid=[ones(length(xq_vec), 1), xq_vec, yq_vec];
 % curva1=Phi1_grid*theta1;
 % curva1_matrix=reshape(curva1, size(xq));
-[f35, gof35] = fit([x, y],z,"poly35");
-[f24, gof24] = fit([x, y],z,"poly24");
-[f25, gof25] = fit([x, y],z,"poly25");
-gof35
-gof24
-gof25
+
+[f, gof] = fit([x, y],z,fit_name(1));
+f_best=f;
+gof_best=gof;
+b = round(gof_best.adjrsquare,2);
+for i=2:length(fit_name)
+    [f, gof] = fit([x, y],z,fit_name(i));
+    a = round(gof.adjrsquare,2);
+    if(a > b)
+        f_best=f;
+        gof_best=gof;
+        b = round(gof_best.adjrsquare,2);
+    end
+end
+
 figure(1)
 %mesh(xq, yq, curva1_matrix)
-plot(f35,[x y],z)
+plot(f_best,[x y],z)
 zlim([0 3500]);
 xlabel('x - Cell IN')
 ylabel('y - Cell OUT')
 zlabel("Integral")
 title("Integral Delta VS i, j")
+legend(type(f_best))
 grid on
 
 %% Different i, delta (5-60 min); j = i+2
