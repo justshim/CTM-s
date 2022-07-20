@@ -50,15 +50,13 @@ n=length(z);
 % Phi1_grid=[ones(length(xq_vec), 1), xq_vec, yq_vec];
 % curva1=Phi1_grid*theta1;
 % curva1_matrix=reshape(curva1, size(xq));
-[f35, gof35] = fit([x, y],z,"poly35");
+[f23, gof23] = fit([x, y],z,"poly23");
 [f24, gof24] = fit([x, y],z,"poly24");
-[f25, gof25] = fit([x, y],z,"poly25");
-gof35
-gof24
-gof25
+[f, gof] = fit([x, y],z,"pol3");
+gof
 figure(1)
 %mesh(xq, yq, curva1_matrix)
-plot(f35,[x y],z)
+plot(f,[x y],z)
 zlim([0 3500]);
 xlabel('x - Cell IN')
 ylabel('y - Cell OUT')

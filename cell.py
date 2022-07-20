@@ -40,7 +40,7 @@ class Cell:
 		
 			self.v.append(self.v_free)
 		else:
-			phi_avg = (self.phi_minus + self.phi_plus)/2 #si puo fare meglio??
+			phi_avg = (self.phi_minus + self.phi_plus)/2
 			self.v.append(phi_avg/self.rho[self.k])
 
 		
