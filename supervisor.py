@@ -316,6 +316,7 @@ class Stretch:
 
 		for i in range(len(self.cells)):
 			self.cells[i].computeV()
+			
 
 		self.computeDelta()
 
@@ -337,6 +338,7 @@ class Stretch:
 			next_phi = self.cells[i+1].phi
 		
 		else:
-			next_phi = self.last_phi
+			#next_phi = self.last_phi[self.k]
+			next_phi = self.cells[i-1].d_big
 
 		return next_phi

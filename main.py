@@ -37,13 +37,19 @@ wb_phi = xlrd.open_workbook(loc_phi)
 #sh_phi = wb_phi.sheet_by_index(5)		#sheet 5 is a real input with peak at 1800 veh/h (24h)
 #sh_phi = wb_phi.sheet_by_index(6)		#sheet 6 is a real input with peak at 2500 veh/h (24h)
 
-sh_phi = wb_phi.sheet_by_index(2)
-
+sh_phi = wb_phi.sheet_by_index(1)
 sh_phi.cell_value(0,0)
+
+sh_last_phi = wb.sheet_by_index(2)
+sh_last_phi.cell_value(0,0)
 
 phi_zero=[]
 for i in range(0, sh_phi.nrows):
 	phi_zero.append(sh_phi.cell_value(i,0))
+
+last_phi=[]
+for i in range(0, sh_last_phi.nrows):
+	last_phi.append(sh_last_phi.cell_value(i,0))
 
 ###################################################
 # Initialization of all components of the model:  #
@@ -53,17 +59,17 @@ for i in range(0, sh_phi.nrows):
 fac = f.Factory()
 
 ## create the stretch via the factory
-	# timeLength [h],   lastPhi,  phi_zero
-fac.createStretch(10/3600, 5000, phi_zero) 
+		 		#timeLength [h],   lastPhi, 	phi_zero
+fac.createStretch(sh.cell_value(2,6), last_phi, phi_zero) 
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
 	           #ID stretch   length,             v_free,                   w,              ,   q_max,           rho_max,         p_ms
-	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), sh.cell_value(i,5), 0.95)	
-			
+	fac.addCellToStretch(0, sh.cell_value(i,1), sh.cell_value(i,2), sh.cell_value(i,3), sh.cell_value(i,4), sh.cell_value(i,5), 1)	
+		
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-#fac.addStationToStretch(0, 500, 3, 6, 60, 0.05, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+#fac.addStationToStretch(0, 500, 3, 6, 60, 0.07, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
@@ -93,6 +99,21 @@ r10 = []
 r11 = []
 r12 = []
 
+s0 = []
+s1 = []
+s2 = []
+s3 = []
+s4 = []
+s5 = []
+s6 = []
+s7 = []
+s8 = []
+s9 = []
+s10 = []
+s11 = []
+s12 = []
+
+v10 = []
 
 cong0 = []
 cong1 = []
@@ -108,7 +129,12 @@ cong10 = []
 cong11 = []
 
 d = []
-
+demand = []
+supply = []
+demand_next = []
+supply_next = []
+fipiu = []
+fimeno = []
 ##################################
 # Exectution of the simulation:  #
 ##################################
@@ -136,7 +162,30 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	r10.append(fac.stretches[0].cells[10].rho[k])
 	r11.append(fac.stretches[0].cells[11].rho[k])
 	r12.append(fac.stretches[0].cells[12].rho[k])
-	
+
+	s0.append(fac.stretches[0].cells[0].s_big)
+	s1.append(fac.stretches[0].cells[1].s_big)
+	s2.append(fac.stretches[0].cells[2].s_big)
+	s3.append(fac.stretches[0].cells[3].s_big)
+	s4.append(fac.stretches[0].cells[4].s_big)
+	s5.append(fac.stretches[0].cells[5].s_big)
+	s6.append(fac.stretches[0].cells[6].s_big)
+	s7.append(fac.stretches[0].cells[7].s_big)
+	s8.append(fac.stretches[0].cells[8].s_big)
+	s9.append(fac.stretches[0].cells[9].s_big)
+	s10.append(fac.stretches[0].cells[10].s_big)
+	s11.append(fac.stretches[0].cells[11].s_big)
+	s12.append(fac.stretches[0].cells[12].s_big)
+
+	demand.append(fac.stretches[0].cells[9].d_big)
+	supply.append(fac.stretches[0].cells[9].s_big)
+	demand_next.append(fac.stretches[0].cells[10].d_big)
+	supply_next.append(fac.stretches[0].cells[10].s_big)
+
+	fipiu.append(fac.stretches[0].cells[9].phi_plus)
+	fimeno.append(fac.stretches[0].cells[9].phi_minus)
+
+	v10.append(fac.stretches[0].cells[10].v[k-1])
 
 	cong0.append(fac.stretches[0].cells[0].congestion_state)
 	cong1.append(fac.stretches[0].cells[1].congestion_state)
@@ -153,7 +202,7 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 
 	d.append(fac.stretches[0].delta_big[k-1])
 
-print("\n End")
+print("\nEnd")
 	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
@@ -170,14 +219,15 @@ plt.plot(r0)
 plt.figure(1)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('r6')
-plt.plot(r6)
+plt.ylabel('rho')
+plt.plot(r9)
+plt.plot(r10)
 
 plt.figure(2)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('r10')
-plt.plot(r10)
+plt.ylabel('v10')
+plt.plot(v10)
 
 plt.figure(3)
 plt.grid(True)
@@ -185,35 +235,74 @@ plt.xlabel('k')
 plt.ylabel('r12')
 plt.plot(r12)
 
-plt.figure(4)
-plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('cong0')
-plt.plot(cong0)
+# plt.figure(4)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('cong0')
+# plt.plot(cong0)
 
-plt.figure(5)
-plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('cong1')
-plt.plot(cong1)
+# #plt.figure(5)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('cong1')
+# plt.plot(cong1)
 
 plt.figure(6)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('cong5')
-plt.plot(cong5)
+plt.ylabel('congestion')
+plt.plot(cong9)
+plt.plot(cong10)
 
 plt.figure(7)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('cong10')
-plt.plot(cong10)
+plt.plot(demand)
+plt.plot(demand_next)
+plt.legend(['demand','demand_next'], title = "Legend")
 
-plt.figure(99)
+plt.figure(77)
 plt.grid(True)
 plt.xlabel('k')
-plt.ylabel('cong11')
-plt.plot(cong11)
+plt.plot(s0)
+plt.plot(s1)
+plt.plot(s2)
+plt.plot(s3)
+plt.plot(s4)
+plt.plot(s5)
+plt.plot(s6)
+plt.plot(s7)
+plt.plot(s8)
+plt.plot(s9)
+plt.plot(s10)
+plt.plot(s11)
+plt.plot(s12)
+plt.legend(['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'], title = "Legend")
+
+plt.figure(8)
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('fipiu')
+plt.plot(fipiu)
+
+
+plt.grid(True)
+plt.xlabel('k')
+plt.ylabel('fimeno')
+plt.plot(fimeno)
+
+
+# plt.figure(7)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('cong10')
+# plt.plot(cong10)
+
+# plt.figure(99)
+# plt.grid(True)
+# plt.xlabel('k')
+# plt.ylabel('cong11')
+# plt.plot(cong11)
 
 # plt.figure(99)
 # plt.grid(True)
