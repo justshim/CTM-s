@@ -9,6 +9,9 @@ import numpy as np
 #######################
 # File read section:  #
 #######################
+#path_file_output = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/opti_data.xls'
+path_file_output = 'C:/A_Tesi/Python/CTM-s/opti_data.xls'
+
 
 ## read file CTM_data from xls file
 
@@ -17,7 +20,7 @@ loc = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
-sh = wb.sheet_by_index(0)
+sh = wb.sheet_by_name("Cells parameters")
 sh.cell_value(0,0)
 
 wbt = xlwt.Workbook()
@@ -36,13 +39,18 @@ wb_phi = xlrd.open_workbook(loc_phi)
 #sh_phi = wb_phi.sheet_by_index(2)		#sheet 2 is a "synthetic" input with 1 peak (24h)
 #sh_phi = wb_phi.sheet_by_index(3)		#sheet 3 is a "synthetic" input with 1 peak (3h)
 #sh_phi = wb_phi.sheet_by_index(4)		#sheet 4 is a flat input (24h)
-sh_phi = wb_phi.sheet_by_index(2)
 
+sh_phi = wb_phi.sheet_by_name("First Demand Smooth")
 sh_phi.cell_value(0,0)
-
 phi_zero=[]
 for i in range(0, sh_phi.nrows):
 	phi_zero.append(sh_phi.cell_value(i,0))
+
+sh_last_phi = wb.sheet_by_name("Last Demand Smooth")
+sh_last_phi.cell_value(0,0)
+last_phi=[]
+for i in range(0, sh_last_phi.nrows):
+	last_phi.append(sh_last_phi.cell_value(i,0))
 
 cell_in = 0
 row = 0
@@ -55,7 +63,7 @@ fac = f.Factory()
 
 ## create the stretch via the factory
 	# timeLength [h],   lastPhi,  phi_zero
-fac.createStretch(10/3600, 5000, phi_zero) 
+fac.createStretch(sh.cell_value(2,6), last_phi, phi_zero) 
 
 ## create the cells via the factory
 for i in range(1, sh.nrows):
@@ -99,11 +107,11 @@ ws.write(0, 5, "pi")
 
 
 
-for cell_in in range(1, sh.nrows-1, 1):
+for cell_in in range(1, sh.nrows-2, 1):
 
-	for cell_out in range(cell_in+1, sh.nrows, 1):
+	for cell_out in range(cell_in+1, sh.nrows-1, 1):
 
-		for delta in range(30, 361, 30): #360k = 3600s
+		for delta in range(60, 721, 60): #360k = 3600s = 60 min. 720k = 7200s = 120 min
 			
 			###################################################
 			# Initialization of all components of the model:  #
@@ -114,7 +122,7 @@ for cell_in in range(1, sh.nrows-1, 1):
 
 			## create the stretch via the factory
 				# timeLength [h],   lastPhi,  phi_zero
-			fac.createStretch(10/3600, 5000, phi_zero) 
+			fac.createStretch(sh.cell_value(2,6), last_phi, phi_zero) 
 
 			## create the cells via the factory
 			for i in range(1, sh.nrows):
@@ -228,8 +236,8 @@ for cell_in in range(1, sh.nrows-1, 1):
 		
 	# plt.show()	
 
-#wbt.save('C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/opti_data.xls')	
-wbt.save('C:/A_Tesi/Python/CTM-s/opti_data.xls')	
+#wbt.save(path_file_output)	
+wbt.save(path_file_output)	
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
 #############################

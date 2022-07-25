@@ -17,7 +17,7 @@ loc = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
-sh = wb.sheet_by_index(0)
+sh = wb.sheet_by_name("Cells parameters")
 sh.cell_value(0,0)
 
 ## read phi first cell from xls file
@@ -37,16 +37,14 @@ wb_phi = xlrd.open_workbook(loc_phi)
 #sh_phi = wb_phi.sheet_by_index(5)		#sheet 5 is a real input with peak at 1800 veh/h (24h)
 #sh_phi = wb_phi.sheet_by_index(6)		#sheet 6 is a real input with peak at 2500 veh/h (24h)
 
-sh_phi = wb_phi.sheet_by_index(1)
+sh_phi = wb_phi.sheet_by_name("First Demand Smooth")
 sh_phi.cell_value(0,0)
-
-sh_last_phi = wb.sheet_by_index(2)
-sh_last_phi.cell_value(0,0)
-
 phi_zero=[]
 for i in range(0, sh_phi.nrows):
 	phi_zero.append(sh_phi.cell_value(i,0))
 
+sh_last_phi = wb.sheet_by_name("Last Demand Smooth")
+sh_last_phi.cell_value(0,0)
 last_phi=[]
 for i in range(0, sh_last_phi.nrows):
 	last_phi.append(sh_last_phi.cell_value(i,0))

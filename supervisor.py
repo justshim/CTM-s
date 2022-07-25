@@ -43,7 +43,7 @@ class Stretch:
 			total_ell +=  self.cells[i].length/self.cells[i].v_free
 
 		self.ttt = total_ell*3600
-		print("TTT: " + str(self.ttt))
+		#print("TTT: " + str(self.ttt))
 		return self.ttt
 		
 

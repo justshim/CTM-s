@@ -96,8 +96,8 @@ class Cell:
 		## Computation of the supply of this cell at time instant k
 
 		supp = self.w * (self.rho_max-self.rho[self.k]) 	# this is a support variable used to simplify the syntax later
-		if(self.k>2500 and self.k<3000):
-				print("Cell " + str(self.id_cell) + " k: " +str(self.k) + "\nsupp:" + str(supp) + " qmax: "+str(self.q_max))
+		#if(self.k>2500 and self.k<3000):
+				#print("Cell " + str(self.id_cell) + " k: " +str(self.k) + "\nsupp:" + str(supp) + " qmax: "+str(self.q_max))
 		
 		if(supp > self.q_max):	
 			self.s_big = self.q_max
