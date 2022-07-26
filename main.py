@@ -12,8 +12,8 @@ import numpy as np
 ## read file CTM_data from xls file
 
 #loc = ("C:/A_Tesi/Python/CTM-s/CTM_data.xls")
-loc = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
-#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/CTM_param_out.xls")
+loc = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
+#loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
 
 wb = xlrd.open_workbook(loc)
@@ -23,8 +23,8 @@ sh.cell_value(0,0)
 ## read phi first cell from xls file
 
 #loc_phi = ("C:/A_Tesi/Python/CTM-s/phi_1.xls")
-loc_phi = ("C:/A_Tesi/CTMs-identification/CTM_param_out.xls")
-#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/CTM_param_out.xls")
+loc_phi = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
+#loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc_phi = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/phi_1.xls")
 
 wb_phi = xlrd.open_workbook(loc_phi)
