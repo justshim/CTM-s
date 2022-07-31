@@ -2,7 +2,7 @@ clearvars
 close all
 clc
 addpath(pwd);
-path=strcat(pwd,"/opti_data.xls");
+path=strcat(pwd,"/opti_data.csv");
 %warning('off','all')
 disp = 1;
 
@@ -31,7 +31,7 @@ for i=1:length(A(:,1))
     if(A(i,3)==delta)
         x=[x A(i,1)]; %i
         y=[y A(i,2)]; %j
-        z=[z A(i,5)]; %integral
+        z=[z A(i,6)]; %integral
     end
 end
 x=x'; 
@@ -72,7 +72,7 @@ for i=1:length(A(:,1))
     if(A(i,2)==A(i,1)+j)
         x=[x A(i,1)]; %i
         y=[y A(i,3)]; %delta
-        z=[z A(i,5)]; %integral
+        z=[z A(i,6)]; %integral
     end
 end
 x=x'; 
@@ -115,7 +115,7 @@ for i=1:length(A(:,1))
     if(A(i,2)==A(i,1)+j)
         x=[x A(i,1)]; %i
         y=[y A(i,3)]; %delta
-        z=[z A(i,7)]; %pi
+        z=[z A(i,8)]; %pi
     end
 end
 x=x'; 
@@ -157,7 +157,7 @@ for i=1:length(A(:,1))
     if(A(i,2)==A(i,1)+j)
         x=[x A(i,1)]; %i
         y=[y A(i,4)]; %beta
-        z=[z A(i,5)]; %integral
+        z=[z A(i,6)]; %integral
     end
 end
 x=x'; 
@@ -198,7 +198,7 @@ for i=1:length(A(:,1))
     if(A(i,2)==A(i,1)+j)
         x=[x A(i,1)]; %i
         y=[y A(i,4)]; %beta
-        z=[z A(i,7)]; %pi
+        z=[z A(i,8)]; %pi
     end
 end
 x=x'; 
@@ -240,7 +240,7 @@ for i=1:length(A(:,1))
     if(true)
         x=[x A(i,3)]; %delta
         y=[y A(i,4)]; %beta
-        z=[z A(i,7)]; %pi
+        z=[z A(i,8)]; %pi
     end
 end
 x=x'; 
@@ -281,7 +281,7 @@ for i=1:length(A(:,1))
     if(true)
         x=[x A(i,3)]; %delta
         y=[y A(i,4)]; %beta
-        z=[z A(i,5)]; %integral
+        z=[z A(i,6)]; %integral
     end
 end
 x=x'; 
