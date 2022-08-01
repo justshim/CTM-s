@@ -11,6 +11,6 @@ if __name__ == '__main__':
 	o.initVars()
 	o.firstIteration()
 	#initDelta, delta, stepDelta, initBeta, beta, stepBeta, initPriority, priority, stepPriority
-	o.initSimulation(60, 61, 60, 7, 8, 1, 94, 95, 1)
+	o.initSimulation(60, 721, 60, 1, 21, 1, 80, 96, 1)
 	elapsed = time.time() - t
 	print("Elapsed time: " + str(elapsed))
