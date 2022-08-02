@@ -3,16 +3,14 @@
 from model import cell as c
 from model import supervisor as s
 from model import factory as f
-import xlrd 
-import xlwt
-import matplotlib.pyplot as plt
+import xlrd
 import numpy as np
 import itertools
 import multiprocessing
 import os
 import csv
-from tqdm.auto import tqdm
-from p_tqdm import p_map, p_umap, p_imap, p_uimap
+
+from p_tqdm import p_map
 
 class data_creation:
 	
