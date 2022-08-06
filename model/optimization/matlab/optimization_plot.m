@@ -7,8 +7,8 @@ parpool('threads')
 disp('==============================')
 disp('-- Optimization analysis ')
 
-path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
- 
+%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 
 addpath(path)
 warning('off')
@@ -31,8 +31,8 @@ fit_name=["poly11","poly12","poly21","poly22","poly13","poly31","poly23","poly32
           "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
           "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
 
-%% 1 - Integral with different i, j and delta fixed
-disp("1 - Integral with different i, j and delta fixed")
+%% 1 - Integral with different i and j, delta fixed
+disp("1 - Integral with different i and j, delta fixed")
 fixed_delta = 480;
 x = [];
 y = [];
@@ -75,8 +75,8 @@ if(plots>0)
     grid on
 end
 
-%% 2 - Integral with different i, delta(10-120 min) and j fixed
-disp('2 - Integral with different i, delta(10-120 min) and j fixed')
+%% 2 - Integral with different i and delta(10-120 min), j fixed
+disp('2 - Integral with different i and delta(10-120 min), j fixed')
 j = 2;
 x = [];
 y = [];
@@ -120,8 +120,8 @@ if(plots>0)
 end
 
 
-%% 3 - Pi with different i, delta(10-120 min) and j fixed
-disp('3 - Pi with different i, delta(10-120 min) and j fixed')
+%% 3 - Pi with different i and delta(10-120 min), j fixed
+disp('3 - Pi with different i and delta(10-120 min), j fixed')
 j = 2;
 x = [];
 y = [];
@@ -164,8 +164,8 @@ if(plots>0)
     grid on
 end
 
-%% 4 - Integral with different i, beta and j fixed
-disp('4 - Integral with different i, beta and j fixed')
+%% 4 - Integral with different i and beta, j fixed
+disp('4 - Integral with different i and beta, j fixed')
 j = 2;
 x = [];
 y = [];
@@ -207,8 +207,8 @@ if(plots>0)
     legend(type(f_best))
     grid on
 end
-%% 5 - Pi with different i, beta and j fixed
-disp('5 - Pi with different i, beta and j fixed')
+%% 5 - Pi with different i and beta, j fixed
+disp('5 - Pi with different i and beta, j fixed')
 j = 2;
 x = [];
 y = [];
@@ -251,8 +251,8 @@ if(plots>0)
     grid on
 end
 
-% %% 6 - Pi with different delta, beta
-% disp('6 - Pi with different delta, beta')
+% %% 6 - Pi with different delta and beta
+% disp('6 - Pi with different delta and beta')
 % 
 % x = [];
 % y = [];
@@ -292,8 +292,8 @@ end
 %     legend(type(f_best))
 %     grid on
 % end
-% %% 7 - Integral with different delta, beta 
-% disp('7 - Integral with different delta, beta ')
+% %% 7 - Integral with different delta and beta 
+% disp('7 - Integral with different delta and beta ')
 % 
 % x = [];
 % y = [];
@@ -374,8 +374,8 @@ end
 %     legend(type(f_best))
 %     grid on
 % end
-% %% 9 - Integral with different beta, priority 
-% disp('9 - Integral with different beta, priority ')
+% %% 9 - Integral with different beta and priority 
+% disp('9 - Integral with different beta and priority ')
 % 
 % x = [];
 % y = [];
