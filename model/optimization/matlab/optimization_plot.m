@@ -8,9 +8,12 @@ disp('==============================')
 disp('-- Optimization analysis ')
 
 %path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path_ctm = "H:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out.xls";
 path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out.xls";
 
 addpath(path)
+addpath(path_ctm)
 warning('off')
 
 plots = 1;
@@ -27,6 +30,12 @@ beta = A(:, 4);
 priority = A(:,5);
 integral=A(:,6);
 pi_greco = A(:, 8);
+
+T = readtable(path_ctm);
+A = table2array(T);
+q_max = A(:, 5);
+rho_max = A(:, 6);
+
 fit_name=["poly11","poly12","poly21","poly22","poly13","poly31","poly23","poly32","poly33", ...
           "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
           "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
@@ -72,6 +81,78 @@ if(plots>0)
     zlabel("Integral")
     title("Integral VS i, j")
     legend(type(f_best))
+    grid on
+end
+
+%% 1.1 - Integral with different rho out, delta and beta fixed
+disp("1.1 - Integral with different rho in and rho out, delta fixed")
+fixed_delta = 480;
+fixed_priority = 0.05;
+fixed_beta = 0.07;
+y = [];
+z = [];
+parfor i=1:length(cell_in)
+    if(delta(i)==fixed_delta && beta(i)==fixed_beta)
+        y=[y cell_out(i)]; %j
+        z=[z integral(i)]; %integral
+    end
+end
+y=y'; 
+z=z';
+
+for i=1:length(y)
+    for k=1:length(rho_max)
+        if(y(i)==k)
+            y(i)=rho_max(k); %j -> rho max
+        end
+    end
+end
+y = sort(y);
+
+if(plots>0)
+    figure()
+    scatter(y,z)
+    hold on
+    plot(fit(y,z,'poly3'))
+    xlabel('x - rho max cell OUT')
+    ylabel('Integral')
+    title("Integral VS rho max j")
+    grid on
+end
+
+%% 1.2 - Integral with different q_max out, delta and beta fixed
+disp("1.2 - Integral with different q_max out, delta and beta fixed")
+fixed_delta = 480;
+fixed_priority = 0.05;
+fixed_beta = 0.07;
+y = [];
+z = [];
+parfor i=1:length(cell_in)
+    if(delta(i)==fixed_delta && beta(i)==fixed_beta)
+        y=[y cell_out(i)]; %j
+        z=[z integral(i)]; %integral
+    end
+end
+y=y'; 
+z=z';
+
+for i=1:length(y)
+    for k=1:length(q_max)
+        if(y(i)==k)
+            y(i)=q_max(k); %j -> rho max
+        end
+    end
+end
+y = sort(y);
+
+if(plots>0)
+    figure()
+    scatter(y,z)
+    hold on
+    plot(fit(y,z,'poly3'))
+    xlabel('x - q max cell OUT')
+    ylabel('Integral')
+    title("Integral VS q max j")
     grid on
 end
 
@@ -164,6 +245,78 @@ if(plots>0)
     grid on
 end
 
+%% 3.1 - Pi with different rho out, delta and beta fixed
+disp("3.1 - Pi with different rho in and rho out, delta fixed")
+fixed_delta = 480;
+fixed_priority = 0.05;
+fixed_beta = 0.07;
+y = [];
+z = [];
+parfor i=1:length(cell_in)
+    if(delta(i)==fixed_delta && beta(i)==fixed_beta)
+        y=[y cell_out(i)]; %j
+        z=[z pi_greco(i)]; %integral
+    end
+end
+y=y'; 
+z=z';
+
+for i=1:length(y)
+    for k=1:length(rho_max)
+        if(y(i)==k)
+            y(i)=rho_max(k); %j -> rho max
+        end
+    end
+end
+y = sort(y);
+
+if(plots>0)
+    figure()
+    scatter(y,z)
+    hold on
+    plot(fit(y,z,'poly3'))
+    xlabel('x - rho max cell OUT')
+    ylabel('Pi')
+    title("Pi VS rho max j")
+    grid on
+end
+
+%% 3.2 - Pi with different q_max out, delta and beta fixed
+disp("3.2 - Pi with different q_max out, delta and beta fixed")
+fixed_delta = 480;
+fixed_priority = 0.05;
+fixed_beta = 0.07;
+y = [];
+z = [];
+parfor i=1:length(cell_in)
+    if(delta(i)==fixed_delta && beta(i)==fixed_beta)
+        y=[y cell_out(i)]; %j
+        z=[z pi_greco(i)]; %integral
+    end
+end
+y=y'; 
+z=z';
+
+for i=1:length(y)
+    for k=1:length(q_max)
+        if(y(i)==k)
+            y(i)=q_max(k); %j -> rho max
+        end
+    end
+end
+y = sort(y);
+
+if(plots>0)
+    figure()
+    scatter(y,z)
+    hold on
+    plot(fit(y,z,'poly3'))
+    xlabel('x - q max cell OUT')
+    ylabel('Pi')
+    title("Pi VS q max j")
+    grid on
+end
+
 %% 4 - Integral with different i and beta, j fixed
 disp('4 - Integral with different i and beta, j fixed')
 j = 2;
@@ -209,7 +362,7 @@ if(plots>0)
 end
 %% 5 - Pi with different i and beta, j fixed
 disp('5 - Pi with different i and beta, j fixed')
-j = 2;
+j = 3;
 x = [];
 y = [];
 z = [];
