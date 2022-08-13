@@ -45,8 +45,8 @@ Output = [integral pi_greco];
 %           "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
 %           "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
 
-mdl = polyfitn(Input, pi_greco, 8);
-%formula=polyn2sym(mdl)
+mdl = polyfitn(Input, pi_greco, 4);
+
 
 
 %% 1 - Integral with different i and j, delta fixed
