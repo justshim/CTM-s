@@ -54,7 +54,6 @@ A_val = aaa.A_val;
 path=strcat(pwd,'/A_ide.mat');
 aaa = load(path, '*');
 A_ide = aaa.A_ide;
-
 clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path path_ctm
 
 I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4) A_val(:,5)];
@@ -63,33 +62,62 @@ O_val = [A_val(:,6) A_val(:,8)];
 O_ide = [A_ide(:,6) A_ide(:,8)];
 clear A_ide A_val
 
-grado = 9;
-output = 2; % 1 = integral delta, 2 = pi greco
+grado=[];
+R2_ide=[];
+R2a_ide=[];
+RMSE_ide=[];
+SSR_ide=[];
+Val_FPE=[];
+Val_AIC=[];
+Val_MDL=[];
+R2_val=[];
+R2a_val=[];
+RMSE_val=[];
+SSR_val=[];
+output = 1; % 1 = integral delta, 2 = pi greco
+%% zozzerie
+for i=1:2
+    grado = [grado i];
+    n = length(O_ide(:,output));
+    
+    mdl_ide = polyfitn(I_ide, O_ide(:,output), grado(i));
+    ypred_ide = polyvaln(mdl_ide,I_ide);
+    R2_ide = [R2_ide mdl_ide.R2];
+    R2a_ide = [R2a_ide mdl_ide.AdjustedR2];
+    RMSE_ide = [RMSE_ide mdl_ide.RMSE];
 
-mdl_ide = polyfitn(I_ide, O_ide(:,output), grado);
-ypred_ide = polyvaln(mdl_ide,I_ide);
+    q=length(mdl_ide.Coefficients); %number of parameters
+    epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
+    SSR_ide=[SSR_ide epsilonIde'*epsilonIde]; 
+    
+    fpe=((n+q)/(n-q))*SSR_ide(i);
+    aic=2*q/n+log(SSR_ide(i));
+    mdl=log(n)*q/n + log(SSR_ide(i));
+    Val_FPE=[Val_FPE fpe];
+    Val_AIC=[Val_AIC aic];
+    Val_MDL=[Val_MDL mdl];
+    
+    %% cross validation
+    disp('cross validation')
+    mdl_val = polyfitn(I_val, O_val(:,output),  grado(i));
+    ypred_val = polyvaln(mdl_val,I_val);
+    R2_val = [R2_val mdl_val.R2];
+    R2a_val = [R2a_val mdl_val.AdjustedR2];
+    RMSE_val = [RMSE_val mdl_val.RMSE];
 
-epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
-SSR_ide=epsilonIde'*epsilonIde; 
-q=length(mdl_ide.Coefficients);
-FPE=((n+q)/(n-q))*SSR_ide;
-AIC=2*q/n +log(SSR_ide);
-MDL=log(n)*q/n + log(SSR_ide);
+    epsilonVal=O_val(:,output)-ypred_val; %residui validazione
+    SSR_val=[SSR_val epsilonVal'*epsilonVal]; 
 
-%% cross validation
-disp('cross validation')
-mdl_val = polyfitn(I_val, O_val(:,output), grado);
-ypred_val = polyvaln(mdl_val,I_ide);
-
-epsilonVal=O_val(:,output)-ypred_val; %residui validazione
-SSR_val=epsilonVal'*epsilonVal; 
-
-rmse = calRMSE(ypred_ide, ypred_val);
-[r2, r2a] = rsquared(ypred_ide, ypred_val, length(mdl_ide.Coefficients));
-
-
-
+end
+%% save file
+path=strcat(pwd,'\opti-ide-val.xlsx');
+fprintf('Saving information in %s ...\n',path)
+header = table("grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide")
+tabella = table(grado',SSR_ide',SSR_val',Val_FPE',Val_AIC',Val_MDL',R2_ide', R2a_ide', RMSE_ide', R2_val', R2a_val', RMSE_val');
+writetable(tabella, path, 'Sheet','integral delta', 'WriteVariableNames', true);  
 disp('==============================')
+
+
 
 if(poly_fit)
     T = readtable(path_ctm);
