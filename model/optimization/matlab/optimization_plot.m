@@ -57,8 +57,8 @@ A_ide = aaa.A_ide;
 clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path path_ctm
 
 path=strcat(pwd,'\opti-ide-val.xlsx');
-header = ["grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
-writematrix(header,path, 'Sheet','Integral delta');
+%header = ["grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
+%writematrix(header,path, 'Sheet','Integral delta');
 
 I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4) A_val(:,5)];
 I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4) A_ide(:,5)];
@@ -78,11 +78,13 @@ R2_val=[];
 R2a_val=[];
 RMSE_val=[];
 SSR_val=[];
+
 output = 1; % 1 = integral delta, 2 = pi greco
 %% zozzerie
-for i=1:9
+for j=10:11
+    i=j-9;
     fprintf('... degree %d \n',i)
-    grado = [grado i];
+    grado = [grado j];
     n = length(O_ide(:,output));
     
     mdl_ide = polyfitn(I_ide, O_ide(:,output), grado(i));
