@@ -63,17 +63,33 @@ O_val = [A_val(:,6) A_val(:,8)];
 O_ide = [A_ide(:,6) A_ide(:,8)];
 clear A_ide A_val
 
-grado = 9;
-output = 2; % 1 = integral delta, 2 = pi greco
+grado = 2;
+output = 1; % 1 = integral delta, 2 = pi greco
+n = length(O_ide(:,output));
 
 mdl_ide = polyfitn(I_ide, O_ide(:,output), grado);
 ypred_ide = polyvaln(mdl_ide,I_ide);
 
-mdl_val = polyfitn(I_val, O_val(:,output), grado);
-ypred_val = polyvaln(mdl_val,I_ide);
+q=length(mdl_ide.Coefficients); %number of parameters
+epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
+SSR_ide=epsilonIde'*epsilonIde; 
 
-rmse = calRMSE(ypred_ide, ypred_val);
-[r2, r2a] = rsquared(ypred_ide, ypred_val, length(mdl_ide.Coefficients));
+Val_FPE=((n+q)/(n-q))*SSR_ide;
+Val_AIC=2*q/n +log(SSR_ide);
+Val_MDL=log(n)*q/n + log(SSR_ide);
+
+%% cross validation
+disp('cross validation')
+mdl_val = polyfitn(I_val, O_val(:,output), grado);
+ypred_val = polyvaln(mdl_val,I_val);
+
+epsilonVal=O_val(:,output)-ypred_val; %residui validazione
+SSR_val=epsilonVal'*epsilonVal; 
+
+%rmse = calRMSE(ypred_ide, ypred_val);
+%[r2, r2a] = rsquared(ypred_ide, ypred_val, q);
+
+
 
 disp('==============================')
 

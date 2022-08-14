@@ -69,11 +69,25 @@ output = 2; % 1 = integral delta, 2 = pi greco
 mdl_ide = polyfitn(I_ide, O_ide(:,output), grado);
 ypred_ide = polyvaln(mdl_ide,I_ide);
 
+epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
+SSR_ide=epsilonIde'*epsilonIde; 
+q=length(mdl_ide.Coefficients);
+FPE=((n+q)/(n-q))*SSR_ide;
+AIC=2*q/n +log(SSR_ide);
+MDL=log(n)*q/n + log(SSR_ide);
+
+%% cross validation
+disp('cross validation')
 mdl_val = polyfitn(I_val, O_val(:,output), grado);
 ypred_val = polyvaln(mdl_val,I_ide);
 
+epsilonVal=O_val(:,output)-ypred_val; %residui validazione
+SSR_val=epsilonVal'*epsilonVal; 
+
 rmse = calRMSE(ypred_ide, ypred_val);
 [r2, r2a] = rsquared(ypred_ide, ypred_val, length(mdl_ide.Coefficients));
+
+
 
 disp('==============================')
 
