@@ -60,11 +60,14 @@ I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4) A_ide(:,5)];
 O_val = [A_val(:,6) A_val(:,8)];
 O_ide = [A_ide(:,6) A_ide(:,8)];
 
-mdl = polyfitn(I_ide, O_ide(:,1), 2);
-ypred = polyvaln(mdl,I_ide);
+mdl_ide = polyfitn(I_ide, O_ide(:,1), 7);
+ypred_ide = polyvaln(mdl_ide,I_ide);
 
-rmse = calRMSE(O_ide(:,1), ypred);
-r2 = rsquared(O_ide(:,1), ypred);
+mdl_val = polyfitn(I_val, O_val(:,1), 7);
+ypred_val = polyvaln(mdl_val,I_ide);
+
+rmse = calRMSE(ypred_ide, ypred_val);
+r2 = rsquared(ypred_ide, ypred_val);
 
 if(poly_fit)
     T = readtable(path_ctm);
