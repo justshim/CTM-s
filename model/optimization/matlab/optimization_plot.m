@@ -7,16 +7,17 @@ parpool('threads')
 disp('==============================')
 disp('-- Optimization analysis ')
 
-path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path_ctm = "C:\A_Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
-%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 
 addpath(path)
 addpath(path_ctm)
 warning('off')
+
 poly_fit = 0;
 plots = 0;
 
@@ -36,7 +37,7 @@ pi_greco = A(:, 8);
 
 
 
-%% generazione dataset
+%% Generate dataset
 % aa = randperm(length(cell_in),length(cell_in)*0.15)';
 % not_aa=setdiff(1:length(cell_in),aa)';
 % A_val = A(aa, :);
@@ -46,8 +47,7 @@ pi_greco = A(:, 8);
 % save_file = [pwd, '/A_ide','.mat'];
 % save(save_file,'A_ide')
 
-%% caricamento dataset
-
+%% Read dataset
 path=strcat(pwd,'/A_val.mat');
 aaa = load(path, '*');
 A_val = aaa.A_val;
@@ -60,16 +60,11 @@ I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4) A_ide(:,5)];
 O_val = [A_val(:,6) A_val(:,8)];
 O_ide = [A_ide(:,6) A_ide(:,8)];
 
-
 mdl = polyfitn(I_ide, O_ide(:,1), 2);
 ypred = polyvaln(mdl,I_ide);
 
-
-
-
-
-
-
+rmse = calRMSE(O_ide(:,1), ypred);
+r2 = rsquared(O_ide(:,1), ypred);
 
 if(poly_fit)
     T = readtable(path_ctm);
@@ -79,6 +74,7 @@ if(poly_fit)
     fit_name=["poly11","poly12","poly21","poly22","poly13","poly31","poly23","poly32","poly33", ...
         "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
         "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
+    
     %% 1 - Integral with different i and j, delta fixed
     disp("1 - Integral with different i and j, delta fixed")
     fixed_delta = 480;
