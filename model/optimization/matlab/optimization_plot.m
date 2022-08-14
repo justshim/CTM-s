@@ -80,7 +80,8 @@ RMSE_val=[];
 SSR_val=[];
 output = 1; % 1 = integral delta, 2 = pi greco
 %% zozzerie
-for i=1:2
+for i=1:9
+    fprintf('... degree %d \n',i)
     grado = [grado i];
     n = length(O_ide(:,output));
     
@@ -102,7 +103,7 @@ for i=1:2
     Val_MDL=[Val_MDL mdl];
     
     %% cross validation
-    disp('cross validation')
+   
     mdl_val = polyfitn(I_val, O_val(:,output),  grado(i));
     ypred_val = polyvaln(mdl_val,I_val);
     R2_val = [R2_val mdl_val.R2];
