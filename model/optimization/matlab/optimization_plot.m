@@ -3,16 +3,16 @@ close all
 clc
 
 delete(gcp('nocreate'));
-parpool('threads')
+parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path_ctm = "C:\A_Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
-path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 
 addpath(path)
 addpath(path_ctm)
@@ -55,19 +55,27 @@ path=strcat(pwd,'/A_ide.mat');
 aaa = load(path, '*');
 A_ide = aaa.A_ide;
 
+clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path path_ctm
+
 I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4) A_val(:,5)];
 I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4) A_ide(:,5)];
 O_val = [A_val(:,6) A_val(:,8)];
 O_ide = [A_ide(:,6) A_ide(:,8)];
+clear A_ide A_val
 
-mdl_ide = polyfitn(I_ide, O_ide(:,1), 7);
+grado = 9;
+output = 2; % 1 = integral delta, 2 = pi greco
+
+mdl_ide = polyfitn(I_ide, O_ide(:,output), grado);
 ypred_ide = polyvaln(mdl_ide,I_ide);
 
-mdl_val = polyfitn(I_val, O_val(:,1), 7);
+mdl_val = polyfitn(I_val, O_val(:,output), grado);
 ypred_val = polyvaln(mdl_val,I_ide);
 
 rmse = calRMSE(ypred_ide, ypred_val);
-r2 = rsquared(ypred_ide, ypred_val);
+[r2, r2a] = rsquared(ypred_ide, ypred_val, length(mdl_ide.Coefficients));
+
+disp('==============================')
 
 if(poly_fit)
     T = readtable(path_ctm);
