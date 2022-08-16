@@ -56,17 +56,17 @@ aaa = load(path, '*');
 A_ide = aaa.A_ide;
 clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path_ctm
 path=strcat(pwd,'\opti-ide-val-single-precision.xlsx');
-header = ["grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
-writematrix(header,path, 'Sheet','Integral delta');
+header = ["grado", "tol", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
+writematrix(header,path, 'Sheet','deep - integral delta');
 
 I_val=single([A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4)]);
 I_ide=single([A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4)]);
 O_val = single([A_val(:,6) A_val(:,8)]);
 O_ide = single([A_ide(:,6) A_ide(:,8)]);
-clear A_ide A_val 
+clear A_ide A_val
 
-first_j=int8(1);
-last_j=int8(11);
+first_j=int8(8);
+last_j=int8(8);
 output = int8(1); % 1 = integral delta, 2 = pi greco
 
 grado=ones(last_j-first_j+1, 1, 'single');
@@ -83,41 +83,62 @@ RMSE_val=ones(last_j-first_j+1, 1, 'single');
 SSR_val=ones(last_j-first_j+1, 1, 'single');
 
 %% zozzerie
-for j=first_j:last_j
-    i=j-first_j+1;
-    fprintf('... degree %d \n',j)
-    grado(i) = j;
-    n = length(O_ide(:,output));
-    mdl_ide = polyfitn(I_ide, O_ide(:,output), j);
-    ypred_ide = polyvaln(mdl_ide,I_ide);
-    R2_ide(i) = mdl_ide.R2;
-    R2a_ide(i) = mdl_ide.AdjustedR2;
-    RMSE_ide(i) = mdl_ide.RMSE;
+load_path=strcat(pwd,'/mdl_ide_8.mat');
+aaa = load(load_path, '*');
+mdl_ide_8 = aaa.mdl_ide;
+clear aaa
 
-    q=length(mdl_ide.Coefficients); %number of parameters
-    epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
-    SSR_ide(i)= epsilonIde'*epsilonIde; 
-    
-    Val_FPE(i)=((n+q)/(n-q))*SSR_ide(i);
-    Val_AIC(i)=2*q/n+log(SSR_ide(i));
-    Val_MDL(i)=log(n)*q/n + log(SSR_ide(i));
-    
-    %% cross validation
-   
-    mdl_val = polyfitn(I_val, O_val(:,output), j);
-    ypred_val = polyvaln(mdl_val,I_val);
-    R2_val(i) = mdl_val.R2;
-    R2a_val(i) = mdl_val.AdjustedR2;
-    RMSE_val(i) = mdl_val.RMSE;
+for ijk=1:10
+    tol=10^ijk;
+    bin_index = [];
 
-    epsilonVal=O_val(:,output)-ypred_val; %residui validazione
-    SSR_val(i)= epsilonVal'*epsilonVal; 
+    ModelTerms_ide = mdl_ide_8.ModelTerms;
+    Coefficients_ide = mdl_ide_8.Coefficients;
+    for k=1:length(Coefficients_ide)
+        if(abs(Coefficients_ide(k))<tol)
+            bin_index = [bin_index k];
+        end
+    end
+    ModelTerms_ide(bin_index, :) = [];
+    Coefficients_ide(bin_index) = [];
 
+    for j=first_j:last_j
+        i=j-first_j+1;
+        fprintf('... degree %d \n',j)
+        grado(i) = j;
+        n = length(O_ide(:,output));
+        mdl_ide = polyfitn(I_ide, O_ide(:,output), ModelTerms_ide);
+        ypred_ide = polyvaln(mdl_ide,I_ide);
+        R2_ide(i) = mdl_ide.R2;
+        R2a_ide(i) = mdl_ide.AdjustedR2;
+        RMSE_ide(i) = mdl_ide.RMSE;
+        q=length(mdl_ide.Coefficients); %number of parameters
+        epsilonIde=O_ide(:,output)-ypred_ide; %residui identificazione
+        SSR_ide(i)= epsilonIde'*epsilonIde;
+        Val_FPE(i)=((n+q)/(n-q))*SSR_ide(i);
+        Val_AIC(i)=2*q/n+log(SSR_ide(i));
+        Val_MDL(i)=log(n)*q/n + log(SSR_ide(i));
+
+        %% cross validation
+
+        mdl_val = polyfitn(I_val, O_val(:,output), ModelTerms_ide);
+        ypred_val = polyvaln(mdl_val,I_val);
+        R2_val(i) = mdl_val.R2;
+        R2a_val(i) = mdl_val.AdjustedR2;
+        RMSE_val(i) = mdl_val.RMSE;
+
+        epsilonVal=O_val(:,output)-ypred_val; %residui validazione
+        SSR_val(i)= epsilonVal'*epsilonVal;
+
+    end
+    fprintf('Saving information in %s ...\n',path)
+    tabella = [grado,tol,SSR_ide,SSR_val,Val_FPE,Val_AIC,Val_MDL,R2_ide, R2a_ide, RMSE_ide, R2_val, R2a_val, RMSE_val];
+    writematrix(tabella, path,'Sheet','deep - integral delta','WriteMode','append');
 end
 %% save file
 fprintf('Saving information in %s ...\n',path)
-tabella = [grado,SSR_ide,SSR_val,Val_FPE,Val_AIC,Val_MDL,R2_ide, R2a_ide, RMSE_ide, R2_val, R2a_val, RMSE_val];
-writematrix(tabella, path,'Sheet','Integral delta','WriteMode','append');  
+tabella = [grado,tol,SSR_ide,SSR_val,Val_FPE,Val_AIC,Val_MDL,R2_ide, R2a_ide, RMSE_ide, R2_val, R2a_val, RMSE_val];
+writematrix(tabella, path,'Sheet','deep - integral delta','WriteMode','append');
 disp('==============================')
 
 
@@ -130,7 +151,7 @@ if(poly_fit)
     fit_name=["poly11","poly12","poly21","poly22","poly13","poly31","poly23","poly32","poly33", ...
         "poly14","poly41","poly24","poly42","poly34","poly43","poly44",...
         "poly15","poly51","poly25","poly52","poly35","poly53","poly45","poly54","poly55"];
-    
+
     %% 1 - Integral with different i and j, delta fixed
     disp("1 - Integral with different i and j, delta fixed")
     fixed_delta = 480;
