@@ -215,8 +215,10 @@ if nt>1
 end
 
 % build the design matrix
-M = ones(n,nt, 'single');
-scalefact = ones(1,nt, 'single');
+%M = ones(n,nt, 'single');
+M = ones(n,nt);
+%scalefact = ones(1,nt, 'single');
+scalefact = ones(1,nt);
 
 parfor i = 1:nt
   for j = 1:p
@@ -230,7 +232,6 @@ end
 % maximum stability.
 
 [Q,R,E] = qr(M,0);
-E=single(E);
 
 polymodel.ModelTerms = modelterms;
 polymodel.Coefficients(E) = R\(Q'*depvar);
@@ -310,7 +311,6 @@ function [modelterms,varlist] = buildcompletemodel(order,p)
 %  modelterms - exponent array for the model
 %
 %  varlist - cell array of character variable names
-
 % build the exponent array recursively
 if p == 0
   % terminal case
@@ -330,7 +330,7 @@ else
     modelterms = [modelterms;[repmat(k,nt,1),t]];
   end
 end
-modelterms = single(modelterms);
+%modelterms = single(modelterms);
 % create a list of variable names for the variables on the fly
 varlist = cell(1,p);
 for i = 1:p
@@ -348,7 +348,6 @@ function [modelterms,varlist] = parsemodel(model,p)
 %
 % arguments: (output)
 %  modelterms - exponent array for the model
-
 modelterms = zeros(0,p);
 if ischar(model)
   model = deblank(model);
