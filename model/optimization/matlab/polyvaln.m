@@ -41,8 +41,7 @@ end
 
 % Evaluate the model
 nt = size(polymodel.ModelTerms,1);
-ypred = zeros(n,1, 'single');
-
+ypred = zeros(n,1);
 parfor i = 1:nt
   t = ones(n,1);
   for j = 1:p

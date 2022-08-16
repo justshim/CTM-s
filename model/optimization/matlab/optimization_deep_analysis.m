@@ -7,9 +7,9 @@ parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 
 read = 1;
 generate = 1-read;
@@ -17,7 +17,7 @@ generate = 1-read;
 shallow = 1;
 deep = 1-shallow;
 
-output = int8(2); % 1 = integral delta, 2 = pi greco
+output = single(2); % 1 = integral delta, 2 = pi greco
 
 path_output=strcat(pwd,'\opti-ide-val-single-precision.xlsx');
 
@@ -56,17 +56,17 @@ if(read)
     A_ide = aaa.A_ide;
     clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path_ctm
 
-    I_val=single([A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4)]);
-    I_ide=single([A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4)]);
-    O_val = single([A_val(:,6) A_val(:,8)]);
-    O_ide = single([A_ide(:,6) A_ide(:,8)]);
+    I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4)];
+    I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4)];
+    O_val = [A_val(:,6) A_val(:,8)];
+    O_ide = [A_ide(:,6) A_ide(:,8)];
     clear A_ide A_val
 end
 
 %% Find best degree polynomial model
 if(shallow)
-    first_j=int8(8);
-    last_j=int8(8);
+    first_j=single(1);
+    last_j=single(12);
 
     grado=ones(last_j-first_j+1, 1, 'single');
     R2_ide=ones(last_j-first_j+1, 1, 'single');
@@ -94,7 +94,7 @@ if(shallow)
         fprintf('... degree %d \n',j)
         grado(i) = j;
         n = length(O_ide(:,output));
-        mdl_ide = polyfitn(I_ide, O_ide(:,output), ModelTerms_ide);
+        mdl_ide = polyfitn(I_ide, O_ide(:,output), i);
         ypred_ide = polyvaln(mdl_ide,I_ide);
         R2_ide(i) = mdl_ide.R2;
         R2a_ide(i) = mdl_ide.AdjustedR2;
@@ -108,7 +108,7 @@ if(shallow)
 
         %% cross validation
 
-        mdl_val = polyfitn(I_val, O_val(:,output), ModelTerms_ide);
+        mdl_val = polyfitn(I_val, O_val(:,output), i);
         ypred_val = polyvaln(mdl_val,I_val);
         R2_val(i) = mdl_val.R2;
         R2a_val(i) = mdl_val.AdjustedR2;
