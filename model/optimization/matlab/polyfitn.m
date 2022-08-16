@@ -214,7 +214,7 @@ if nt>1
 end
 
 % build the design matrix
-M = ones(n,nt);
+M = ones(n,nt, 'single');
 scalefact = ones(1,nt);
 for i = 1:nt
   for j = 1:p

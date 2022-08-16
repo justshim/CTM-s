@@ -7,10 +7,10 @@ parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
-%path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path_ctm = "C:\A_Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path_ctm = "C:\A_Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 %path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 
@@ -56,14 +56,14 @@ aaa = load(path, '*');
 A_ide = aaa.A_ide;
 clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path path_ctm
 
-path=strcat(pwd,'\opti-ide-val.xlsx');
+%path=strcat(pwd,'\opti-ide-val.xlsx');
 %header = ["grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
 %writematrix(header,path, 'Sheet','Integral delta');
 
-I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4) A_val(:,5)];
-I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4) A_ide(:,5)];
-O_val = [A_val(:,6) A_val(:,8)];
-O_ide = [A_ide(:,6) A_ide(:,8)];
+I_val=single([A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4)]);
+I_ide=single([A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4)]);
+O_val = single([A_val(:,6) A_val(:,8)]);
+O_ide = single([A_ide(:,6) A_ide(:,8)]);
 clear A_ide A_val
 
 grado=[];
@@ -81,13 +81,13 @@ SSR_val=[];
 
 output = 1; % 1 = integral delta, 2 = pi greco
 %% zozzerie
-for j=10:11
-    i=j-9;
-    fprintf('... degree %d \n',i)
+for j=20:20
+    i=1;
+    fprintf('... degree %d \n',j)
     grado = [grado j];
     n = length(O_ide(:,output));
     
-    mdl_ide = polyfitn(I_ide, O_ide(:,output), grado(i));
+    mdl_ide = polyfitn(I_ide, O_ide(:,output), j);
     ypred_ide = polyvaln(mdl_ide,I_ide);
     R2_ide = [R2_ide mdl_ide.R2];
     R2a_ide = [R2a_ide mdl_ide.AdjustedR2];
@@ -118,9 +118,9 @@ for j=10:11
 end
 %% save file
 
-fprintf('Saving information in %s ...\n',path)
-tabella = [grado',SSR_ide',SSR_val',Val_FPE',Val_AIC',Val_MDL',R2_ide', R2a_ide', RMSE_ide', R2_val', R2a_val', RMSE_val'];
-writematrix(tabella, path,'Sheet','Integral delta','WriteMode','append');  
+%fprintf('Saving information in %s ...\n',path)
+%tabella = [grado',SSR_ide',SSR_val',Val_FPE',Val_AIC',Val_MDL',R2_ide', R2a_ide', RMSE_ide', R2_val', R2a_val', RMSE_val'];
+%writematrix(tabella, path,'Sheet','Integral delta','WriteMode','append');  
 disp('==============================')
 
 
