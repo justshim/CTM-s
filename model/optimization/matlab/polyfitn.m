@@ -205,6 +205,7 @@ else
 end
 nt = size(modelterms,1);
 
+
 % check for replicate terms 
 if nt>1
   mtu = unique(modelterms,'rows');
@@ -215,8 +216,9 @@ end
 
 % build the design matrix
 M = ones(n,nt, 'single');
-scalefact = ones(1,nt);
-for i = 1:nt
+scalefact = ones(1,nt, 'single');
+
+parfor i = 1:nt
   for j = 1:p
     M(:,i) = M(:,i).*indepvar_s(:,j).^modelterms(i,j);
     scalefact(i) = scalefact(i)/(stdind(j)^modelterms(i,j));
@@ -226,7 +228,9 @@ end
 % estimate the model using QR. do it this way to provide a
 % covariance matrix when all done. Use a pivoted QR for
 % maximum stability.
+
 [Q,R,E] = qr(M,0);
+E=single(E);
 
 polymodel.ModelTerms = modelterms;
 polymodel.Coefficients(E) = R\(Q'*depvar);
@@ -326,7 +330,7 @@ else
     modelterms = [modelterms;[repmat(k,nt,1),t]];
   end
 end
-
+modelterms = single(modelterms);
 % create a list of variable names for the variables on the fly
 varlist = cell(1,p);
 for i = 1:p
@@ -335,7 +339,7 @@ end
 
 
 % ==================================================
-function [modelterms,varlist] = parsemodel(model,p);
+function [modelterms,varlist] = parsemodel(model,p)
 % 
 % arguments: (input)
 %  model - character string or cell array of strings

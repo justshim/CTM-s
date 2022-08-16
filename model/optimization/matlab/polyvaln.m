@@ -41,8 +41,9 @@ end
 
 % Evaluate the model
 nt = size(polymodel.ModelTerms,1);
-ypred = zeros(n,1);
-for i = 1:nt
+ypred = zeros(n,1, 'single');
+
+parfor i = 1:nt
   t = ones(n,1);
   for j = 1:p
     t = t.*indepvar(:,j).^polymodel.ModelTerms(i,j);
