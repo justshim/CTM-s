@@ -17,7 +17,7 @@ generate = 1-read;
 shallow = 0;
 deep = 1-shallow;
 
-output = 2; % 1 = integral delta, 2 = pi greco
+output = 1; % 1 = integral delta, 2 = pi greco
 
 path_output=strcat(pwd,'\opti-ide-val-single-precision.xlsx');
 
@@ -56,8 +56,8 @@ end
 
 %% Find best degree polynomial model
 if(shallow)
-    first_j=8;
-    last_j=8;
+    first_j=9;
+    last_j=9;
 
     grado=ones(last_j-first_j+1, 1);
     R2_ide=ones(last_j-first_j+1, 1);
@@ -88,8 +88,8 @@ if(shallow)
         
         mdl_ide = polyfitn(I_ide, O_ide(:,output), j);
         ypred_ide = polyvaln(mdl_ide,I_ide);
-       
-%         save_file = [pwd, '/mdl_ide_8_pi','.mat'];
+        
+%         save_file = [pwd, '/mdl_ide_9','.mat'];
 %         save(save_file,'mdl_ide')
         
         R2_ide(i) = mdl_ide.R2;
@@ -114,7 +114,7 @@ if(shallow)
         SSR_val(i)= epsilonVal'*epsilonVal;
 
     end
-    fprintf('Saving information in %s ...\n',path_output)
+    fprintf('Saving information in %s ...\n',path)
     tabella = [grado,SSR_ide,SSR_val,Val_FPE,Val_AIC,Val_MDL,R2_ide, R2a_ide, RMSE_ide, R2_val, R2a_val, RMSE_val];
     writematrix(tabella, path_output,'Sheet',sheet,'WriteMode','append');
     disp('==============================')
@@ -124,13 +124,11 @@ if(deep)
     header = ["grado", "tol", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
     if (output == 1)
         sheet = 'deep - integral delta';
-        model = strcat('/mdl_ide_8_', 'integral', '.mat');
     elseif (output == 2)
         sheet = 'deep - pi';
-        model = strcat('/mdl_ide_8_', 'pi', '.mat');
     end
     writematrix(header, path_output, 'Sheet', sheet);
-    
+    model = strcat('/mdl_ide_', '8', '.mat');
     load_path=strcat(pwd,model);
     aaa = load(load_path, '*');
     mdl_ide = aaa.mdl_ide;
