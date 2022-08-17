@@ -7,9 +7,9 @@ parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 
 read = 1;
 generate = 1-read;
@@ -17,7 +17,7 @@ generate = 1-read;
 shallow = 1;
 deep = 1-shallow;
 
-output = single(2); % 1 = integral delta, 2 = pi greco
+output = single(1); % 1 = integral delta, 2 = pi greco
 
 path_output=strcat(pwd,'\opti-ide-val-single-precision.xlsx');
 
@@ -68,18 +68,18 @@ if(shallow)
     first_j=single(1);
     last_j=single(12);
 
-    grado=ones(last_j-first_j+1, 1, 'single');
-    R2_ide=ones(last_j-first_j+1, 1, 'single');
-    R2a_ide=ones(last_j-first_j+1, 1, 'single');
-    RMSE_ide=ones(last_j-first_j+1, 1, 'single');
-    SSR_ide=ones(last_j-first_j+1, 1, 'single');
-    Val_FPE=ones(last_j-first_j+1, 1, 'single');
-    Val_AIC=ones(last_j-first_j+1, 1, 'single');
-    Val_MDL=ones(last_j-first_j+1, 1, 'single');
-    R2_val=ones(last_j-first_j+1, 1, 'single');
-    R2a_val=ones(last_j-first_j+1, 1, 'single');
-    RMSE_val=ones(last_j-first_j+1, 1, 'single');
-    SSR_val=ones(last_j-first_j+1, 1, 'single');
+    grado=ones(last_j-first_j+1, 1);
+    R2_ide=ones(last_j-first_j+1, 1);
+    R2a_ide=ones(last_j-first_j+1, 1);
+    RMSE_ide=ones(last_j-first_j+1, 1);
+    SSR_ide=ones(last_j-first_j+1, 1);
+    Val_FPE=ones(last_j-first_j+1, 1);
+    Val_AIC=ones(last_j-first_j+1, 1);
+    Val_MDL=ones(last_j-first_j+1, 1);
+    R2_val=ones(last_j-first_j+1, 1);
+    R2a_val=ones(last_j-first_j+1, 1);
+    RMSE_val=ones(last_j-first_j+1, 1);
+    SSR_val=ones(last_j-first_j+1, 1);
 
     header = ["grado", "SSR_ide", "SSR_val", "Val_FPE", "Val_AIC", "Val_MDL", "R2_ide", "R2a_ide", "RMSE_ide", "R2_val", "R2a_val", "RMSE_val"];
     if (output == 1)
@@ -132,7 +132,7 @@ if(deep)
         sheet = 'deep - pi';
     end
     writematrix(header, path_output, 'Sheet', sheet);
-    model = strcat('/mdl_ide_', '8', '.mat');
+    model = strcat('/mdl_ide_', '9', '.mat');
     load_path=strcat(pwd,model);
     aaa = load(load_path, '*');
     mdl_ide = aaa.mdl_ide;
@@ -153,7 +153,7 @@ if(deep)
         Coefficients_ide(bin_index) = [];
 
         fprintf('... tolerance %d \n',tol)
-        grado = 8;
+        grado = 9;
         n = length(O_ide(:,output));
         mdl_ide = polyfitn(I_ide, O_ide(:,output), ModelTerms_ide);
         ypred_ide = polyvaln(mdl_ide,I_ide);
