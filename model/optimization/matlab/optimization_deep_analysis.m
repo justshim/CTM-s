@@ -17,27 +17,19 @@ generate = 1-read;
 shallow = 1;
 deep = 1-shallow;
 
-output = single(1); % 1 = integral delta, 2 = pi greco
+output = 1; % 1 = integral delta, 2 = pi greco
 
 path_output=strcat(pwd,'\opti-ide-val-single-precision.xlsx');
 
 %% extract data
 T = readtable(path);
 
-varname=T.Properties.VariableNames;
 A = table2array(T);
-cell_in = A(:, 1);
-cell_out = A(:, 2);
-delta = A(:, 3);
-beta = A(:, 4);
-priority = A(:,5);
-integral=A(:,6);
-pi_greco = A(:, 8);
 
 %% Generate dataset
 if (generate)
-    aa = randperm(length(cell_in),length(cell_in)*0.15)';
-    not_aa=setdiff(1:length(cell_in),aa)';
+    aa = randperm(length(A(:,1)),length(A(:,1))*0.25)';
+    not_aa=setdiff(1:length(A(:,1)),aa)';
     A_val = A(aa, :);
     A_ide = A(not_aa, :);
     save_file = [pwd, '/A_val','.mat'];
@@ -54,19 +46,18 @@ if(read)
     path=strcat(pwd,'/A_ide.mat');
     aaa = load(path, '*');
     A_ide = aaa.A_ide;
-    clear pi_greco integral priority beta delta aaa T A cell_out cell_in varname path_ctm
 
     I_val=[A_val(:,1) A_val(:,2) A_val(:,3) A_val(:,4)];
     I_ide=[A_ide(:,1) A_ide(:,2) A_ide(:,3) A_ide(:,4)];
     O_val = [A_val(:,6) A_val(:,8)];
     O_ide = [A_ide(:,6) A_ide(:,8)];
-    clear A_ide A_val
+    clear A_ide A_val aaa T A
 end
 
 %% Find best degree polynomial model
 if(shallow)
-    first_j=single(1);
-    last_j=single(12);
+    first_j=12;
+    last_j=12;
 
     grado=ones(last_j-first_j+1, 1);
     R2_ide=ones(last_j-first_j+1, 1);
@@ -94,8 +85,10 @@ if(shallow)
         fprintf('... degree %d \n',j)
         grado(i) = j;
         n = length(O_ide(:,output));
-        mdl_ide = polyfitn(I_ide, O_ide(:,output), i);
+        
+        mdl_ide = polyfitn(I_ide, O_ide(:,output), j);
         ypred_ide = polyvaln(mdl_ide,I_ide);
+        
         R2_ide(i) = mdl_ide.R2;
         R2a_ide(i) = mdl_ide.AdjustedR2;
         RMSE_ide(i) = mdl_ide.RMSE;
@@ -108,7 +101,7 @@ if(shallow)
 
         %% cross validation
 
-        mdl_val = polyfitn(I_val, O_val(:,output), i);
+        mdl_val = polyfitn(I_val, O_val(:,output), j);
         ypred_val = polyvaln(mdl_val,I_val);
         R2_val(i) = mdl_val.R2;
         R2a_val(i) = mdl_val.AdjustedR2;
