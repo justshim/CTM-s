@@ -6,22 +6,22 @@ delete(gcp('nocreate'));
 parpool('threads');
 
 %% Load files
-load_path=strcat(pwd,'\model_integral_coeff.mat');
-aaa = load(load_path, '*');
-model_integral_coeff = aaa.Coefficients_ide_integral;
+load_path=strcat(pwd,'/data models/4 vars\model_integral_coeff.mat');
+min = load(load_path, '*');
+model_integral_coeff = min.Coefficients_ide_integral;
 
-load_path=strcat(pwd,'\model_integral_terms.mat');
-aaa = load(load_path, '*');
-model_integral_terms = aaa.ModelTerms_ide_integral;
+load_path=strcat(pwd,'/data models/4 vars\model_integral_terms.mat');
+min = load(load_path, '*');
+model_integral_terms = min.ModelTerms_ide_integral;
 
-load_path=strcat(pwd,'\model_pi_coeff.mat');
-aaa = load(load_path, '*');
-model_pi_coeff = aaa.Coefficients_ide_pi;
+load_path=strcat(pwd,'/data models/4 vars\model_pi_coeff.mat');
+min = load(load_path, '*');
+model_pi_coeff = min.Coefficients_ide_pi;
 
-load_path=strcat(pwd,'\model_pi_terms.mat');
-aaa = load(load_path, '*');
-model_pi_terms = aaa.ModelTerms_ide_pi;
-clear aaa
+load_path=strcat(pwd,'/data models/4 vars\model_pi_terms.mat');
+min = load(load_path, '*');
+model_pi_terms = min.ModelTerms_ide_pi;
+clear min
 
 %% Build model functions
 model_integral = struct();
@@ -37,24 +37,40 @@ model_pi.ModelTerms = model_pi_terms;
 fun_pi = polyn2sym_mod(model_pi);
 fun_pi = @(x) -fun_pi(x);
 
-fun_both = @(x) (fun_integral(x) + 1000*fun_pi(x));
+% w = 2460;
+%w = (8991+14)/2;
+%fun_both = @(x) (fun_integral(x) + w*fun_pi(x));
 
 %% Find minima
-A = [1 1 0 0];
-b = 2;
-Aeq = [];
-beq = [];
-
 % x(1) = i; x(2) = j; x(3) = delta; x(4) = beta
-lb = [1 2 60 0.01];
-ub = [12 13 720 0.2];
+
+% linear constraints
+A = [-1, 1, 0, 0;
+     1, -1, 0, 0;];  %A*x <= b
+b = [3; -1]; %station lunga almeno 1 e massimo 3: -x1 +x2<=3 && -(-x1 + x2)<=-1
+Aeq = [];       %Aeq*x = beq
+beq = [];
+%nonlcon = [];
+% nonlinear constraints
+lb = [1 2 60 0.07];
+ub = [12 13 720 0.07];
 x0 = (lb + ub)/2;
+% lb = [];
+% ub = [];
+x0=[0 0 0 0];
+%options = optimoptions('fmincon','Algorithm','interior-point');
 
-disp("=== Optimizing integral Delta ===")
-disp("=== Optimizing integral Delta ===");
-sol_integral = fmincon(fun_integral,x0,A,b,Aeq,beq,lb,ub);
-disp("=== Optimizing Pi ===");
-sol_pi = fmincon(fun_pi,x0,A,b,Aeq,beq,lb,ub);
-disp("=== Optimizing both ===");
-sol_both = fmincon(fun_both,x0,A,b,Aeq,beq,lb,ub);
 
+fprintf("\n");
+fprintf("=== Optimizing integral Delta ===");
+[sol_integral,y_sol_integral,exitflag,output]  = fmincon(fun_integral,x0,A,b,Aeq,beq,lb,ub, @mycon);
+
+fprintf("\n");
+fprintf("=== Optimizing Pi ===");
+[sol_pi,y_sol_pi,exitflag,output] = fmincon(fun_pi,x0,A,b,Aeq,beq,lb,ub);
+
+% fprintf("\n");
+% fprintf("=== Optimizing both ===");
+% [sol_both,y_sol_both,exitflag,output] = fmincon(fun_both,x0,A,b,Aeq,beq,lb,ub);
+function [c,ceq] = mycon(x)
+c = ...     % Compute nonlinear inequalities at x.

@@ -7,19 +7,18 @@ parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta.csv";
+path_ctm = "H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
 %path_ctm = "C:\A_Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
-path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
+%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+%path_ctm = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\CTMs-identification\fnc\extracted_data\CTM_param_out_nice.xls";
 
 addpath(path)
 addpath(path_ctm)
 warning('off')
 
-poly_fit = 0;
-plots = 0;
+plots = 1;
 
 %% extract data
 T = readtable(path);
@@ -34,7 +33,7 @@ priority = A(:,5);
 integral=A(:,6);
 pi_greco = A(:, 8);
 
-if(poly_fit)
+
     T = readtable(path_ctm);
     A = table2array(T);
     q_max = A(:, 5);
@@ -573,4 +572,3 @@ if(poly_fit)
     % end
     %%
     disp('==============================')
-end
