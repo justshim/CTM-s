@@ -52,7 +52,7 @@ f = replace(f,["x(1)","x(2)"],["x","y"]);
 f = replace(f,"@(x)","@(x,y)");
 f = str2func(f);
 
-%f = @(x,y) -f(x,y);
+f = @(x,y) -f(x,y);
 figure()
 fmesh(f, [1 13])
 
@@ -83,11 +83,11 @@ x0 = (lb + ub)/2;
 
 fprintf("\n");
 fprintf("=== Optimizing integral Delta ===");
-%[sol_integral,y_sol_integral,exitflag,output]  = fmincon(fun_integral,x0,A,b,Aeq,beq,lb,ub);
+[sol_integral,y_sol_integral,exitflag,output]  = fmincon(fun_integral,x0,A,b,Aeq,beq,lb,ub);
 
 fprintf("\n");
 fprintf("=== Optimizing Pi ===");
-%[sol_pi,y_sol_pi,exitflag,output] = fmincon(fun_pi,x0,A,b,Aeq,beq,lb,ub);
+[sol_pi,y_sol_pi,exitflag,output] = fmincon(fun_pi,x0,A,b,Aeq,beq,lb,ub);
 
 % fprintf("\n");
 % fprintf("=== Optimizing both ===");
