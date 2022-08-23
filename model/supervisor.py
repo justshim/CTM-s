@@ -240,7 +240,7 @@ class Stretch:
 		## For each cell, check if any on-ramp merges in it, and sum all Dr's (needed for the computation of phi_i)
 		for r_on in range (len(self.on_ramps)):
 			if self.on_ramps[r_on].j == i:
-				total_ds += self.on_ramps[s].d_r_big
+				total_ds += self.on_ramps[r_on].d_r_big
 
 		return total_ds
 	
