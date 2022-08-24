@@ -187,7 +187,7 @@ class Stretch:
 							if d.id_station == int(station.id_station):
 								station.computeRs(d.d_s_big, t)
 						
-						sum_D_good = sum_D_good + d.d_s_big
+						sum_d_good = sum_d_good + d.d_s_big
 
 						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.d_s_big  ## VERIFICARE FORMULA
 

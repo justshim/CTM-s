@@ -26,17 +26,17 @@ import pygad
 if __name__ == '__main__':
     t = time.time()
 
-    # path = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
+    path = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
     # path = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
-    path = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls"
+    # path = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls"
 
     path_file_output = "../data/ga_result.csv"
 
     duration = 8640  # k=24h=8640 , k=1h=360, k=3h=1080
-    # onramps = [[1000, 3000, 4, 0.01]]
-    # offramps = [[2, 0.5]]
-    onramps = []
-    offramps = []
+    onramps = [[1000, 500, 4, 0.05]]
+    offramps = [[8, 0.05]]
+    # onramps = []
+    # offramps = []
 
     station = [1, 1, 1, 1, 1, 1]
 
@@ -44,12 +44,12 @@ if __name__ == '__main__':
     gene_space = [{'low': 500, 'high': 500}, {'low': 1, 'high': 12}, {'low': 2, 'high': 13},
                   {'low': 60, 'high': 720}, {'low': 0, 'high': 0.2}, {'low': 0, 'high': 0.1}]
 
-    parallel_processing = 4
+    parallel_processing = 12
 
     function_inputs = [station[0], station[1], station[2], station[3], station[4], station[5]]
     desired_output = 0
 
-    num_generations = 50
+    num_generations = 20
     num_parents_mating = 4
 
     sol_per_pop = 8
@@ -58,21 +58,21 @@ if __name__ == '__main__':
     init_range_low = -2
     init_range_high = 5
 
-    parent_selection_type = "sss"
+    parent_selection_type = "rank"
     keep_parents = 1
 
     crossover_type = "single_point"
 
     mutation_type = "random"
     mutation_percent_genes = 50
-    initial_population = [[500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05], [500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05]]
+#    initial_population = [[500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05], [500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05]]
 
 
     def fitness_func(solution, solution_idx):
         output = [0, 0]
         if solution[1] < solution[2]:
             output = main_ga.ga(path, duration, solution, onramps, offramps)
-            fitness = 10000 / numpy.abs(output[0] - desired_output)
+            fitness = 10000000 / numpy.abs(output[0] - desired_output)
             print("Solution: [rs_max: " + str(solution[0]) + ", i: " + str(solution[1]) + ", j: " + str(solution[2]) +
                   ", delta: " + str(solution[3]) + ", beta: " + str(solution[4]) + ", p: " + str(solution[5]) + "]\n" +
                   "Fitness: " + str(fitness))
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                            gene_space=gene_space,
                            init_range_low=init_range_low,
                            init_range_high=init_range_high,
-                           initial_population=initial_population,
+                           #initial_population=initial_population,
                            parent_selection_type=parent_selection_type,
                            keep_parents=keep_parents,
                            crossover_type=crossover_type,
@@ -112,3 +112,4 @@ if __name__ == '__main__':
 
     elapsed = time.time() - t
     print("Elapsed time: " + str(elapsed))
+    ga_instance.plot_fitness(title="pino")
