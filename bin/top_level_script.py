@@ -38,7 +38,7 @@ if __name__ == '__main__':
     onramps = []
     offramps = []
 
-    station = [10, 1, 1, 60, 0.01, 0.01]
+    station = [1, 1, 1, 1, 1, 1]
 
     gene_type = [int, int, int, int, float, float]
     gene_space = [{'low': 500, 'high': 500}, {'low': 1, 'high': 12}, {'low': 2, 'high': 13},
@@ -65,14 +65,20 @@ if __name__ == '__main__':
 
     mutation_type = "random"
     mutation_percent_genes = 50
+    initial_population = [[500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05], [500, 1, 2, 500, 0.1, 0.05], [500, 2, 3, 500, 0.2, 0.05]]
 
 
     def fitness_func(solution, solution_idx):
-        output = main_ga.ga(path, duration, solution, onramps, offramps)
-        fitness = 1 / numpy.abs(output[0] - desired_output)
-        print("Solution: [rs_max: " + str(solution[0]) + ", i: " + str(solution[1]) + ", j: " + str(solution[2]) +
-              ", delta: " + str(solution[3]) + ", beta: " + str(solution[4]) + ", p: " + str(solution[5]) + "]\n" +
-              "Integral Delta: " + str(output[0]))
+        output = [0, 0]
+        if solution[1] < solution[2]:
+            output = main_ga.ga(path, duration, solution, onramps, offramps)
+            fitness = 10000 / numpy.abs(output[0] - desired_output)
+            print("Solution: [rs_max: " + str(solution[0]) + ", i: " + str(solution[1]) + ", j: " + str(solution[2]) +
+                  ", delta: " + str(solution[3]) + ", beta: " + str(solution[4]) + ", p: " + str(solution[5]) + "]\n" +
+                  "Fitness: " + str(fitness))
+        else:
+            fitness = -99999999
+            print("Invalid solution mi vergogno sono un incapace cane randagio")
         return fitness
 
 
@@ -87,6 +93,7 @@ if __name__ == '__main__':
                            gene_space=gene_space,
                            init_range_low=init_range_low,
                            init_range_high=init_range_high,
+                           initial_population=initial_population,
                            parent_selection_type=parent_selection_type,
                            keep_parents=keep_parents,
                            crossover_type=crossover_type,
