@@ -5,30 +5,12 @@ import numpy
 from model import main_ga
 import pygad
 
-# from model.optimization import data_creation as opt
-#
-# if __name__ == '__main__':
-#     loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
-#     # loc = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
-#     # loc = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls"
-#     path_file_output = "../data/opti_data.csv"
-#     duration = 8640  # k=24h=8640 , k=1h=360, k=3h=1080
-#     t = time.time()
-#     o = opt.data_creation(loc, path_file_output, duration)
-#     o.initVars()
-#     o.firstIteration()
-#     # initDelta, delta, stepDelta, initBeta, beta, stepBeta, initPriority (MS), priority (MS), stepPriority (MS)
-#     o.initSimulation(60, 721, 60, 1, 21, 1, 95, 96, 1)
-#     elapsed = time.time() - t
-#     print("Elapsed time: " + str(elapsed))
-
-
 if __name__ == '__main__':
     t = time.time()
 
-    path = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
+    # path = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
     # path = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
-    #path = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls"
+    path = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls"
 
     path_file_output = "../data/ga_result.csv"
 
@@ -46,7 +28,7 @@ if __name__ == '__main__':
     gene_space = [{'low': 1, 'high': 12}, {'low': 2, 'high': 13},
                   {'low': 1, 'high': 720}, {'low': 0, 'high': 0.2}]
 
-    parallel_processing = 12
+    parallel_processing = 4
 
     function_inputs = [station[0], station[1], station[2], station[3]]
 
@@ -81,7 +63,7 @@ if __name__ == '__main__':
         output = [0, 0]
         if solution[0] < solution[1]:
             output = main_ga.ga(path, duration, rsmax, p, solution, onramps, offramps)
-            fitness = 10000000 / output[0]
+            fitness = 10000 * output[1]
             print("Solution: [i: " + str(solution[0]) + ", j: " + str(solution[1]) +
                   ", delta: " + str(solution[2]) + ", beta: " + str(solution[3]) + "]\n" +
                   "Fitness: " + str(fitness))
