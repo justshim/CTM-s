@@ -7,6 +7,20 @@ import pygad
 import csv
 
 if __name__ == '__main__':
+    gen = 0
+
+    def new_gen(ga):
+        global gen
+
+        gen = ga.generations_completed
+        print("\n")
+        print("************************************")
+        print("gen: " + str(gen))
+        print("************************************")
+        print("\n")
+
+
+
     t = time.time()
 
     path = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
@@ -33,7 +47,7 @@ if __name__ == '__main__':
 
     function_inputs = [station[0], station[1], station[2], station[3]]
 
-    num_generations = 2
+    num_generations = 25
     num_parents_mating = 4
 
     sol_per_pop = 16
@@ -53,21 +67,16 @@ if __name__ == '__main__':
     mutation_by_replacement = True
 #    initial_population = [[1, 2, 300, 0.1], [3, 6, 120, 0.05], [7, 9, 720, 0.2], [11, 12, 50, 0.02]]
     initial_population = None
-    gen=0
+
+    stop_criteria = "saturate_7"
+    on_generation = new_gen
+
 
     with open(path_file_output, 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f, delimiter=';')
-        header = ["i", "j", "delta","beta", "integral", "pi", "fitness"]
+        header = ["generation", "i", "j", "delta","beta", "integral", "pi", "fitness"]
         writer.writerow(header)
         def fitness_func(solution, solution_idx):
-            if(solution_idx == 0):
-                global gen
-                gen = gen+1
-                print("\n")
-                print("************************************")
-                print("gen: " + str(gen))
-                print("************************************")
-                print("\n")
             output = [0, 0]
             if solution[0] < solution[1]:
                 output = main_ga.ga(path, duration, rsmax, p, solution, onramps, offramps)
@@ -82,6 +91,7 @@ if __name__ == '__main__':
             return fitness
 
 
+
         fitness_function = fitness_func
 
         ga_instance = pygad.GA(num_generations=num_generations,
@@ -91,6 +101,8 @@ if __name__ == '__main__':
                                num_genes=num_genes,
                                gene_type=gene_type,
                                gene_space=gene_space,
+                               on_generation=on_generation,
+                               stop_criteria=stop_criteria,
                                init_range_low=init_range_low,
                                init_range_high=init_range_high,
                                mutation_by_replacement=mutation_by_replacement,
