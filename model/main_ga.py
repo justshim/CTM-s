@@ -2,7 +2,7 @@ from model import factory as f
 import xlrd
 
 
-def ga(path, duration, station, onramps, offramps):
+def ga(path, duration, rsmax, p, station, onramps, offramps):
     #station = [rsmax, ii, jj, delta, beta, p]
 
     # File read
@@ -53,8 +53,8 @@ def ga(path, duration, station, onramps, offramps):
         fac1.addCellToStretch(0, sh.cell_value(i, 1), sh.cell_value(i, 2), sh.cell_value(i, 3),
                               sh.cell_value(i, 4), sh.cell_value(i, 5), 1)
 
-    fac1.stretches[0].cells[station[1]].p_ms = fac1.stretches[0].cells[station[1]].p_ms - station[5]
-    fac1.addStationToStretch(0, station[0], station[1], station[2], station[3], station[4], station[5])
+    fac1.stretches[0].cells[station[1]].p_ms = fac1.stretches[0].cells[station[1]].p_ms - p
+    fac1.addStationToStretch(0, rsmax, station[0], station[1], station[2], station[3], p)
 
     if len(onramps) > 0:
         # create the on-ramps via the factory
