@@ -41,8 +41,8 @@ if __name__ == '__main__':
     station = [1, 1, 1, 1, 1, 1]
 
     gene_type = [int, int, int, int, float, float]
-    gene_space = [{'low': 500, 'high': 500}, {'low': 1, 'high': 12}, {'low': 2, 'high': 13},
-                  {'low': 60, 'high': 720}, {'low': 0, 'high': 0.2}, {'low': 0, 'high': 0.1}]
+    gene_space = [{'low': 1500, 'high': 1500}, {'low': 1, 'high': 12}, {'low': 2, 'high': 13},
+                  {'low': 60, 'high': 720}, {'low': 0, 'high': 0.2}, {'low': 0.05, 'high': 0.05}]
 
     parallel_processing = 12
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     init_range_high = 5
 
     parent_selection_type = "rank"
-    keep_parents = 1
+    keep_parents = 0
 
     crossover_type = "single_point"
 
