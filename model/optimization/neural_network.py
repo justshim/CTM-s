@@ -52,14 +52,18 @@ def scale_datasets(x_train, x_test):
         standard_scaler.fit_transform(x_test),
         columns=x_test.columns
     )
+    x_test_orig = pd.DataFrame(
+        standard_scaler.inverse_transform(x_test),
+        columns=x_test.columns
+    )
     #print("mean: " + str(standard_scaler.mean_))
     #print("var: " + str(standard_scaler.var_))
 
 
-    return x_train_scaled, x_test_scaled
+    return x_train_scaled, x_test_scaled, x_test_orig
 
 
-x_train_scaled, x_test_scaled = scale_datasets(x_train, x_test)
+x_train_scaled, x_test_scaled, x_test_orig = scale_datasets(x_train, x_test)
 
 hidden_units1 = 160
 hidden_units2 = 480
@@ -99,7 +103,7 @@ model.compile(
 history = model.fit(
     x_train_scaled.values,
     y_train.values,
-    epochs=100,
+    epochs=500,
     batch_size=936,
     validation_split=0.2
 )
@@ -118,33 +122,17 @@ def plot_history(history, key):
 # Plot the history
 plot_history(history, 'mean_squared_logarithmic_error')
 
+
+print(x_test)
+
+
+output_predicted = model.predict(x_test_scaled.values)
+
 x_test['prediction'] = model.predict(x_test_scaled)
 
+#output_predicted = pd.DataFrame(output_predicted, columns = ['pred integral'])
+print(x_test)
+#data_orig = pd.concat([data_orig, output_predicted], axis=1)
+#print(data_orig)
 
-
-
-
-standard_scaler = StandardScaler(with_mean=True, with_std=True, copy=True)
-x_scaled = pd.DataFrame(
-    standard_scaler.fit_transform(union),
-    columns=union.columns
-)
-
-print("mean: " + str(standard_scaler.mean_))
-print("var: " + str(standard_scaler.var_))
-print(x_scaled)
-
-data_orig = pd.DataFrame(
-    standard_scaler.inverse_transform(x_scaled),
-    columns=x_scaled.columns
-)
-print(data_orig)
-
-
-output_predicted = model.predict(x_scaled.values)
-output_predicted = pd.DataFrame(output_predicted, columns = ['pred integral'])
-print(output_predicted)
-data_orig = pd.concat([data_orig, output_predicted], axis=1)
-print(data_orig)
-
-data_orig.to_csv("pino.csv", index=False, float_format='%g', encoding="utf-8")
+x_test.to_csv("pino.csv", index=False, float_format='%g', encoding="utf-8")
