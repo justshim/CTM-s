@@ -11,15 +11,12 @@ from tensorflow.keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.losses import MeanSquaredLogarithmicError
 
-TRAIN_DATA_PATH = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/' \
-                  'CTM-s/model/optimization/matlab/data models/4 vars/ide_set.csv'
-TEST_DATA_PATH = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/' \
-                 'CTM-s/model/optimization/matlab/data models//4 vars/val_set.csv'
+
 TRAIN_DATA_PATH = './matlab/data models/4 vars/ide_set.csv'
 TEST_DATA_PATH = './matlab/data models//4 vars/val_set.csv'
 
 TARGET_NAME = 'integral'
-
+print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 # x_train = features, y_train = target
 train_data = pd.read_csv(TRAIN_DATA_PATH)
 train_data = train_data.drop('priority', axis=1)
@@ -34,7 +31,8 @@ test_data = test_data.drop('max_delta', axis=1)
 x_train, y_train = train_data.drop(TARGET_NAME, axis=1), train_data[TARGET_NAME]
 x_test, y_test = test_data.drop(TARGET_NAME, axis=1), test_data[TARGET_NAME]
 
-
+union = pd.concat([x_train, x_test], ignore_index=True)
+print(union)
 def scale_datasets(x_train, x_test):
     # Standard Scale test and train data
     # Z - Score normalization
@@ -43,11 +41,11 @@ def scale_datasets(x_train, x_test):
         standard_scaler.fit_transform(x_train),
         columns=x_train.columns
     )
-    print("mean: " + str(standard_scaler.mean_))
-    print("var: " + str(standard_scaler.var_))
-    print(x_train_scaled)
-    data_orig = standard_scaler.inverse_transform(x_train_scaled)
-    print(data_orig)
+    #print("mean: " + str(standard_scaler.mean_))
+    #print("var: " + str(standard_scaler.var_))
+    #print(x_train_scaled)
+    #data_orig = standard_scaler.inverse_transform(x_train_scaled)
+    #print(data_orig)
 
 
     x_test_scaled = pd.DataFrame(
@@ -101,8 +99,8 @@ model.compile(
 history = model.fit(
     x_train_scaled.values,
     y_train.values,
-    epochs=10,
-    batch_size=64,
+    epochs=100,
+    batch_size=936,
     validation_split=0.2
 )
 
@@ -113,45 +111,40 @@ def plot_history(history, key):
     plt.xlabel("Epochs")
     plt.ylabel(key)
     plt.legend([key, 'val_' + key])
+    plt.grid(True)
     plt.show()
 
 
 # Plot the history
 plot_history(history, 'mean_squared_logarithmic_error')
 
-# x_test['prediction'] = model.predict(x_test_scaled)
+x_test['prediction'] = model.predict(x_test_scaled)
 
 
 
 
 
 standard_scaler = StandardScaler(with_mean=True, with_std=True, copy=True)
+x_scaled = pd.DataFrame(
+    standard_scaler.fit_transform(union),
+    columns=union.columns
+)
 
-data=[[1, 3, 500, 0.5],[36, 34, 5000, 0.5]]
-#Fittedscaler = standard_scaler.fit(data)
-data_scaled=standard_scaler.fit_transform(data),
-print(data_scaled)
+print("mean: " + str(standard_scaler.mean_))
+print("var: " + str(standard_scaler.var_))
+print(x_scaled)
+
+data_orig = pd.DataFrame(
+    standard_scaler.inverse_transform(x_scaled),
+    columns=x_scaled.columns
+)
+print(data_orig)
 
 
+output_predicted = model.predict(x_scaled.values)
+output_predicted = pd.DataFrame(output_predicted, columns = ['pred integral'])
+print(output_predicted)
+data_orig = pd.concat([data_orig, output_predicted], axis=1)
+print(data_orig)
 
-ciao = tf.constant([data_scaled], dtype=tf.float32)
-aaa = model(ciao)
-print(aaa)
-
-
-
-
-
-# st_in = np.linspace(1, 12, 12)
-# st_out = np.linspace(2, 13, 12)
-# beta = np.linspace(0, 0.2, 10)
-# delta = np.linspace(0, 720, 24)
-# sol = []
-# for i in st_in:
-#     for j in st_out:
-#         if j-i > 1:
-#             for b in beta:
-#                 for d in delta:
-#                     sol.append(model.call(tf.constant([i, j, b, d])))
-#
-# print(min(sol))
+data_orig.to_csv("pino.csv", index=False, float_format='%g', encoding="utf-8")
