@@ -1,5 +1,6 @@
 import math
 import pandas as pd
+import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import Model
@@ -53,9 +54,12 @@ learning_rate = 0.01
 
 
 # Creating model using the Sequential in tensorflow
+# Dense = fully connected layer, with num of outputs; Dropout helps avoid overfitting
 def build_model_using_sequential():
     mdl = Sequential([
         Dense(hidden_units1, kernel_initializer='normal', activation='relu'),
+        Dropout(0.2),
+        Dense(hidden_units2, kernel_initializer='normal', activation='relu'),
         Dropout(0.2),
         Dense(hidden_units2, kernel_initializer='normal', activation='relu'),
         Dropout(0.2),
@@ -70,6 +74,8 @@ model = build_model_using_sequential()
 
 # loss function
 msle = MeanSquaredLogarithmicError()
+# model settings for learning
+# Adam is a stochastic gradient descent method based on adaptive estimation of first-order and second-order moments
 model.compile(
     loss=msle,
     optimizer=Adam(learning_rate=learning_rate),
@@ -98,3 +104,17 @@ def plot_history(history, key):
 plot_history(history, 'mean_squared_logarithmic_error')
 
 x_test['prediction'] = model.predict(x_test_scaled)
+aaa = model(tf.constant([1, 3, 0.1, 500]))
+# st_in = np.linspace(1, 12, 12)
+# st_out = np.linspace(2, 13, 12)
+# beta = np.linspace(0, 0.2, 10)
+# delta = np.linspace(0, 720, 24)
+# sol = []
+# for i in st_in:
+#     for j in st_out:
+#         if j-i > 1:
+#             for b in beta:
+#                 for d in delta:
+#                     sol.append(model.call(tf.constant([i, j, b, d])))
+#
+# print(min(sol))
