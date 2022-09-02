@@ -8,7 +8,7 @@ import pygad
 from model.optimization import data_creation as opt
 
 if __name__ == '__main__':
-    loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
+    loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_validazione.xls")
     # loc = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
     # loc = "C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls"
     path_file_output = "../data/opti_data.csv"
