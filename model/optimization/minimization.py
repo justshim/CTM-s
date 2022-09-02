@@ -32,7 +32,7 @@ x_test_scaled = scale_datasets(x_test)
 
 
 #load NN model
-model = tf.keras.models.load_model('SavedModel/my_model', compile=False)
+model = tf.keras.models.load_model('SavedModel/modellovdue', compile=False)
 
 
 x_test[['integ_pred', 'pi_pred']] = model.predict(x_test_scaled)
@@ -48,8 +48,9 @@ print("min integral: " + str(min_integ))
 print("max pi: " + str(max_pi))
 
 upperbound_integ = (min_integ*0.2)+min_integ
-lowerbound_pi = (max_pi*0.1)+max_pi
+lowerbound_pi = max_pi-(max_pi*0.1)
 print("upperbound integral: " + str(upperbound_integ))
+print("lowerbound pi: " + str(lowerbound_pi))
 sol_ottime_sciccherie = sol_ammissibili.loc[(sol_ammissibili['integ_pred'] <= upperbound_integ) & (sol_ammissibili['pi_pred'] >= lowerbound_pi)]
 print(sol_ottime_sciccherie)
 
