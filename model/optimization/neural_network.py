@@ -20,18 +20,16 @@ TARGET_NAME_2 = 'pi'
 print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 # x_train = features, y_train = target
 train_data = pd.read_csv(TRAIN_DATA_PATH)
-train_data = train_data.drop('priority', axis=1)
-train_data = train_data.drop('max_delta', axis=1)
+train_data = train_data.drop(['priority', 'max_delta', 'pi'], axis=1)
 
 test_data = pd.read_csv(TEST_DATA_PATH)
-test_data = test_data.drop('priority', axis=1)
-test_data = test_data.drop('max_delta', axis=1)
+test_data = test_data.drop(['priority', 'max_delta', 'pi'], axis=1)
 
-y_train = train_data[[TARGET_NAME_1, TARGET_NAME_2]]
-y_test = test_data[[TARGET_NAME_1, TARGET_NAME_2]]
+y_train = train_data[TARGET_NAME_1]
+y_test = test_data[TARGET_NAME_1]
 
-x_train = train_data.drop([TARGET_NAME_1, TARGET_NAME_2], axis=1)
-x_test = test_data.drop([TARGET_NAME_1, TARGET_NAME_2], axis=1)
+x_train = train_data.drop(TARGET_NAME_1, axis=1)
+x_test = test_data.drop(TARGET_NAME_1, axis=1)
 
 
 
