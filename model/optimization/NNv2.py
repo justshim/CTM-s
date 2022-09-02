@@ -28,8 +28,8 @@ test_data = test_data.drop(['priority', 'max_delta'], axis=1)
 y_train = train_data[[TARGET_NAME_1, TARGET_NAME_2]]
 y_test = test_data[[TARGET_NAME_1, TARGET_NAME_2]]
 print(y_test)
-#y_train['pi']=y_train['pi']*1000
-#y_test['pi']=y_test['pi']*1000
+y_train['pi']=y_train['pi']*100
+y_test['pi']=y_test['pi']*100
 x_train = train_data.drop([TARGET_NAME_1, TARGET_NAME_2], axis=1)
 x_test = test_data.drop([TARGET_NAME_1, TARGET_NAME_2], axis=1)
 
@@ -60,10 +60,10 @@ def scale_datasets(x_train, x_test):
 
 x_train_scaled, x_test_scaled = scale_datasets(x_train, x_test)
 
-hidden_units1 = 30
-hidden_units2 = 20
-hidden_units3 = 10
-learning_rate = 0.01
+hidden_units1 = 200
+hidden_units2 = 300
+hidden_units3 = 150
+learning_rate = 0.1
 
 
 # Creating model using the Sequential in tensorflow
@@ -73,10 +73,10 @@ def build_model_using_sequential():
         Dense(14, input_shape=(14,), activation='relu'),
         Dense(hidden_units1, kernel_initializer='he_normal', activation='relu'),
         Dropout(0.2),
-        Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
-        Dropout(0.2),
-        Dense(hidden_units3, kernel_initializer='he_normal', activation='relu'),
-        Dropout(0.2),
+        #Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
+        #Dropout(0.2),
+        #Dense(hidden_units3, kernel_initializer='he_normal', activation='relu'),
+        #Dropout(0.2),
         Dense(2)
     ])
     return mdl
@@ -92,16 +92,16 @@ mse = MeanSquaredError()
 # model settings for learning
 # Adam is a stochastic gradient descent method based on adaptive estimation of first-order and second-order moments
 model.compile(
-    loss=mse,
-    optimizer=Adam(learning_rate=learning_rate)
-
+    loss=msle,
+    #optimizer=Adam(learning_rate=learning_rate)
+    optimizer=Adam()
 )
 # train the model
 history = model.fit(
     x_train_scaled.values,
     y_train.values,
-    epochs=20,
-    batch_size=600,
+    epochs=100,
+    batch_size=160,
     validation_data=(x_test_scaled, y_test)
     #validation_split=0.2
 )
