@@ -12,8 +12,8 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.losses import MeanSquaredLogarithmicError
 
 
-TRAIN_DATA_PATH = './matlab/data models/4 vars/ide_set.csv'
-TEST_DATA_PATH = './matlab/data models//4 vars/val_set.csv'
+TRAIN_DATA_PATH = './matlab/data models/4 vars/ide_set_all.csv'
+TEST_DATA_PATH = './matlab/data models/4 vars/val_set_all.csv'
 
 TARGET_NAME = 'integral'
 print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
@@ -79,8 +79,6 @@ def build_model_using_sequential():
         Dropout(0.2),
         Dense(hidden_units2, kernel_initializer='normal', activation='relu'),
         Dropout(0.2),
-        Dense(hidden_units2, kernel_initializer='normal', activation='relu'),
-        Dropout(0.2),
         Dense(hidden_units3, kernel_initializer='normal', activation='relu'),
         Dense(1, kernel_initializer='normal', activation='linear')
     ])
@@ -131,7 +129,7 @@ output_predicted = model.predict(x_test_scaled.values)
 x_test['prediction'] = model.predict(x_test_scaled)
 
 #output_predicted = pd.DataFrame(output_predicted, columns = ['pred integral'])
-print(x_test)
+#print(x_test)
 #data_orig = pd.concat([data_orig, output_predicted], axis=1)
 #print(data_orig)
 

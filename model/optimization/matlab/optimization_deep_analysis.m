@@ -7,11 +7,11 @@ parpool('threads');
 disp('==============================')
 disp('-- Optimization analysis ')
 
-path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta.csv";
+%path = "H:\Il mio Drive\Tesi magistrale\Python\CTM-s\data\opti_data_i-j-delta-beta.csv";
 %path = "C:\A_Tesi\Python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
-%path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_i-j-delta-beta-priority.csv";
+path = "C:\Users\adria\Documents\Uni\LM II anno\Tesi\python\CTM-s\data\opti_data_all.csv";
 
-read = 1;
+read = 0;
 generate = 1-read;
 
 shallow = 0;
@@ -32,9 +32,9 @@ if (generate)
     not_aa=setdiff(1:length(A(:,1)),aa)';
     A_val = A(aa, :);
     A_ide = A(not_aa, :);
-    save_file = [pwd, '/data models/4 vars/A_val','.mat'];
+    save_file = [pwd, '/data models/4 vars/A_val_all','.mat'];
     save(save_file,'A_val')
-    save_file = [pwd, '/data models/4 vars/A_ide','.mat'];
+    save_file = [pwd, '/data models/4 vars/A_ide_all','.mat'];
     save(save_file,'A_ide')
 end
 
