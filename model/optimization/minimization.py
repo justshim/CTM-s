@@ -10,7 +10,7 @@ TARGET_NAME_2 = 'pi'
 print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 
 test_data = pd.read_csv(TEST_DATA_PATH)
-test_data = test_data.drop('priority', axis=1)
+#test_data = test_data.drop('priority', axis=1)
 test_data = test_data.drop('max_delta', axis=1)
 
 x_test = test_data.drop([TARGET_NAME_1, TARGET_NAME_2], axis=1)
