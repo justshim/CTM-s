@@ -1,6 +1,9 @@
 import itertools
+import random
+
 import numpy as np
 import pandas as pd
+import vaex
 
 if __name__ == '__main__':
     generation = False
@@ -29,15 +32,20 @@ if __name__ == '__main__':
         with open(path_file_output, 'a') as f:
             np.savetxt(f, arr, delimiter=";", fmt='%g')
     if(generation == False):
+        #file_path='C:/Users/dspal/Desktop/cazzillo/super_mega_enorme_dataset.csv'
+        #dv = vaex.from_csv(file_path, convert=True, chunk_size=10_000_000, sep=';', names = ['i', 'j', 'delta', 'beta', 'priority', 'L_i', 'v_i', 'w_i', 'qmax_i','rhomax_i'])
+        dv = vaex.open('C:/Users/dspal/Desktop/cazzillo/super_mega_enorme_dataset.csv.hdf5')
+        #col1 = dv['i'].values
 
+        x = random.randrange(-1, 1, 2)
+        print(x)
+        dv['L_j'] =  dv['L_i'] + (dv['L_i']*0.2)
+        dv['v_j'] = dv['v_i'] + (dv['v_i'] * 0.2)
+        dv['w_j'] = dv['w_i'] + (dv['w_i'] * 0.2)
+        dv['qmax_j'] =  dv['qmax_i'] + (dv['qmax_i']*0.2)
+        dv['rhomax_j'] = dv['rhomax_i'] + (dv['rhomax_i'] * 0.2)
 
-        noise = np.random.normal(100, 100, 100)
-        print(noise)
-        #'L_i','v_i','w_i','qmax_i','rhomax_i'
-        fields = ['L_i']
-        #a = pd.read_csv("C:/Users/dspal/Desktop/super_mega_enorme_dataset.csv", usecols=fields, sep=';')
-
-        # See content in 'star_name'
+        print(dv)
         print("ghe semo: ")
 
 
