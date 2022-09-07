@@ -32,21 +32,20 @@ if __name__ == '__main__':
         with open(path_file_output, 'a') as f:
             np.savetxt(f, arr, delimiter=";", fmt='%g')
     if(generation == False):
+
         #file_path='C:/Users/dspal/Desktop/cazzillo/super_mega_enorme_dataset.csv'
         #dv = vaex.from_csv(file_path, convert=True, chunk_size=10_000_000, sep=';', names = ['i', 'j', 'delta', 'beta', 'priority', 'L_i', 'v_i', 'w_i', 'qmax_i','rhomax_i'])
         dv = vaex.open('C:/Users/dspal/Desktop/cazzillo/super_mega_enorme_dataset.csv.hdf5')
-        #col1 = dv['i'].values
-
-        x = random.randrange(-1, 1, 2)
-        print(x)
-        dv['L_j'] =  dv['L_i'] + (dv['L_i']*0.2)
-        dv['v_j'] = dv['v_i'] + (dv['v_i'] * 0.2)
-        dv['w_j'] = dv['w_i'] + (dv['w_i'] * 0.2)
-        dv['qmax_j'] =  dv['qmax_i'] + (dv['qmax_i']*0.2)
-        dv['rhomax_j'] = dv['rhomax_i'] + (dv['rhomax_i'] * 0.2)
-
-        print(dv)
-        print("ghe semo: ")
+        xx = np.random.randint(-1, 2, vaex.dataframe.DataFrame.count(dv))
+        dv['xx'] = xx
+        dv['L_j'] =  dv['L_i'] + (dv['L_i'] * 0.25 * dv['xx'])
+        dv['v_j'] = dv['v_i'] + (dv['v_i'] * 0.05 * dv['xx'])
+        dv['w_j'] = dv['w_i'] + (dv['w_i'] * 0.05 * dv['xx'])
+        dv['qmax_j'] =  dv['qmax_i'] + (dv['qmax_i'] * 0.10 * dv['xx'])
+        dv['rhomax_j'] = dv['rhomax_i'] + (dv['rhomax_i'] * 0.20 * dv['xx'])
+        #print(dv)
+        #dv.export_many('C:/Users/dspal/Desktop/cazzillo/output_chunk-{i:02}.csv', chunk_size=1_000_000)
+        #dv.export_hdf5('C:/Users/dspal/Desktop/cazzillo/output_data.hdf5')
 
 
 
