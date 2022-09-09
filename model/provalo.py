@@ -48,8 +48,8 @@ if __name__ == '__main__':
 
     if random is True:
         #dv = vaex.open('C:/Users/User/Desktop/output_data.hdf5')
-        dv = vaex.open('C:/Users/User/Desktop/cazzillo/output_data_random.hdf5')
-        values = np.random.randint(0, vaex.dataframe.DataFrame.count(dv), 100000)
+        dv = vaex.open('C:/Users/User/Desktop/cazzillo/output_data.hdf5')
+        values = np.random.randint(0, vaex.dataframe.DataFrame.count(dv), 330000)
         dv2 = dv.take(values)
-        print(dv)
-        #dv2.export_hdf5('C:/Users/User/Desktop/cazzillo/output_data_random.hdf5')
+        print(dv2)
+        dv2.export_hdf5('C:/Users/User/Desktop/cazzillo/output_data_random.hdf5')

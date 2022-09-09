@@ -3,16 +3,19 @@ import xlrd
 import numpy as np
 import random
 
-N_CELLS = 20
+N_CELLS = 21
 DURATION = 8640
-def simulation(params, path_phi):
+path_phi = 'C:/Users/User/Documents/MATLAB/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls'
+
+
+def simulation(params):
     i = int(params[0])
     j = int(params[1])
 
     delta = int(params[2])
-    beta = int(params[3])/100
-    priority_s = int(params[4])/100
-    #print(priority_s)
+    beta = int(params[3]) / 100
+    priority_s = int(params[4]) / 100
+    # print(priority_s)
 
     L_i = params[5]
     v_i = int(params[6])
@@ -46,18 +49,18 @@ def simulation(params, path_phi):
     fac0 = f.Factory()
     fac0.createStretch(0.00277777777777778, last_phi, phi_zero)
 
-    length = np.random.randint(min(L_i, L_j)*1.2, max(L_i, L_j)*1.6, 20) / 1000
-    length[i] = L_i/1000
-    length[j] = L_j/1000
-    v_free = np.random.randint((v_i - 0.15 * v_i), (v_i + 0.15 * v_i), 20)
-    w = np.random.randint((w_i - 0.15 * w_i), (w_i + 0.15 * w_i), 20)
-    q_max = np.random.randint((qmax_i - 0.15 * qmax_i), (qmax_i + 0.15 * qmax_i), 20)
-    rho_max = np.random.randint((rhomax_i - 0.15 * rhomax_i), (rhomax_i + 0.15 * rhomax_i), 20)
-    #print(length)
-    #length = np.full((20, 1), 1)
+    length = np.random.randint(300, max(L_i, L_j) * 3.5, N_CELLS) / 1000
+    # length[i] = L_i/1000
+    # length[j] = L_j/1000
+    v_free = np.random.randint((v_i - 0.15 * v_i), (v_i + 0.15 * v_i), N_CELLS)
+    w = np.random.randint((w_i - 0.15 * w_i), (w_i + 0.15 * w_i), N_CELLS)
+    q_max = np.random.randint((qmax_i - 0.15 * qmax_i), (qmax_i + 0.15 * qmax_i), N_CELLS)
+    rho_max = np.random.randint((rhomax_i - 0.15 * rhomax_i), (rhomax_i + 0.15 * rhomax_i), N_CELLS)
+    # print(length)
+    # length = np.full((20, 1), 1)
 
     for t in range(N_CELLS):
-        #print(length[t], v_free[t], w[t], q_max[t], rho_max[t])
+        # print(length[t], v_free[t], w[t], q_max[t], rho_max[t])
         fac0.addCellToStretch(0, length[t], v_free[t], w[t], q_max[t], rho_max[t], 1)
 
     max_delta0 = first_iteration(fac0, DURATION)
@@ -75,14 +78,14 @@ def simulation(params, path_phi):
     integral = result[0]
     max_delta = result[1]
 
-    if(max_delta0 == 0):
+    if (max_delta0 == 0):
         print("No congestion")
         pi = 1
     else:
         pi = (max_delta0 - max_delta) / max_delta0
 
-
-    return integral, pi
+    return [i, j, delta, beta, priority_s, length[i], v_i, w_i, qmax_i, rhomax_i, length[j], v_j, w_j, qmax_j, rhomax_j,
+            integral, pi]
 
 
 def iteration(fac1, duration):
