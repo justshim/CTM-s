@@ -40,7 +40,10 @@ class Cell:
 		
 			self.v.append(self.v_free)
 		else:
+
 			phi_avg = (self.phi_minus + self.phi_plus)/2
+			#print("phi_avg: ")
+			#print(phi_avg)
 			self.v.append(phi_avg/self.rho[self.k])
 
 		
@@ -65,6 +68,9 @@ class Cell:
 		elif(self.congestion_state == 3): #CONGESTED ALL
 			self.phi = self.s_big  * self.p_ms
 			#print("Congested 3, cell " + str(self.id_cell))
+
+		#print("congestion_state: ")
+		#print(self.congestion_state)
 
 	def computePhiPlus(self, rs_total):
 		## Computation of the total flow entering this cell at time instant k
@@ -123,7 +129,9 @@ class Cell:
 			#print("Congestion ")
 		
 		else:
-			print("Congestion Error")
+			print("cell: " + str(self.id_cell) + " Congestion Error")
+			#print("D_prec: " + str(d_prec) + " self.p_ms * self.s_big: " + str(self.p_ms * self.s_big))
+			#print("total_ds: " + str(total_ds) + " (1 - self.p_ms) * self.s_big): " + str((1 - self.p_ms) * self.s_big))
 
 
 	def updateK(self, kappa):

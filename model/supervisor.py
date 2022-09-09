@@ -51,6 +51,7 @@ class Stretch:
 		total_ell = 0
 		## Computation of the additional TTT (total travel time) due to congestions on this stretch
 		for i in range(len(self.cells)-1):
+			#print(self.cells[i].v[self.k])
 			total_ell += 60 * ((self.cells[i].length/self.cells[i].v[self.k]) - (self.cells[i].length/self.cells[i].v_free))
 			
 			if (total_ell<0):
@@ -119,13 +120,13 @@ class Stretch:
 		## Second batch of cell value updates, with special case for last cell
 		for i in range (len(self.cells)):
 			next_phi = self.computeNextPhi(i)
-			
+
 			total_rs_station = self.computeRsStation(i)
 			total_ss_station = self.computeSsStation(i, next_phi)
-			
+
 			total_sr_ramp = self.computeSrRamp(i, next_phi)
 			total_rr_ramp = self.computeRrRamp(i)
-			
+
 			total_rs = total_rr_ramp + total_rs_station
 			total_ss = total_sr_ramp + total_ss_station
 
@@ -210,6 +211,7 @@ class Stretch:
 		for s in range (len(self.stations)):
 			self.stations[s].updateK(self.k)
 			self.stations[s].computeDsBig(self.time_length)
+			#print(self.stations[s].computeDsBig(self.time_length))
 
 		## Same for on-ramps, plus computation of some preliminary values
 		for r_on in range (len(self.on_ramps)):
@@ -227,7 +229,7 @@ class Stretch:
 		for r_off in range (len(self.off_ramps)):
 			if self.off_ramps[r_off].i == i:
 				total_beta += self.off_ramps[r_off].beta_r
-		
+		#print("total_beta " + str(total_beta))
 		return total_beta
 
 	def computeTotalDs(self, i):
@@ -241,14 +243,14 @@ class Stretch:
 		for r_on in range (len(self.on_ramps)):
 			if self.on_ramps[r_on].j == i:
 				total_ds += self.on_ramps[r_on].d_r_big
-
+		#print("total_ds " + str(total_ds))
 		return total_ds
 	
 	def computeRsStation(self, i):
 		## For each cell, check if any stations merge into it, and compute their r_s; 
 		total_rs = 0
 		for s in range (len(self.stations)):	
-			if self.stations[s].j == i:
+			if (self.stations[s].j == i):
 				#print("i: "+str(i)+"	self.stations[s].j: "+str(self.stations[s].j))
 				if self.cells[i].congestion_state == 0 or self.cells[i].congestion_state == 1:
 	 				self.stations[s].computeRs(0, self.cells[i].congestion_state)
@@ -260,14 +262,14 @@ class Stretch:
 	 				self.iterativeProcedure(i, self.cells[i].congestion_state)
 					
 				total_rs += self.stations[s].r_s
-				
+
 		return total_rs
 
 	def computeSsStation(self, i, next_phi):
 		##check if any stations stem from it, and compute their s_s. These are then summed up for use, respectively, in the computation of Phi- and Phi+
 		total_ss=0
 		for s in range (len(self.stations)):
-			if self.stations[s].i == i:
+			if (self.stations[s].i == i):
 				self.stations[s].computeSs(next_phi)
 				total_ss += self.stations[s].s_s[self.k]
 
@@ -334,11 +336,12 @@ class Stretch:
 	def computeNextPhi(self, i):
 		next_phi=0
 		# Last cell does not have a "next" cell, hence phi_(i+1) is given as input
-		if((i+1) < (len(self.cells))):
+		if(i+1) < (len(self.cells)):
 			next_phi = self.cells[i+1].phi
 		
 		else:
 			#next_phi = self.last_phi[self.k]
 			next_phi = self.cells[i-1].d_big
 
+		#print("Cell: " + str(i) + "  next_phi: " + str(next_phi))
 		return next_phi

@@ -1,20 +1,24 @@
 from model import factory as f
 import xlrd
+import numpy as np
+import random
 
-
+N_CELLS = 20
+DURATION = 8640
 def simulation(params, path_phi):
-    i = params[0]
-    j = params[1]
+    i = int(params[0])
+    j = int(params[1])
 
-    delta = params[2]
-    beta = params[3]
-    priority = params[4]
+    delta = int(params[2])
+    beta = int(params[3])/100
+    priority_s = int(params[4])/100
+    #print(priority_s)
 
     L_i = params[5]
-    v_i = params[6]
-    w_i = params[7]
-    qmax_i = params[8]
-    rhomax_i = params[9]
+    v_i = int(params[6])
+    w_i = int(params[7])
+    qmax_i = int(params[8])
+    rhomax_i = int(params[9])
 
     L_j = params[11]
     v_j = params[12]
@@ -23,68 +27,61 @@ def simulation(params, path_phi):
     rhomax_j = params[15]
 
     # read phi first cell from xls file
-    wb_phi = xlrd.open_workbook(path)
+    wb_phi = xlrd.open_workbook(path_phi)
 
     sh_phi = wb_phi.sheet_by_name("First Demand Real")
     sh_phi.cell_value(0, 0)
     phi_zero = []
 
-    for i in range(0, sh_phi.nrows):
-        phi_zero.append(sh_phi.cell_value(i, 0))
+    for t in range(0, sh_phi.nrows):
+        phi_zero.append(sh_phi.cell_value(t, 0))
 
-    sh_last_phi = wb.sheet_by_name("Last Demand Real")
+    sh_last_phi = wb_phi.sheet_by_name("Last Demand Real")
     sh_last_phi.cell_value(0, 0)
     last_phi = []
-    for i in range(0, sh_last_phi.nrows):
-        last_phi.append(sh_last_phi.cell_value(i, 0))
+    for t in range(0, sh_last_phi.nrows):
+        last_phi.append(sh_last_phi.cell_value(t, 0))
 
     # create a factory instance that manages the creation of objects
     fac0 = f.Factory()
-    fac0.createStretch(sh.cell_value(2, 6), last_phi, phi_zero)
-    for i in range(1, sh.nrows):
-        fac0.addCellToStretch(0, sh.cell_value(i, 1), sh.cell_value(i, 2), sh.cell_value(i, 3), sh.cell_value(i, 4), sh.cell_value(i, 5), 1)
+    fac0.createStretch(0.00277777777777778, last_phi, phi_zero)
 
-    if len(onramps) > 0:
-        # create the on-ramps via the factory
-        # ID stretch, d_r, r_r_max, j, p_r
-        for onr in onramps:
-            fac0.addOnRampToStretch(0, onr[0], onr[1], onr[2], onr[3])
-            fac0.stretches[0].cells[onr[2]].p_ms = fac0.stretches[0].cells[onr[2]].p_ms - onr[3]
+    length = np.random.randint(min(L_i, L_j)*1.2, max(L_i, L_j)*1.6, 20) / 1000
+    length[i] = L_i/1000
+    length[j] = L_j/1000
+    v_free = np.random.randint((v_i - 0.15 * v_i), (v_i + 0.15 * v_i), 20)
+    w = np.random.randint((w_i - 0.15 * w_i), (w_i + 0.15 * w_i), 20)
+    q_max = np.random.randint((qmax_i - 0.15 * qmax_i), (qmax_i + 0.15 * qmax_i), 20)
+    rho_max = np.random.randint((rhomax_i - 0.15 * rhomax_i), (rhomax_i + 0.15 * rhomax_i), 20)
+    #print(length)
+    #length = np.full((20, 1), 1)
 
-    if len(offramps) > 0:
-        # create the off-ramps via the factory
-        # ID_stretch, i, beta_r
-        for offr in offramps:
-            fac0.addOffRampToStretch(0, offr[0], offr[1])
+    for t in range(N_CELLS):
+        #print(length[t], v_free[t], w[t], q_max[t], rho_max[t])
+        fac0.addCellToStretch(0, length[t], v_free[t], w[t], q_max[t], rho_max[t], 1)
 
-    max_delta0 = first_iteration(fac0, duration)
+    max_delta0 = first_iteration(fac0, DURATION)
 
     fac1 = f.Factory()
-    fac1.createStretch(sh.cell_value(2, 6), last_phi, phi_zero)
-    for i in range(1, sh.nrows):
-        fac1.addCellToStretch(0, sh.cell_value(i, 1), sh.cell_value(i, 2), sh.cell_value(i, 3),
-                              sh.cell_value(i, 4), sh.cell_value(i, 5), 1)
+    fac1.createStretch(0.00277777777777778, last_phi, phi_zero)
 
-    fac1.stretches[0].cells[station[1]].p_ms = fac1.stretches[0].cells[station[1]].p_ms - p
-    fac1.addStationToStretch(0, rsmax, station[0], station[1], station[2], station[3], p)
+    for t in range(N_CELLS):
+        fac1.addCellToStretch(0, length[t], v_free[t], w[t], q_max[t], rho_max[t], 1)
 
-    if len(onramps) > 0:
-        # create the on-ramps via the factory
-        # ID stretch, d_r, r_r_max, j, p_r
-        for onr in onramps:
-            fac1.addOnRampToStretch(0, onr[0], onr[1], onr[2], onr[3])
-            fac1.stretches[0].cells[onr[2]].p_ms = fac1.stretches[0].cells[onr[2]].p_ms - onr[3]
+    fac1.stretches[0].cells[j].p_ms = fac1.stretches[0].cells[j].p_ms - priority_s
+    fac1.addStationToStretch(0, 1000, i, j, delta, beta, priority_s)
 
-    if len(offramps) > 0:
-        # create the off-ramps via the factory
-        # ID_stretch, i, beta_r
-        for offr in offramps:
-            fac1.addOffRampToStretch(0, offr[0], offr[1])
-
-    result = iteration(fac1, duration)
+    result = iteration(fac1, DURATION)
     integral = result[0]
     max_delta = result[1]
-    pi = (max_delta0 - max_delta) / max_delta0
+
+    if(max_delta0 == 0):
+        print("No congestion")
+        pi = 1
+    else:
+        pi = (max_delta0 - max_delta) / max_delta0
+
+
     return integral, pi
 
 
