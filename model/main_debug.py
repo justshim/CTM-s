@@ -26,7 +26,7 @@ sh.cell_value(0,0)
 # phi_1_24h_realsmooth_incr
 # phi_1_24h_singlepeak
 
-path_phi = "C:\A_Tesi\Aimsun\CTM-s\phi_input\phi_1_24h_doublepeak.txt"
+path_phi = "C:\A_Tesi\Aimsun\CTM-s\phi_input\phi_1_24h_realsmooth_incr.txt"
 phi_zero=[]
 last_phi=[]
 with open(path_phi, encoding='utf8') as fa:
@@ -53,7 +53,7 @@ for i in range(1, sh.nrows):
 		
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-#fac.addStationToStretch(0, 500, 3, 6, 60, 0.07, 0.05) #Note: r_s_max was statically assigned to the Qmax(4)/10 (the cell where the station merges back)
+fac.addStationToStretch(0, 500, 8, 10, 240, 0.07, 0.05)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
@@ -119,6 +119,7 @@ demand_next = []
 supply_next = []
 fipiu = []
 fimeno = []
+phi = []
 ##################################
 # Exectution of the simulation:  #
 ##################################
@@ -130,8 +131,8 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	fac.stretches[0].update(k)
 	k = k + 1
 	# save the various parameters in the previously created variables
-	#l0.append(fac.stretches[0].stations[0].l[k])
-	#e0.append(fac.stretches[0].stations[0].e[k])
+	l0.append(fac.stretches[0].stations[0].l[k])
+	e0.append(fac.stretches[0].stations[0].e[k])
 
 	r0.append(fac.stretches[0].cells[0].rho[k])
 	r1.append(fac.stretches[0].cells[1].rho[k])
@@ -161,13 +162,15 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	s11.append(fac.stretches[0].cells[11].s_big)
 	s12.append(fac.stretches[0].cells[12].s_big)
 
+	phi.append(fac.stretches[0].cells[9].phi)
+
 	demand.append(fac.stretches[0].cells[9].d_big)
 	supply.append(fac.stretches[0].cells[9].s_big)
 	demand_next.append(fac.stretches[0].cells[10].d_big)
 	supply_next.append(fac.stretches[0].cells[10].s_big)
 
-	fipiu.append(fac.stretches[0].cells[9].phi_plus)
-	fimeno.append(fac.stretches[0].cells[9].phi_minus)
+	fipiu.append(fac.stretches[0].cells[10].phi_plus)
+	fimeno.append(fac.stretches[0].cells[10].phi_minus)
 
 	v10.append(fac.stretches[0].cells[10].v[k-1])
 
@@ -193,89 +196,107 @@ print("\nEnd")
 #############################
 # Plot management section:  #
 #############################
-
+x_time = np.linspace(1, 24, 8640)
 plt.figure(0)
 plt.grid(True)
-plt.xlabel('k')
-plt.ylabel('r0')
-plt.plot(r0)
+plt.xlabel('time [h]')
+plt.ylabel('flow')
+plt.plot(x_time, phi)
 
 plt.figure(1)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r1')
-plt.plot(r1)
+plt.plot(x_time, r1)
 
 plt.figure(2)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r2')
-plt.plot(r2)
+plt.plot(x_time, r2)
 
 plt.figure(3)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r3')
-plt.plot(r3)
+plt.plot(x_time, r3)
 
 plt.figure(4)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r4')
-plt.plot(r4)
+plt.plot(x_time, r4)
 
 plt.figure(5)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r5')
-plt.plot(r5)
+plt.plot(x_time, r5)
 
 plt.figure(6)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r6')
-plt.plot(r6)
+plt.plot(x_time, r6)
 
 plt.figure(7)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r7')
-plt.plot(r7)
+plt.plot(x_time, r7)
 
 plt.figure(8)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r8')
-plt.plot(r8)
+plt.plot(x_time, r8)
 
 plt.figure(9)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r9')
-plt.plot(r9)
+plt.plot(x_time, r9)
 
 plt.figure(10)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('r10')
-plt.plot(r10)
+plt.plot(x_time, r10)
 
 plt.figure(11)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
+plt.ylabel('r11')
+plt.plot(x_time, r11)
+
+plt.figure(12)
+plt.grid(True)
+plt.xlabel('time [h]')
 plt.ylabel('r12')
-plt.plot(r12)
+plt.plot(x_time, r12)
 
 plt.figure(90)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('fipiu')
-plt.plot(fipiu)
+plt.plot(x_time, fipiu)
 
 plt.figure(91)
 plt.grid(True)
-plt.xlabel('k')
+plt.xlabel('time [h]')
 plt.ylabel('fimeno')
-plt.plot(fimeno)
+plt.plot(x_time, fimeno)
+
+plt.figure(80)
+plt.grid(True)
+plt.xlabel('time [h]')
+plt.ylabel('e')
+plt.plot(x_time, e0)
+
+plt.figure(81)
+plt.grid(True)
+plt.xlabel('time [h]')
+plt.ylabel('l')
+plt.plot(x_time, l0)
 
 plt.show()
