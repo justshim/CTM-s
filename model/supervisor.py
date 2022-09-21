@@ -53,7 +53,7 @@ class Stretch:
 		for i in range(len(self.cells)-1):
 			#print(self.cells[i].v[self.k])
 			total_ell += 60 * ((self.cells[i].length/self.cells[i].v[self.k]) - (self.cells[i].length/self.cells[i].v_free))
-			
+			#print(self.cells[i].v[self.k])
 			if (total_ell<0):
 				total_ell = 0
 
@@ -327,8 +327,9 @@ class Stretch:
 		# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
 		if(i != 0):
 			prev_d_big = self.cells[i-1].d_big
-		
+
 		else:
+
 			prev_d_big = self.phi_zero[self.k]		
 			
 		return prev_d_big
