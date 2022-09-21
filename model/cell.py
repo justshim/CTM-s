@@ -42,8 +42,8 @@ class Cell:
 		else:
 
 			phi_avg = (self.phi_minus + self.phi_plus)/2
-			print("rho: ")
-			print(self.rho[self.k])
+			#print("rho: ")
+			#print(self.rho[self.k])
 			self.v.append(phi_avg/self.rho[self.k])
 
 		
