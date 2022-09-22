@@ -21,7 +21,7 @@ if __name__ == '__main__':
         print("Stretch: " + str(index))
         print("************************************")
         print("\n")
-        with open('../data/input1.csv', 'a', encoding='UTF8', newline='') as f_input:
+        with open('../data/input5.csv', 'a', encoding='UTF8', newline='') as f_input:
             N_CELLS = 15
             stretch = np.zeros([N_CELLS, 6])
             for row in range(N_CELLS):
@@ -80,7 +80,7 @@ if __name__ == '__main__':
             stop_criteria = "saturate_7"
             on_generation = new_gen
 
-            with open('../data/ga_gdn1.csv', 'a', encoding='UTF8', newline='') as f:
+            with open('../data/ga_gdn5.csv', 'a', encoding='UTF8', newline='') as f:
                 writer = csv.writer(f, delimiter=';')
                 def fitness_func(solution, solution_idx):
                     output = [0, 0]
