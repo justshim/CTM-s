@@ -16,6 +16,11 @@ if __name__ == '__main__':
             phi.append(float(row[0]))
 
     for index in range(N_STRETCHES):
+        print("\n")
+        print("************************************")
+        print("Stretch: " + str(index))
+        print("************************************")
+        print("\n")
         with open('../data/input2.csv', 'a', encoding='UTF8', newline='') as f_input:
             N_CELLS = 15
             stretch = np.zeros([N_CELLS, 6])
