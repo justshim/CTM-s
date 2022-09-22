@@ -6,7 +6,7 @@ import pygad
 
 
 if __name__ == '__main__':
-    N_STRETCHES = 2000
+    N_STRETCHES = 3000
     inputs = []
     phi = []
 
