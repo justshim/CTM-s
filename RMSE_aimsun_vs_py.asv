@@ -129,10 +129,10 @@ RMSE = [];
 
 last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
- f1 = figure;
+
 for CELL = 1:13
-    y = section_main(CELL).density; %aimsun
-    yhat_temp = dens(:,CELL); %py
+    y = section_main(CELL).flow;
+    yhat_temp = flow(:,CELL);
     yhat_temp = [yhat_temp; 0];
 
     z=1;
@@ -150,27 +150,22 @@ for CELL = 1:13
     x = linspace(1, 24, 1440);
 
     f1 = figure;
-    h = plot(x,y);
-    h.LineWidth = 3
-    h.Color="blue"
+    scatter(sensor_sum(10).density,sensor_sum(10).vehicle_speed,[],'filled')
     hold on
     grid on
-    h = plot(x,yhat);
-    h.LineWidth = 3
-    h.Color="red"
     f1.WindowState = 'maximized';
     ax = gca();
     font_sz = 25;
     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-    ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    ax.XAxis.Label.String = '$\rho[veh/km]$'; ax.XAxis.Label.FontSize = font_sz;
     ax.XAxis.Label.Interpreter = 'latex';
-    ax.YAxis.Label.String = '$Density [veh/km]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.String = '$speed[km/h]$'; ax.YAxis.Label.FontSize = font_sz;
     ax.YAxis.Label.Interpreter = 'latex';
-    str_pdf=strcat('density_',num2str(CELL), '.pdf');
-    str_eps=strcat('density_',num2str(CELL), '.eps');
-    exportgraphics(f1,str_pdf,'BackgroundColor','none');
-    exportgraphics(f1,str_eps,'BackgroundColor','none');
+    exportgraphics(f1,'density_speed.pdf',...
+        'BackgroundColor','none');
+    exportgraphics(f1,'density_speed.eps',...
+        'BackgroundColor','none');
 
 end
 

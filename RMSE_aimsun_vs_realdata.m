@@ -117,32 +117,34 @@ clear section_main_temp
 for j = 1:length(section_main)
     section_main(j).id = num2str(section_main(j).id);
 end
-%% python data
-D = readtable("C:\A_Tesi\Python\CTM-s\model\density.csv");
-dens = table2array(D);
-F = readtable("C:\A_Tesi\Python\CTM-s\model\flow.csv");
-flow = table2array(F);
 
+%% matlab data
+path=strcat('H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\data.mat');
+aa = load(path, '*');
+data = aa.sensor_sum;
+clear aa;
 
 %% plots and RMSE
 RMSE = [];
 
 last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
- f1 = figure;
+
 for CELL = 1:13
-    y = section_main(CELL).density; %aimsun
-    yhat_temp = dens(:,CELL); %py
-    yhat_temp = [yhat_temp; 0];
+    y_tmp = data(CELL).flow'; %real data
+    y_hat = section_main(CELL).flow; %aimsun
+    if (sum(isnan(y_tmp))~=0)
+        y_tmp(isnan(y_tmp))=0;
+    end
 
     z=1;
-    yhat=zeros(1440,1);
-    for p=1:6:length(yhat_temp)
-        yhat(z) = (yhat_temp(p) + yhat_temp(p+1) + yhat_temp(p+2) + yhat_temp(p+3) + yhat_temp(p+4) + yhat_temp(p+5))/6;
+    y=zeros(1440,1);
+    for p=1:6:length(y_tmp)
+        y(z) = (y_tmp(p) + y_tmp(p+1) + y_tmp(p+2) + y_tmp(p+3) + y_tmp(p+4) + y_tmp(p+5))/6;
         z=z+1;
     end
 
-    RMSE = [RMSE; sqrt(mean((y - yhat).^2))];  % Root Mean Squared Error
+    RMSE = [RMSE; sqrt(mean((y - y_hat).^2))];  % Root Mean Squared Error
 
 
     n_row = 3;
@@ -150,12 +152,12 @@ for CELL = 1:13
     x = linspace(1, 24, 1440);
 
     f1 = figure;
-    h = plot(x,y);
+    h = plot(x,y_hat);
     h.LineWidth = 3
     h.Color="blue"
     hold on
     grid on
-    h = plot(x,yhat);
+    h = plot(x,y);
     h.LineWidth = 3
     h.Color="red"
     f1.WindowState = 'maximized';
@@ -165,12 +167,12 @@ for CELL = 1:13
     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
     ax.XAxis.Label.Interpreter = 'latex';
-    ax.YAxis.Label.String = '$Density [veh/km]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.String = '$Flow [veh/h]$'; ax.YAxis.Label.FontSize = font_sz;
     ax.YAxis.Label.Interpreter = 'latex';
-    str_pdf=strcat('density_',num2str(CELL), '.pdf');
-    str_eps=strcat('density_',num2str(CELL), '.eps');
+    str_pdf=strcat('flow_',num2str(CELL), '.pdf');
+    str_eps=strcat('flow_',num2str(CELL), '.eps');
     exportgraphics(f1,str_pdf,'BackgroundColor','none');
     exportgraphics(f1,str_eps,'BackgroundColor','none');
 
-end
 
+end
