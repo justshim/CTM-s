@@ -1,0 +1,57 @@
+clearvars
+close all
+clc
+
+%% matlab data
+path=strcat('H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\extracted_data\data.mat');
+aa = load(path, '*');
+data = aa.sensor_sum;
+clear aa;
+
+
+%% python data
+D = readtable("C:\A_Tesi\Python\CTM-s\model\density.csv");
+dens_py = table2array(D);
+F = readtable("C:\A_Tesi\Python\CTM-s\model\flow.csv");
+flow_py = table2array(F);
+
+%% plots and RMSE
+RMSE = [];
+last_fig_num = get(gcf,'Number');
+figure(last_fig_num)
+
+for CELL = 1:13
+    y = data(CELL).flow;
+    yhat_temp = flow_py(:,CELL);
+    yhat_temp = [yhat_temp; 0];
+
+    %z=1;
+    %yhat=zeros(1440,1);
+    %for p=1:6:length(yhat_temp)
+    %    yhat(z) = (yhat_temp(p) + yhat_temp(p+1) + yhat_temp(p+2) + yhat_temp(p+3) + yhat_temp(p+4) + yhat_temp(p+5))/6;
+    %    z=z+1;
+    %end
+
+    RMSE = [RMSE; sqrt(mean((y - yhat).^2))];  % Root Mean Squared Error
+
+
+    n_row = 3;
+
+    x = linspace(1, 24, 1440);
+
+    % % % % % % % %
+
+    %     subplot(n_row,ceil((13)/n_row),CELL)
+    %     plot(x, y)
+    %     hold on
+    %     plot(x, yhat)
+    %     %ax = gca;
+    %     %ax.YLim = [0,8];
+    %     title_str1 = ['flow',section_main(CELL).id];
+    %     title(title_str1)
+    %     grid on
+
+
+
+end
+
