@@ -8,7 +8,6 @@ aa = load(path, '*');
 data = aa.sensor_sum;
 clear aa;
 
-
 %% python data
 D = readtable("C:\A_Tesi\Python\CTM-s\model\density.csv");
 dens_py = table2array(D);
@@ -21,36 +20,47 @@ last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
 
 for CELL = 1:13
-    y = data(CELL).flow;
-    yhat_temp = flow_py(:,CELL);
-    yhat_temp = [yhat_temp; 0];
-
-    %z=1;
-    %yhat=zeros(1440,1);
-    %for p=1:6:length(yhat_temp)
-    %    yhat(z) = (yhat_temp(p) + yhat_temp(p+1) + yhat_temp(p+2) + yhat_temp(p+3) + yhat_temp(p+4) + yhat_temp(p+5))/6;
-    %    z=z+1;
-    %end
-
+    y = data(CELL).flow'; % realdata
+    yhat = flow_py(:,CELL); % python
+    y_mm=movmean(y, 121*8640/1440);
+    yhat = [yhat; 0];
+    
+    if (sum(isnan(y))~=0)
+        y(isnan(y))=0;
+    end
     RMSE = [RMSE; sqrt(mean((y - yhat).^2))];  % Root Mean Squared Error
-
-
     n_row = 3;
 
-    x = linspace(1, 24, 1440);
+    x = linspace(1, 24, 8640);
 
-    % % % % % % % %
 
-    %     subplot(n_row,ceil((13)/n_row),CELL)
-    %     plot(x, y)
-    %     hold on
-    %     plot(x, yhat)
-    %     %ax = gca;
-    %     %ax.YLim = [0,8];
-    %     title_str1 = ['flow',section_main(CELL).id];
-    %     title(title_str1)
-    %     grid on
 
+ f1 = figure;
+    h = plot(x,y);
+    h.LineWidth = 3;
+    h.Color=[0.4, 0.9, 1];
+    hold on
+    grid on
+    h = plot(x,y_mm);
+    h.LineWidth = 3;
+    h.Color="blue";
+    h = plot(x,yhat);
+    h.LineWidth = 3
+    h.Color="red"
+    f1.WindowState = 'maximized';
+    ax = gca();
+    %ax.YLim = [0; 2500];
+    font_sz = 25;
+    ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    ax.XAxis.Label.Interpreter = 'latex';
+    ax.YAxis.Label.String = '$Flow [veh/h]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.Interpreter = 'latex';
+    str_pdf=strcat('flow_',num2str(CELL), '.pdf');
+    str_eps=strcat('flow_',num2str(CELL), '.eps');
+    %exportgraphics(f1,str_pdf,'BackgroundColor','none');
+    exportgraphics(f1,str_eps,'BackgroundColor','none');
 
 
 end
