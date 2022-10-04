@@ -11,8 +11,8 @@ from tensorflow.keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.losses import *
 
-INPUT_PATH = '../../data/input_all.csv'
-OUTPUT_PATH = '../../data/output_all.csv'
+INPUT_PATH = '../../data/input_all_all.csv'
+OUTPUT_PATH = '../../data/output_all_all.csv'
 
 print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 
@@ -36,10 +36,10 @@ def scale_datasets(x_t):
 
 x_train_scaled = scale_datasets(x_train)
 
-hidden_units1 = 150
+hidden_units1 = 1
 hidden_units2 = 10
 hidden_units3 = 150
-learning_rate = 0.001
+# learning_rate = 0.001
 
 
 def input_flatten(df):
@@ -89,8 +89,8 @@ model.compile(
 history = model.fit(
     input,
     y_train.values,
-    epochs=100,
-    batch_size=256,
+    epochs=250,
+    batch_size=128,
     # validation_data=(x_test_scaled, y_test),
     validation_split=0.2
 )
@@ -111,6 +111,11 @@ def plot_history(history):
     plt.grid(True)
     plt.show()
 
+
+min_loss = min(history.history['val_loss'])
+index_min = np.argmin(history.history['val_loss'])
+print(min_loss)
+print(index_min)
 
 # print("\nEvaluate")
 # result = model.predict(x_test_scaled.values)
