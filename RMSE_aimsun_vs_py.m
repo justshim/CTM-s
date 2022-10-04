@@ -10,7 +10,7 @@ clc
 
 % _no_station
 
-file_name = "sec_phi_1_24h_realsmooth_station_limited_capacity";
+file_name = "sec_phi_1_24h_realsmooth";
 n_lanes = 1;
 if(n_lanes == 1)
     path=strcat('C:\A_Tesi\Aimsun\CTM-s\A2 (1 lane)\Model\Resources\Scripts\', file_name,'.csv');
@@ -131,8 +131,9 @@ last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
  f1 = figure;
 for CELL = 1:13
-    y = section_main(CELL).density; %aimsun
-    yhat_temp = dens(:,CELL); %py
+    y = section_main(CELL).flow; %aimsun
+    y_mm=movmean(y, 121);
+    yhat_temp = flow(:,CELL); %py
     yhat_temp = [yhat_temp; 0];
 
     z=1;
@@ -151,13 +152,16 @@ for CELL = 1:13
 
     f1 = figure;
     h = plot(x,y);
-    h.LineWidth = 3
-    h.Color="blue"
+    h.LineWidth = 3;
+    h.Color=[0.4, 0.9, 1];
     hold on
     grid on
+    h = plot(x,y_mm);
+    h.LineWidth = 3;
+    h.Color="blue";
     h = plot(x,yhat);
-    h.LineWidth = 3
-    h.Color="red"
+    h.LineWidth = 3;
+    h.Color="red";
     f1.WindowState = 'maximized';
     ax = gca();
     font_sz = 25;
@@ -165,12 +169,12 @@ for CELL = 1:13
     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
     ax.XAxis.Label.Interpreter = 'latex';
-    ax.YAxis.Label.String = '$Density [veh/km]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.String = '$Flow [veh/h]$'; ax.YAxis.Label.FontSize = font_sz;
     ax.YAxis.Label.Interpreter = 'latex';
-    str_pdf=strcat('density_',num2str(CELL), '.pdf');
-    str_eps=strcat('density_',num2str(CELL), '.eps');
-    exportgraphics(f1,str_pdf,'BackgroundColor','none');
-    exportgraphics(f1,str_eps,'BackgroundColor','none');
+    str_pdf=strcat('flow_',num2str(CELL), '.pdf');
+    str_eps=strcat('flow_',num2str(CELL), '.eps');
+%     exportgraphics(f1,str_pdf,'BackgroundColor','none');
+%     exportgraphics(f1,str_eps,'BackgroundColor','none');
 
 end
 

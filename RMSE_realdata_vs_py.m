@@ -20,8 +20,9 @@ last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
 
 for CELL = 1:13
-    y = data(CELL).density';
-    yhat = dens_py(:,CELL);
+    y = data(CELL).flow'; % realdata
+    yhat = flow_py(:,CELL); % python
+    y_mm=movmean(y, 121*8640/1440);
     yhat = [yhat; 0];
     
     if (sum(isnan(y))~=0)
@@ -36,13 +37,16 @@ for CELL = 1:13
 
  f1 = figure;
     h = plot(x,y);
-    h.LineWidth = 3
-    h.Color="blue"
+    h.LineWidth = 3;
+    h.Color=[0.4, 0.9, 1];
     hold on
     grid on
+    h = plot(x,y_mm);
+    h.LineWidth = 3;
+    h.Color="blue";
     h = plot(x,yhat);
-    h.LineWidth = 3
-    h.Color="red"
+    h.LineWidth = 3;
+    h.Color="red";
     f1.WindowState = 'maximized';
     ax = gca();
     %ax.YLim = [0; 2500];
@@ -51,12 +55,12 @@ for CELL = 1:13
     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
     ax.XAxis.Label.Interpreter = 'latex';
-    ax.YAxis.Label.String = '$Density [veh/km]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.String = '$Flow [veh/h]$'; ax.YAxis.Label.FontSize = font_sz;
     ax.YAxis.Label.Interpreter = 'latex';
-    str_pdf=strcat('density_',num2str(CELL), '.pdf');
-    str_eps=strcat('density_',num2str(CELL), '.eps');
-    exportgraphics(f1,str_pdf,'BackgroundColor','none');
-    exportgraphics(f1,str_eps,'BackgroundColor','none');
+    str_pdf=strcat('flow_',num2str(CELL), '.pdf');
+    str_eps=strcat('flow_',num2str(CELL), '.eps');
+    %exportgraphics(f1,str_pdf,'BackgroundColor','none');
+    %exportgraphics(f1,str_eps,'BackgroundColor','none');
 
 
 end

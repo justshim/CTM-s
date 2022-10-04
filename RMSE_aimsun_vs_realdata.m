@@ -10,7 +10,7 @@ clc
 
 % _no_station
 
-file_name = "sec_phi_1_24h_realsmooth_station_limited_capacity";
+file_name = "sec_phi_1_24h_realsmooth";
 n_lanes = 1;
 if(n_lanes == 1)
     path=strcat('C:\A_Tesi\Aimsun\CTM-s\A2 (1 lane)\Model\Resources\Scripts\', file_name,'.csv');
@@ -153,13 +153,13 @@ for CELL = 1:13
 
     f1 = figure;
     h = plot(x,y_hat);
-    h.LineWidth = 3
-    h.Color="blue"
+    h.LineWidth = 3;
+    h.Color="blue";
     hold on
     grid on
     h = plot(x,y);
-    h.LineWidth = 3
-    h.Color="red"
+    h.LineWidth = 3;
+    h.Color="red";
     f1.WindowState = 'maximized';
     ax = gca();
     font_sz = 25;
@@ -171,8 +171,8 @@ for CELL = 1:13
     ax.YAxis.Label.Interpreter = 'latex';
     str_pdf=strcat('flow_',num2str(CELL), '.pdf');
     str_eps=strcat('flow_',num2str(CELL), '.eps');
-    exportgraphics(f1,str_pdf,'BackgroundColor','none');
-    exportgraphics(f1,str_eps,'BackgroundColor','none');
+    %exportgraphics(f1,str_pdf,'BackgroundColor','none');
+    %exportgraphics(f1,str_eps,'BackgroundColor','none');
 
 
 end
