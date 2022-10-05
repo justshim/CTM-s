@@ -37,9 +37,12 @@ def scale_datasets(x_t):
 
 x_train_scaled = scale_datasets(x_train)
 
-for h in range(60, 80):
+for b in range(1200, 1600, 16):
+    if b == 0:
+        continue
+
     hidden_units1 = 55
-    hidden_units2 = h
+    hidden_units2 = 0
     hidden_units3 = 0
     # learning_rate = 0.001
 
@@ -63,8 +66,8 @@ for h in range(60, 80):
             Dense(90, input_shape=(90,), activation='relu'),
             Dense(hidden_units1, kernel_initializer='he_normal', activation='relu'),
             Dropout(0.2),
-            Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
-            Dropout(0.2),
+            # Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
+            # Dropout(0.2),
             # Dense(hidden_units3, kernel_initializer='he_normal', activation='relu'),
             # Dropout(0.2),
             Dense(3)
@@ -92,7 +95,7 @@ for h in range(60, 80):
         input,
         y_train.values,
         epochs=250,
-        batch_size=128,
+        batch_size=b,
         # validation_data=(x_test_scaled, y_test),
         validation_split=0.2
     )
@@ -130,5 +133,5 @@ for h in range(60, 80):
 
     with open('../../data/nn4.csv', 'a', encoding='UTF8', newline='') as f:
         writer = csv.writer(f, delimiter=';')
-        row = [h, min_loss, index_min]
+        row = [b, min_loss, index_min]
         writer.writerow(row)

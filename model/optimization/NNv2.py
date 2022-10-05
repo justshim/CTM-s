@@ -19,8 +19,9 @@ print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 x_train = pd.read_csv(INPUT_PATH, sep=";", header=None)
 y_train = pd.read_csv(OUTPUT_PATH, sep=";", header=None)
 
-#print(x_train)
-#print(y_train)
+
+# print(x_train)
+# print(y_train)
 
 
 def scale_datasets(x_t):
@@ -36,9 +37,11 @@ def scale_datasets(x_t):
 
 x_train_scaled = scale_datasets(x_train)
 
-hidden_units1 = 1
+hidden_units1 = 50
 hidden_units2 = 10
 hidden_units3 = 150
+
+
 # learning_rate = 0.001
 
 
@@ -50,6 +53,7 @@ def input_flatten(df):
         aa = pd.DataFrame(flat).transpose()
         output = pd.concat([output, aa])
     return output
+
 
 input = input_flatten(x_train_scaled)
 
@@ -89,7 +93,7 @@ model.compile(
 history = model.fit(
     input,
     y_train.values,
-    epochs=250,
+    epochs=100,
     batch_size=128,
     # validation_data=(x_test_scaled, y_test),
     validation_split=0.2
