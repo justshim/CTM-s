@@ -39,8 +39,8 @@ x_train_scaled = scale_datasets(x_train)
 
 for h in range(80, 100):
     hidden_units1 = 55
-    hidden_units2 = 58
-    hidden_units3 = h
+    hidden_units2 = h
+    hidden_units3 = 0
     # learning_rate = 0.001
 
 
@@ -63,8 +63,8 @@ for h in range(80, 100):
             Dense(90, input_shape=(90,), activation='relu'),
             Dense(hidden_units1, kernel_initializer='he_normal', activation='relu'),
             Dropout(0.2),
-            # Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
-            # Dropout(0.2),
+            Dense(hidden_units2, kernel_initializer='he_normal', activation='relu'),
+            Dropout(0.2),
             # Dense(hidden_units3, kernel_initializer='he_normal', activation='relu'),
             # Dropout(0.2),
             Dense(3)
