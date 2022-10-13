@@ -19,6 +19,8 @@ print("GPU test: " + str(tf.test.is_gpu_available()) + "\n")
 x_train = pd.read_csv(INPUT_PATH, sep=";", header=None)
 y_train = pd.read_csv(OUTPUT_PATH, sep=";", header=None)
 
+y_train.iloc[:, 2] = y_train.iloc[:, 2].multiply(100)
+print(y_train)
 
 # print(x_train)
 # print(y_train)
@@ -37,7 +39,7 @@ def scale_datasets(x_t):
 
 x_train_scaled = scale_datasets(x_train)
 
-hidden_units1 = 50
+hidden_units1 = 55
 hidden_units2 = 10
 hidden_units3 = 150
 
@@ -94,7 +96,7 @@ history = model.fit(
     input,
     y_train.values,
     epochs=100,
-    batch_size=128,
+    batch_size=156,
     # validation_data=(x_test_scaled, y_test),
     validation_split=0.2
 )

@@ -13,10 +13,11 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
+#loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
 #loc = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
+loc = ("C:/Users/User/Documents/MATLAB/CTMs-identification/fnc/extracted_data/CTM_param_out_A2_15cells.xls")
 
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_name("Cells parameters")
@@ -28,7 +29,7 @@ sh.cell_value(0,0)
 # phi_1_24h_realsmooth_incr
 # phi_1_24h_singlepeak
 
-path_phi = "C:\A_Tesi\Aimsun\CTM-s\phi_input\phi_1_24h_realsmooth_incr.txt"
+path_phi = "C:/Users/User/Documents/Python/CTM-s/data/phi_1_24h_doublepeak.csv"
 phi_zero=[]
 last_phi=[]
 summma = 0
@@ -57,7 +58,7 @@ for i in range(1, sh.nrows):
 		
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 1500, 8, 10, 144, 0.07, 0.05)
+fac.addStationToStretch(0, 1500, 4, 6, 570, 0.19, 0.05)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
@@ -219,11 +220,9 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	# cong10.append(fac.stretches[0].cells[10].congestion_state)
 	# cong11.append(fac.stretches[0].cells[11].congestion_state)
 	#
-	# d.append(fac.stretches[0].delta_big[k-1])
+	d.append(fac.stretches[0].delta_big[k-1])
 
 print("\nEnd")
-print("einvece")
-print(fitot/8640)
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
 
@@ -232,11 +231,9 @@ with open("./flow.csv", 'w', encoding='UTF8', newline='') as f_out:
 	header = ["phi0", "phi1", "phi2", "phi3", "phi4", "phi5","phi6", "phi7", "phi8","phi9", "phi10", "phi11","phi12"]
 	writer.writerow(header)
 	for i in range(1, len(phi0)):
-		writer.writerow([phi0[i], phi1[i],phi2[i], phi3[i], phi4[i], phi5[i],phi6[i], phi7[i],phi8[i], phi9[i],phi10[i], phi11[i],phi12[i]])
+		writer.writerow([phi0[i], phi1[i], phi2[i], phi3[i], phi4[i], phi5[i], phi6[i], phi7[i], phi8[i], phi9[i], phi10[i], phi11[i], phi12[i]])
 
-
-
-
+print(max(d))
 
 #############################
 # Plot management section:  #
@@ -245,8 +242,8 @@ x_time = np.linspace(1, 24, 8640)
 plt.figure(0)
 plt.grid(True)
 plt.xlabel('time [h]')
-plt.ylabel('phi-')
-plt.plot(x_time, fimeno)
+plt.ylabel('Delta')
+plt.plot(x_time, d)
 #
 # plt.figure(1)
 # plt.grid(True)
