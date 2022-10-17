@@ -13,11 +13,11 @@ import numpy as np
 
 ## read file CTM_data from xls file
 
-#loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
+loc = ("H:/Il mio Drive/Tesi magistrale/CTMs-identification/fnc/extracted_data/CTM_param_out_nice.xls")
 #loc = ("C:/A_Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/extracted_data/CTM_param_out.xls")
 #loc = ("C:/Users/adria/Documents/Uni/LM II anno/Tesi/python/CTM-s/CTM_data.xls")
-loc = ("C:/Users/User/Documents/MATLAB/CTMs-identification/fnc/extracted_data/CTM_param_out_A2_15cells.xls")
+#loc = ("C:/Users/User/Documents/MATLAB/CTMs-identification/fnc/extracted_data/CTM_param_out_nice_A2.xls")
 
 wb = xlrd.open_workbook(loc)
 sh = wb.sheet_by_name("Cells parameters")
@@ -29,7 +29,8 @@ sh.cell_value(0,0)
 # phi_1_24h_realsmooth_incr
 # phi_1_24h_singlepeak
 
-path_phi = "C:/Users/User/Documents/Python/CTM-s/data/phi_1_24h_doublepeak.csv"
+#path_phi = "C:/Users/User/Documents/Python/CTM-s/data/phi_1_24h_doublepeak.csv"
+path_phi = "C:/A_Tesi/Aimsun/CTM-s/phi_input/phi_1_24h_realsmooth_incr.txt"
 phi_zero=[]
 last_phi=[]
 summma = 0
@@ -58,7 +59,7 @@ for i in range(1, sh.nrows):
 		
 ## create the stations via the factory
 			#ID stretch, r_s_max, i, j, delta, beta_s, p
-fac.addStationToStretch(0, 1500, 4, 6, 570, 0.19, 0.05)
+#fac.addStationToStretch(0, 1500, 8, 10, 570, 0.07, 0.05)
 
 ## create the on-ramps via the factory
 			#ID stretch, d_r, r_r_max, j, p_r
@@ -153,19 +154,19 @@ while k<8640: 	# k=24h=8640 , k=1h=360, k=3h=1080
 	# l0.append(fac.stretches[0].stations[0].l[k])
 	# e0.append(fac.stretches[0].stations[0].e[k])
 	#
-	# r0.append(fac.stretches[0].cells[0].rho[k])
-	# r1.append(fac.stretches[0].cells[1].rho[k])
-	# r2.append(fac.stretches[0].cells[2].rho[k])
-	# r3.append(fac.stretches[0].cells[3].rho[k])
-	# r4.append(fac.stretches[0].cells[4].rho[k])
-	# r5.append(fac.stretches[0].cells[5].rho[k])
-	# r6.append(fac.stretches[0].cells[6].rho[k])
-	# r7.append(fac.stretches[0].cells[7].rho[k])
-	# r8.append(fac.stretches[0].cells[8].rho[k])
-	# r9.append(fac.stretches[0].cells[9].rho[k])
-	# r10.append(fac.stretches[0].cells[10].rho[k])
-	# r11.append(fac.stretches[0].cells[11].rho[k])
-	# r12.append(fac.stretches[0].cells[12].rho[k])
+	r0.append(fac.stretches[0].cells[0].rho[k])
+	r1.append(fac.stretches[0].cells[1].rho[k])
+	r2.append(fac.stretches[0].cells[2].rho[k])
+	r3.append(fac.stretches[0].cells[3].rho[k])
+	r4.append(fac.stretches[0].cells[4].rho[k])
+	r5.append(fac.stretches[0].cells[5].rho[k])
+	r6.append(fac.stretches[0].cells[6].rho[k])
+	r7.append(fac.stretches[0].cells[7].rho[k])
+	r8.append(fac.stretches[0].cells[8].rho[k])
+	r9.append(fac.stretches[0].cells[9].rho[k])
+	r10.append(fac.stretches[0].cells[10].rho[k])
+	r11.append(fac.stretches[0].cells[11].rho[k])
+	r12.append(fac.stretches[0].cells[12].rho[k])
 	#
 	phi0.append(fac.stretches[0].cells[0].phi)
 	phi1.append(fac.stretches[0].cells[1].phi)
@@ -226,12 +227,19 @@ print("\nEnd")
 #print("Len rho: " + str(len(fac.stretches[0].cells[0].rho))) 
 
 
-with open("./flow.csv", 'w', encoding='UTF8', newline='') as f_out:
+with open("./flow_no_station.csv", 'w', encoding='UTF8', newline='') as f_out:
 	writer = csv.writer(f_out, delimiter=';')
 	header = ["phi0", "phi1", "phi2", "phi3", "phi4", "phi5","phi6", "phi7", "phi8","phi9", "phi10", "phi11","phi12"]
 	writer.writerow(header)
 	for i in range(1, len(phi0)):
 		writer.writerow([phi0[i], phi1[i], phi2[i], phi3[i], phi4[i], phi5[i], phi6[i], phi7[i], phi8[i], phi9[i], phi10[i], phi11[i], phi12[i]])
+
+with open("./density_no_station.csv", 'w', encoding='UTF8', newline='') as f_out:
+	writer = csv.writer(f_out, delimiter=';')
+	header = ["rho0", "rho1", "rho2", "rho3", "rho4", "rho5","rho6", "rho7", "rho8","rho9", "rho10", "rho11","rho12"]
+	writer.writerow(header)
+	for i in range(1, len(r0)):
+		writer.writerow([r0[i], r1[i], r2[i], r3[i], r1[i], r5[i], r6[i], r7[i], r8[i], r9[i], r10[i], r11[i], r12[i]])
 
 print(max(d))
 
@@ -239,11 +247,11 @@ print(max(d))
 # Plot management section:  #
 #############################
 x_time = np.linspace(1, 24, 8640)
-plt.figure(0)
-plt.grid(True)
-plt.xlabel('time [h]')
-plt.ylabel('Delta')
-plt.plot(x_time, d)
+# plt.figure(0)
+# plt.grid(True)
+# plt.xlabel('time [h]')
+# plt.ylabel('Delta')
+# plt.plot(x_time, d)
 #
 # plt.figure(1)
 # plt.grid(True)

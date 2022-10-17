@@ -9,9 +9,11 @@ data = aa.sensor_sum;
 clear aa;
 
 %% python data
-D = readtable("C:\A_Tesi\Python\CTM-s\model\density.csv");
+%D = readtable("H:\Il mio Drive\Tesi magistrale\Python\CTM-s\model\density_station.csv");
+D = readtable("H:\Il mio Drive\Tesi magistrale\Python\CTM-s\model\density_no_station.csv");
 dens_py = table2array(D);
-F = readtable("C:\A_Tesi\Python\CTM-s\model\flow.csv");
+%F = readtable("H:\Il mio Drive\Tesi magistrale\Python\CTM-s\model\flow_station.csv");
+F = readtable("H:\Il mio Drive\Tesi magistrale\Python\CTM-s\model\flow_no_station.csv");
 flow_py = table2array(F);
 
 %% plots and RMSE
@@ -20,9 +22,9 @@ last_fig_num = get(gcf,'Number');
 figure(last_fig_num)
 
 for CELL = 1:13
-    y = data(CELL).flow'; % realdata
-    yhat = flow_py(:,CELL); % python
-    y_mm=movmean(y, 121*8640/1440);
+    y = data(CELL).density'; % realdata
+    yhat = dens_py(:,CELL); % python
+    
     yhat = [yhat; 0];
     
     if (sum(isnan(y))~=0)
@@ -32,7 +34,7 @@ for CELL = 1:13
     n_row = 3;
 
     x = linspace(1, 24, 8640);
-
+y_mm=movmean(y, 90*8640/1440);
 
 
  f1 = figure;
@@ -53,14 +55,14 @@ for CELL = 1:13
     font_sz = 25;
     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-    ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    ax.XAxis.Label.String = '$Time \mathrm{[h]}$'; ax.XAxis.Label.FontSize = font_sz;
     ax.XAxis.Label.Interpreter = 'latex';
-    ax.YAxis.Label.String = '$Flow [veh/h]$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.String = '$\rho \mathrm{[veh/km]}$'; ax.YAxis.Label.FontSize = font_sz;
     ax.YAxis.Label.Interpreter = 'latex';
-    str_pdf=strcat('flow_',num2str(CELL), '.pdf');
-    str_eps=strcat('flow_',num2str(CELL), '.eps');
-    %exportgraphics(f1,str_pdf,'BackgroundColor','none');
-    %exportgraphics(f1,str_eps,'BackgroundColor','none');
+    str_pdf=strcat('density_',num2str(CELL), '.pdf');
+    str_eps=strcat('density_',num2str(CELL), '.eps');
+    exportgraphics(f1,str_pdf,'BackgroundColor','none');
+    exportgraphics(f1,str_eps,'BackgroundColor','none');
 
 
 end
