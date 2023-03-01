@@ -1,7 +1,9 @@
 # ILC for Highway Traffic Control
-This repository contains the work to study the use of Iterative Learning Control (ILC) for highway traffic control. 
+This repository contains the code to study the use and impact of Iterative Learning Control (ILC) for highway traffic control. 
 More specifically, the code formulates the linear program approximation used to determine control strategies for highway on-ramp flow from a service-station. 
-The code here builds upon the CTM-s model implemented by **Adriano Cotta Ramusino** and **Davide Spalenza**.
+The work here builds upon the CTM-s model implemented by Adriano Cotta Ramusino and Davide Spalenza during their masters thesis at the University of Pavia.
+
+
 This repository is the result of the semester project work of **Justin Shim** completed in the pursuit of the M.Sc. in Robotics, Systems, and Controls at ETH Zürich.
 The project was advised by Dr. Carlo Cenedese, Dr. Efe Balta, and Prof. Dr. John Lygeros of the Automatic Control Lab at ETH Zürich.
 
