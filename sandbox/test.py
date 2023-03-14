@@ -30,6 +30,8 @@ if __name__ == '__main__':
         for line in fa:
             phi_real.append(float(line.strip()))
 
+    phi_real = pd.read_csv(phi_loc).to_numpy().flatten()
+
     """Create factory object"""
     fac = f.Factory()
 
@@ -149,7 +151,6 @@ if __name__ == '__main__':
     supply_ms_p = np.array(supply_ms_p)[order]
     supply_ss_p = np.array(supply_ss_p)[order]
 
-
     # Plotting
     fig = plt.figure()
     # plt.plot(rhos, phis)
@@ -163,5 +164,5 @@ if __name__ == '__main__':
 
     plt.plot(rhos, phis, linewidth=0.1, linestyle='solid', color='red')
 
-
+    # Save figure
     fig.savefig('/Users/justshim/src/semester-project/CTM-s/figures/fundamental_diagram.png', dpi=300)
