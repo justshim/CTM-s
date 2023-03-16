@@ -1,0 +1,6 @@
+import numpy as np
+
+
+class TrafficControlInput:
+    r_s_c: np.ndarray         # TODO:...
+    beta_s: np.ndarray      # TODO:...
