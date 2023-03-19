@@ -14,7 +14,7 @@ class HighwayParameters:
 
     def __init__(self, loc: str):
         parameters = pd.read_csv(loc, sep=';').to_numpy()
-        self.id = parameters[:, 0]
+        self.id = parameters[:, 0].astype(int)
         self.l = parameters[:, 1]
         self.v = parameters[:, 2]
         self.w = parameters[:, 3]
@@ -36,8 +36,8 @@ class OnRampParameters:
 
     def __init__(self, loc: str, phi_loc: str):
         parameters = pd.read_csv(loc, sep=';').to_numpy()
-        self.id = parameters[:, 0]
-        self.j = parameters[:, 1]
+        self.id = parameters[:, 0].astype(int)
+        self.j = parameters[:, 1].astype(int)
         self.r_r_max = parameters[:, 2]
         self.p_r = parameters[:, 3]
         self.d_r = pd.read_csv(phi_loc, header=None, sep=';').to_numpy()
@@ -53,8 +53,8 @@ class OffRampParameters:
 
     def __init__(self, loc: str):
         parameters = pd.read_csv(loc, sep=';').to_numpy()
-        self.id = parameters[:, 0]
-        self.i = parameters[:, 1]
+        self.id = parameters[:, 0].astype(int)
+        self.i = parameters[:, 1].astype(int)
         self.beta_r = parameters[:, 2]
 
     def __len__(self):
@@ -73,10 +73,10 @@ class StationParameters:
 
     def __init__(self, loc: str):
         station = pd.read_csv(loc, sep=';').to_numpy()
-        self.id = station[:, 0]
-        self.i = station[:, 1]
-        self.j = station[:, 2]
-        self.j_r = np.unique(self.j)
+        self.id = station[:, 0].astype(int)
+        self.i = station[:, 1].astype(int)
+        self.j = station[:, 2].astype(int)
+        self.j_r = np.unique(self.j).astype(int)
         self.r_s_max = station[:, 3]
         self.delta = station[:, 4]
         self.beta_s = station[:, 5]

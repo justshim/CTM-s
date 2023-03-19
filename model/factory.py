@@ -68,7 +68,7 @@ class Factory:
 		for i in range(len(parameters.highway)):
 			self.add_cell_to_stretch(
 				id_stretch=0,
-				length=parameters.highway.L[i],
+				length=parameters.highway.l[i],
 				v_free=parameters.highway.v[i],
 				w=parameters.highway.w[i],
 				q_max=parameters.highway.q_max[i],
