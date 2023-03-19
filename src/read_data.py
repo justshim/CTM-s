@@ -6,4 +6,4 @@ def read_parameters(hi_loc: str, onr_loc: str, offr_loc: str, st_loc: str, phi_o
 
 
 def read_phi(loc: str) -> np.ndarray:
-    return pd.read_csv(loc).to_numpy().flatten()
+    return pd.read_csv(loc, header=None).to_numpy().flatten()
