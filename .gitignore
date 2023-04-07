@@ -2,5 +2,4 @@
 .idea
 .DS_Store
 /sandbox/
-src/__pycache__/
-model/__pycache__/
+__pycache__/
