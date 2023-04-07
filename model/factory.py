@@ -1,7 +1,8 @@
 from typing import List
+import numpy as np
+
 from model.supervisor import Stretch
 from model.parameters import CTMsParameters
-import numpy as np
 
 
 class Factory:
@@ -12,17 +13,17 @@ class Factory:
 	stretches: List[Stretch]
 	n_stretches: int
 
-	def __init__(self, parameters: CTMsParameters, data: np.ndarray):
+	def __init__(self, parameters: CTMsParameters):
 		self.stretches = []
 		self.n_stretches = 0
-		self.build(parameters, data)
+		self.build(parameters)
 
-	def create_stretch(self, dt, first_phi, last_phi):
+	def create_stretch(self, dt):
 		"""
 		Method for the creation of instances of the object Stretch
 		"""
 
-		stretch = Stretch(dt, first_phi, last_phi)
+		stretch = Stretch(dt)
 		self.stretches.append(stretch)
 		self.n_stretches += 1
 
@@ -31,38 +32,38 @@ class Factory:
 		Call to supervisors' method for the creation of instances of the object Cell
 		"""
 
-		self.stretches[id_stretch].createCell(length, v_free, w, q_max, rho_max, p)
+		self.stretches[id_stretch].create_cell(length, v_free, w, q_max, rho_max, p)
 
 	def add_station_to_stretch(self, id_stretch, r_s_max, i, j, delta, beta_s, p):
 		"""
 		Call to supervisors' method for the creation of instances of the object Station
 		"""
 
-		self.stretches[id_stretch].createStation(r_s_max, i, j, delta, beta_s, p)
+		self.stretches[id_stretch].create_station(r_s_max, i, j, delta, beta_s, p)
 
 	def add_on_ramp_to_stretch(self, id_stretch, d_r, r_r_max, j, p_r):
 		"""
 		Call to supervisors' method for the creation of instances of the object OnRamp
 		"""
 
-		self.stretches[id_stretch].createOnRamp(d_r, r_r_max, j, p_r)
+		self.stretches[id_stretch].create_on_ramp(d_r, r_r_max, j, p_r)
 
 	def add_off_ramp_to_stretch(self, id_stretch, i, beta_r):
 		"""
 		Call to supervisors' method for the creation of instances of the object OffRamp
 		"""
 
-		self.stretches[id_stretch].createOffRamp(i, beta_r)
+		self.stretches[id_stretch].create_off_ramp(i, beta_r)
 
-	def build(self, parameters: CTMsParameters, phi_data: np.ndarray):
+	def build(self, parameters: CTMsParameters):
 		"""
 		Initialization helper function to build factory according to parameters
 		"""
+
 		# Create highway stretch
 		self.create_stretch(
-			dt=parameters.highway.dt[0],
-			first_phi=phi_data,
-			last_phi=phi_data)
+				dt=parameters.highway.dt
+			)
 
 		# Add cells to highway stretch
 		for i in range(len(parameters.highway)):
@@ -73,7 +74,8 @@ class Factory:
 				w=parameters.highway.w[i],
 				q_max=parameters.highway.q_max[i],
 				rho_max=parameters.highway.rho_max[i],
-				p=parameters.highway.p_ms[i])
+				p=parameters.highway.p_ms[i]
+			)
 
 		# Add on-ramps to the stretch
 		for i in range(len(parameters.onramps)):
@@ -82,14 +84,16 @@ class Factory:
 				d_r=parameters.onramps.d_r,
 				r_r_max=parameters.onramps.r_r_max[i],
 				j=parameters.onramps.j[i],
-				p_r=parameters.onramps.p_r[i])
+				p_r=parameters.onramps.p_r[i]
+			)
 
 		# Add off-ramps to the stretch
 		for i in range(len(parameters.offramps)):
 			self.add_off_ramp_to_stretch(
 				id_stretch=0,
 				i=parameters.offramps.i[i],
-				beta_r=parameters.offramps.beta_r[i])
+				beta_r=parameters.offramps.beta_r[i]
+			)
 
 		# Add service station to the stretch
 		for i in range(len(parameters.stations)):
@@ -100,4 +104,5 @@ class Factory:
 				j=parameters.stations.j[i],
 				delta=parameters.stations.delta[i],
 				beta_s=parameters.stations.beta_s[i],
-				p=parameters.stations.p[i])
+				p=parameters.stations.p[i]
+			)

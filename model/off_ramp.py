@@ -12,14 +12,14 @@ class OffRamp:
 		self.s_r = 0
 		self.k = 0
 
-	def toString(self):
+	def to_string(self):
 		"""
 		Utility method to print some information about the off-ramp
 		"""
 
-		print("Off-Ramp ID: "+str(self.id_offramp))
-		print("From cell "+str(self.j))
-		print("Supply: "+str(self.s_r))
+		print("Off-Ramp ID: " + str(self.id_offramp))
+		print("From cell " + str(self.j))
+		print("Supply: " + str(self.s_r))
 		print()
 
 	def computeSr(self, next_phi):
@@ -29,9 +29,16 @@ class OffRamp:
 
 		self.s_r = (self.beta_r / (1 - self.beta_r)) * next_phi 	
 
-	def updateK(self, kappa):
+	def update_k(self, kappa):
 		"""
 		Each iteration starts with the update of the time instant
 		"""
 
 		self.k = kappa
+
+	def reset(self):
+		"""
+		Reset off-ramp to zero initial condition
+		"""
+		self.k = 0
+		self.s_r = 0

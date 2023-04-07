@@ -16,7 +16,7 @@ class OnRamp:
 		self.d_r_big = 0
 		self.k = 0
 
-	def toString(self):
+	def to_string(self):
 		"""
 		Utility method to print some information about the on-ramp
 		"""
@@ -57,10 +57,20 @@ class OnRamp:
 		elif t == 2 or t == 3:
 			self.r_r = rr
 
-	def updateK(self, kappa):
+	def update_k(self, kappa):
 		"""
 		Each iteration starts with the update of the time instant
 		"""
 
 		self.k = kappa
+
+	def reset(self):
+		"""
+		Reset on-ramp to zero initial condition
+		"""
+		self.k = 0
+		self.r_r = 0
+		self.l_r = [0]
+		self.d_r_big = 0
+
 		
