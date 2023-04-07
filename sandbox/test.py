@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,6 +5,7 @@ import matplotlib.pyplot as plt
 from model import factory as f
 
 
+# TODO: Outdated
 if __name__ == '__main__':
     """ Read in parameters """
     # cwd = os.getcwd()
@@ -36,19 +36,19 @@ if __name__ == '__main__':
     fac = f.Factory()
 
     # Create highway stretch
-    fac.createStretch(time_length=dt[0],
-                      last_phi=phi_real,
-                      first_d_big=phi_real)  # TODO: Refactor: time_length to dt
+    fac.create_stretch(dt=dt[0],
+                       last_phi=phi_real,
+                       first_d_big=phi_real)  # TODO: Refactor: time_length to dt
 
     # Add cells to highway stretch
     for i in range(ID.size):
-        fac.addCellToStretch(id_stretch=0,
-                             length=L[i],
-                             v_free=v_free[i],
-                             w=w_cong[i],
-                             q_max=q_max[i],
-                             rho_max=rho_max[i],
-                             p=p_ms)
+        fac.add_cell_to_stretch(id_stretch=0,
+                                length=L[i],
+                                v_free=v_free[i],
+                                w=w_cong[i],
+                                q_max=q_max[i],
+                                rho_max=rho_max[i],
+                                p=p_ms)
 
     # TODO: Add on-ramps, off-ramps to the stretch
     # fac.addOnRampToStretch(id_stretch=0,
@@ -61,13 +61,13 @@ if __name__ == '__main__':
     #                         beta_r=0)
 
     # Add service station to stretch
-    fac.addStationToStretch(id_stretch=0,
-                            r_s_max=1500,
-                            i=5,
-                            j=7,
-                            delta=80,
-                            beta_s=0.10,
-                            p=0.07)
+    fac.add_station_to_stretch(id_stretch=0,
+                               r_s_max=1500,
+                               i=5,
+                               j=7,
+                               delta=80,
+                               beta_s=0.10,
+                               p=0.07)
 
     # TODO: Better way of doing this?
     fac.stretches[0].cells[7].p_ms = 0.93
@@ -133,9 +133,9 @@ if __name__ == '__main__':
         fac.stretches[0].update(k)
         rhos.append(fac.stretches[0].cells[i].rho[-1])
         phis.append(fac.stretches[0].cells[i].phi)
-        demand_ms.append(fac.stretches[0].computeDPrec(i))
-        supply_ms.append(fac.stretches[0].cells[i].s_big)
-        demand_ss.append(fac.stretches[0].stations[0].d_s_big)
+        demand_ms.append(fac.stretches[0].compute_prev_demand(i))
+        supply_ms.append(fac.stretches[0].cells[i].supply)
+        demand_ss.append(fac.stretches[0].stations[0].demand)
         supply_ms_alloc.append(supply_ms[-1] - demand_ss[-1])
         supply_ms_p.append(supply_ms[-1] * fac.stretches[0].cells[i].p_ms)
         supply_ss_p.append(supply_ms[-1] * (1 - fac.stretches[0].cells[i].p_ms))
