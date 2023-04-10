@@ -7,74 +7,68 @@ from math import inf
 import mosek
 
 from model.parameters import CTMsParameters
-from model.control import TrafficControlInput
+# from model.control import TrafficControlInput
 
 
 class MyTrafficOptimizer:
     """
     Class to define optimization problem
     """
-    parameters: CTMsParameters  # CTM-s Parameters Object
-    x_0: np.ndarray  # Initial Highway State at time of LP initialization
-    phi_0: np.ndarray  # Incoming Flow at First Cell
-    phi_s_0: np.ndarray   # TODO: ...
+    parameters: CTMsParameters      # CTM-s Parameters Object
+    x_0: np.ndarray                 # Initial Highway State at time of LP initialization
+    phi_0: np.ndarray               # Incoming Flow at First Cell
+    phi_s_0: np.ndarray             # TODO: Should change this to s_s
 
-    k_0: int  # Time at LP initialization # TODO?
-    k_l: int  # Length of Time Interval # TODO: Units?
-    dt: float  # Time Increment TODO: Units
+    k_0: int                        # Time at LP initialization # TODO?
+    k_l: int                        # Length of Time Interval # TODO: Units?
+    dt: float                       # Time Increment TODO: Units
 
-    n_c: int  # Number of Cells
-    n_on: int  # Number of On-ramps
-    n_off: int  # Number of Off-ramps
-    n_s: int  # Number of Stations
-    n_r: int  # Number of Service Station Out-Flows
-    n: int  # Dimension of State: Density of each cell, users and queue length for each station
-    m: int  # Number of flows between cells, exiting service stations, terminal
+    n_c: int                        # Number of Cells
+    n_on: int                       # Number of On-ramps
+    n_off: int                      # Number of Off-ramps
+    n_s: int                        # Number of Stations
+    n_r: int                        # Number of Station Exit Flow Points
 
-    num_constraints: int  # [Mosek]: Number of Constraints in LP
-    num_variables: int  # [Mosek]: Number of Optimization Variables in LP
+    n: int                          # Dimension of State: Density of each cell, users and queue length for each station
+    m: int                          # Dimension of Input: Flows into each cell, flows exiting stations, terminal flow
 
-    st_to_r: np.ndarray  # CTM-s Input to State Matrices # TODO: Come back and fix the maps, comments
-    r_to_st: List  # TODO: ...
-    j_to_r: Dict  # Map: j -> r; cell j -> index of input
+    st_to_r: np.ndarray             # CTM-s Input to State Matrices # TODO: Come back and fix the maps, comments
+    r_to_st: List                   # TODO: ...
+    j_to_r: Dict                    # Map: j -> r; cell j -> index of input
 
-    beta: np.ndarray  # TODO: ...
-    beta_s: np.ndarray  # TODO: ...
+    beta: np.ndarray                # TODO: ...
+    beta_s: np.ndarray              # TODO: ...
 
-    rho_0_matrix: np.ndarray  # TODO: Selection Matrix
-    l_0_matrix: np.ndarray  # TODO: Selection Matrix
-    l_s_0_matrix: np.ndarray # TODO: ...?
-    e_0_matrix: np.ndarray  # TODO: Selection Matrix
-    e_s_0_matrix: np.ndarray  # TODO: ???
-    rho_matrix: np.ndarray  # Input to State Matrix (Flows to Cell Density)
-    l_matrix: np.ndarray  # Input to State Matrix (Flows to Number of SS Users)
-    e_matrix: np.ndarray  # Input to State Matrix (Flows to SS Queue Length)
+    rho_0_matrix: np.ndarray        # Initial Condition Matrix for Cell Density
+    l_0_matrix: np.ndarray          # Initial Condition Matrix for Number of Station Users
+    l_s_0_matrix: np.ndarray        # TODO: ...?
+    e_0_matrix: np.ndarray          # Initial Condition Matrix for Station Queue Length
+    e_s_0_matrix: np.ndarray        # TODO: ???
+    rho_matrix: np.ndarray          # Input to State Matrix (Flows to Cell Density)
+    l_matrix: np.ndarray            # Input to State Matrix (Flows to Number of Station Users)
+    e_matrix: np.ndarray            # Input to State Matrix (Flows to Station Queue Length)
 
-    a_ub: np.ndarray  # [Mosek]: Constraint Matrix
-    asub: List  # [Mosek]: Non-zero indices of columns in constraint matrix
-    aval: List  # [Mosek]: Non-zero values of columns in constraint matrix
-    b_lb: List  # [Mosek]: Lower Constraint
-    b_ub: List  # [Mosek]: Upper Constraint
-    bkc: List  # [Mosek]: Constraint Bound Keys
-    c: np.ndarray  # [Mosek]: Cost Function
+    num_constraints: int            # [Mosek]: Number of Constraints in LP
+    num_variables: int              # [Mosek]: Number of Optimization Variables in LP
 
-    # Optimization Parameters
-    eta: float  # Tradeoff between TTS and TTD
+    a_ub: np.ndarray                # [Mosek]: Constraint Matrix
+    asub: List                      # [Mosek]: Non-zero indices of columns in constraint matrix
+    aval: List                      # [Mosek]: Non-zero values of columns in constraint matrix
+    b_lb: List                      # [Mosek]: Lower Constraint
+    b_ub: List                      # [Mosek]: Upper Constraint
+    bkc: List                       # [Mosek]: Constraint Bound Keys
+    c: np.ndarray                   # [Mosek]: Cost Function
 
-    # Control
-    control: TrafficControlInput  # TODO: ...
-    controlled: bool
+    eta: float                      # Optimization Parameter: Tradeoff between TTS and TTD
 
-    # Solution
-    u_opt: np.ndarray  # TODO: ...
-    u_opt_k: np.ndarray  # TODO: ...
+    u_opt: np.ndarray               # TODO:
+    u_opt_k: np.ndarray             # TODO: ...
 
-    # State, Input Variables
-    x_rho: np.ndarray  # TODO: ...
-    x_l: np.ndarray  # TODO: ...
-    x_e: np.ndarray  # TODO: ...
-    u_phi: np.ndarray  # TODO: ...
-    u_rs: np.ndarray  # TODO: ...
+    x_rho: np.ndarray               # LP Solution: Cell Density
+    x_l: np.ndarray                 # LP Solution: Number of People at Station
+    x_e: np.ndarray                 # LP Solution: Station Queue Length
+    u_phi: np.ndarray               # LP Solution: Traffic Flow Between Cells
+    u_rs: np.ndarray                # LP Solution: Traffic Flow from Station
 
     # Helper
     k_ones: np.ndarray
@@ -95,10 +89,7 @@ class MyTrafficOptimizer:
         self.n_s = len(self.parameters.stations)
         self.n_r = len(self.parameters.stations.j_r)
         self.n = self.n_c + 2 * self.n_s
-        self.m = self.n_c + self.n_r + 1  # TODO: Include on-ramps eventually
-
-        self.num_constraints = 0
-        self.num_variables = self.k_l * self.m
+        self.m = self.n_c + self.n_r + self.n_on + 1
 
         self.st_to_r = np.zeros_like(self.parameters.stations.j)
         self.r_to_st = [[] for _ in self.parameters.stations.j_r]
@@ -113,10 +104,12 @@ class MyTrafficOptimizer:
         self.l_s_0_matrix = np.empty(0)
         self.e_0_matrix = np.empty(0)
         self.e_s_0_matrix = np.empty(0)
-
         self.rho_matrix = np.empty(0)
         self.l_matrix = np.empty(0)
         self.e_matrix = np.empty(0)
+
+        self.num_constraints = 0
+        self.num_variables = self.k_l * self.m
 
         self.a_ub = []
         self.asub = []
@@ -128,10 +121,6 @@ class MyTrafficOptimizer:
         self.c = np.empty(0)
 
         self.eta = eta
-
-        # TODO: ...
-        self.control = TrafficControlInput()
-        self.controlled = False
 
         self.u_opt = np.empty(0)
         self.u_opt_k = np.empty(0)
@@ -279,7 +268,7 @@ class MyTrafficOptimizer:
 
     def add_constraints(self, a: np.ndarray, b_1: np.ndarray, bkc=mosek.boundkey.up, b_2=np.empty(0)):
         """
-        TODO: Add description and comments
+        Helper function to build constraints for Mosek solver
         """
 
         assert (a.shape[0] == b_1.shape[0])
@@ -297,7 +286,7 @@ class MyTrafficOptimizer:
 
     def formulate_constraints(self):
         """
-        TODO: Add description / comments
+        Helper function to formulate constraint matrix for Mosek solver
         """
 
         self.num_constraints = len(self.a_ub)
@@ -310,7 +299,7 @@ class MyTrafficOptimizer:
 
     def define_state_constraints(self):
         """
-        TODO: ...
+        Define constraints on cell density, number of station users, station queue length
         """
 
         ################################
@@ -336,16 +325,22 @@ class MyTrafficOptimizer:
         ############################################
         b_l_0 = np.zeros(((self.k_l + 1) * self.n_s, 1)) - np.matmul(self.l_0_matrix, self.x_0) - np.matmul(self.l_s_0_matrix, self.phi_s_0)
         self.add_constraints(self.l_matrix, b_l_0, mosek.boundkey.lo)
-        # TODO!
+        # TODO: Add max service station capacity constraint...
 
     def define_flow_constraints(self):
         """
-        TODO: Add description / comments
+        Define constraints on mainstream flows and station out-flows
         """
 
         ###############################
         # Mainstream Flow Constraints #
         ###############################
+        # 0) Enforce flow into last cell is equivalent to terminal flow
+        a_f = np.zeros(self.m)
+        a_f[self.n_c - 1] = 1
+        a_f[self.n_c] = -1
+        a_eq_0 = block_diag(*[a_f for _ in range(self.k_l)])
+        b_eq_0 = np.zeros((self.k_l, 1))
 
         # 1) Less than previous demand
         # a) Less than max flow supported from free-flow in previous cell
@@ -363,8 +358,7 @@ class MyTrafficOptimizer:
         a_1_a_rhs = np.multiply(a_1_2, self.rho_matrix[r_1, :])
 
         a_ub_1_a = a_1_a_lhs - a_1_a_rhs
-        b_ub_1_a = np.multiply(a_1_2, np.matmul(self.rho_0_matrix[r_1, :], self.x_0))  # Initial condition
-        self.add_constraints(a_ub_1_a, b_ub_1_a)
+        b_ub_1_a = np.multiply(a_1_2, np.matmul(self.rho_0_matrix[r_1, :], self.x_0))
 
         # b) Less than max flow supported by the previous cell
         # Note: But no constraint on phi_0, phi_final
@@ -372,7 +366,6 @@ class MyTrafficOptimizer:
 
         a_ub_1_b = a_1_a_lhs
         b_ub_1_b = np.kron(self.k_ones, q_max_i.reshape(-1, 1))
-        self.add_constraints(a_ub_1_b, b_ub_1_b)
 
         # 3) Less than priority times supply
         # a) Less than max flow supported due to congestion in next cell
@@ -392,8 +385,7 @@ class MyTrafficOptimizer:
         a_3_a_rhs = np.multiply(a_3_2, self.rho_matrix[r_3, :])
 
         a_ub_3_a = a_3_a_lhs + a_3_a_rhs
-        b_ub_3_a = np.multiply(a_3_2, rho_max_i_k - np.matmul(self.rho_0_matrix[r_3, :], self.x_0))  # Initial condition
-        self.add_constraints(a_ub_3_a, b_ub_3_a)
+        b_ub_3_a = np.multiply(a_3_2, rho_max_i_k - np.matmul(self.rho_0_matrix[r_3, :], self.x_0))
 
         # b) Less than max flow supported by the next cell
         # Note: But no constraint on phi_final
@@ -402,7 +394,13 @@ class MyTrafficOptimizer:
 
         a_ub_3_b = a_3_a_lhs
         b_ub_3_b = np.multiply(p_ms_i_k, q_max_i_k)
-        self.add_constraints(a_ub_3_b, b_ub_3_b)
+
+        # Add all mainstream flow constraints
+        self.add_constraints(a_eq_0, b_eq_0, mosek.boundkey.fx)
+        self.add_constraints(a_ub_1_a, b_ub_1_a)
+        self.add_constraints(a_ub_1_b, b_ub_1_b)
+        # self.add_constraints(a_ub_3_a, b_ub_3_a)  # TODO: Testing assumption, remove constraint
+        # self.add_constraints(a_ub_3_b, b_ub_3_b)  # TODO: Testing assumption, remove constraint
 
         ####################################
         # Service Station Flow Constraints #
@@ -414,7 +412,6 @@ class MyTrafficOptimizer:
         a_4_1[:, self.n_c + 1:] = np.eye(self.n_r)
         a_4_a_lhs = block_diag(*[a_4_1 for _ in range(self.k_l)])
         a_4_a_rhs = np.zeros_like(a_4_a_lhs)
-
         b_ub_4_a = np.zeros((self.k_l * self.n_r, 1))
 
         b_i_s = (self.dt * self.beta_s) / (1 - self.beta[:, self.parameters.stations.i])
@@ -442,146 +439,122 @@ class MyTrafficOptimizer:
                             a_4_a_rhs[r_1, c_1] += (b_i_s[k_dq_2 - self.k_0, i_] / self.dt)
 
         a_ub_4_a = a_4_a_lhs - a_4_a_rhs
-        self.add_constraints(a_ub_4_a, b_ub_4_a)
 
         # b) Less than max flow supported by the service station
         ids = [st[0] for st in self.r_to_st]
-        r_s_max_i = self.parameters.stations.r_s_max[ids]
+        r_s_max_j = self.parameters.stations.r_s_max[ids]
 
         a_ub_4_b = a_4_a_lhs
-        b_ub_4_b = np.kron(self.k_ones, r_s_max_i.reshape(-1, 1))
-        self.add_constraints(a_ub_4_b, b_ub_4_b)
-
-        # c) Less than max flow prescribed by controller
-        if self.controlled:
-            a_ub_4_c = a_ub_4_b
-            b_ub_4_c = self.control.r_s_c.reshape(-1, 1)
-            self.add_constraints(a_ub_4_c, b_ub_4_c)
+        b_ub_4_b = np.kron(self.k_ones, r_s_max_j.reshape(-1, 1))
 
         # 6) Less than priority times supply
         # a) Less than max flow supported due to congestion in next cell
         j_r = self.parameters.stations.j_r
 
-        p_s_i = np.array([self.parameters.stations.j_to_p[j] for j in j_r])
+        p_s_i = np.array([self.parameters.stations.j_to_p[j] for j in self.parameters.stations.j_r])
         p_s_i_k = np.kron(self.k_ones, p_s_i.reshape(-1, 1))
-        w_i = self.parameters.highway.w[j_r]
-        w_i_k = np.kron(self.k_ones, w_i.reshape(-1, 1))
-        rho_max_i = self.parameters.highway.rho_max[j_r]
-        rho_max_i_k = np.kron(self.k_ones, rho_max_i.reshape(-1, 1))
+        w_j = self.parameters.highway.w[self.parameters.stations.j_r]
+        w_j_k = np.kron(self.k_ones, w_j.reshape(-1, 1))
+        rho_max_j = self.parameters.highway.rho_max[self.parameters.stations.j_r]
+        rho_max_j_k = np.kron(self.k_ones, rho_max_j.reshape(-1, 1))
 
         a_6_1 = np.zeros((self.n_r, self.m))
         a_6_1[:, self.n_c + 1:] = np.eye(self.n_r)
         a_6_a_lhs = block_diag(*[a_6_1 for _ in range(self.k_l)])
 
-        r_6 = [(self.n_c * k) + j for k in range(self.k_l) for j in j_r]
-        a_6_4 = np.multiply(p_s_i_k, w_i_k)
+        r_6 = [(self.n_c * k) + j for k in range(self.k_l) for j in self.parameters.stations.j_r]
+        a_6_4 = np.multiply(p_s_i_k, w_j_k)
         a_6_a_rhs = np.multiply(a_6_4, self.rho_matrix[r_6, :])
 
         a_ub_6_a = a_6_a_lhs + a_6_a_rhs
-        b_ub_6_a = np.multiply(a_6_4, (rho_max_i_k - np.matmul(self.rho_0_matrix[r_6, :], self.x_0)))  # Initial condition update
-        self.add_constraints(a_ub_6_a, b_ub_6_a)
+        b_ub_6_a = np.multiply(a_6_4, (rho_max_j_k - np.matmul(self.rho_0_matrix[r_6, :], self.x_0)))
 
         # b) Less than max flow supported by the next cell
-        q_max_i = self.parameters.highway.q_max[j_r]
-        q_max_i_k = np.kron(self.k_ones, q_max_i.reshape(-1, 1))
+        q_max_j = self.parameters.highway.q_max[self.parameters.stations.j_r]
+        q_max_j_k = np.kron(self.k_ones, q_max_j.reshape(-1, 1))
 
         a_ub_6_b = a_6_a_lhs
-        b_ub_6_b = np.multiply(p_s_i_k, q_max_i_k)
-        self.add_constraints(a_ub_6_b, b_ub_6_b)
+        b_ub_6_b = np.multiply(p_s_i_k, q_max_j_k)
 
-        # # # #################################
-        # #
-        # # 5) Less than supply minus mainstream demand
-        # a_5_lhs = a_6_a_lhs
-        # a_5_rhs_1 = np.multiply(w_i_k, self.rho_matrix[c.tolist(), :])
-        # b_ub_5_1 = np.multiply(p_s_i_k, np.multiply(w_i_k, rho_max_i_k))
-        # b_ub_5_2 = np.multiply(p_s_i_k, q_max_i_k)
-        # beta_ms_j = 1 - self.beta[:, j_r-1]
-        # beta_ms_j_k = beta_ms_j.reshape(-1, 1)
-        # v_j = self.parameters.highway.v[j_r-1]
-        # v_j_k = np.kron(self.k_ones, np.reshape(v_j, (-1, 1)))
-        # a_5_1 = np.multiply(beta_ms_j_k, v_j_k)
-        # a_5_rhs_3 = np.multiply(a_5_1, self.rho_matrix[(c-1).tolist(), :])  # TODO: Bug here
-        # b_ub_5_3 = np.zeros((self.k_int*len(j_r), 1))
-        # b_ub_5_4 = np.kron(self.k_ones, self.parameters.highway.q_max[j_r])
-        #
-        # a_ub_5_a = a_5_lhs + a_5_rhs_1 + a_5_rhs_3
-        # b_ub_5_a = b_ub_5_1 - b_ub_5_3
-        # self.add_constraints(a_ub_5_a, b_ub_5_a)
-        #
-        # # a_ub_5_b = a_5_lhs + a_5_rhs_1
-        # # b_ub_5_b = b_ub_5_1 - b_ub_5_4
-        # # self.add_constraints(a_ub_5_b, b_ub_5_b)
-        #
-        # a_ub_5_c = a_5_lhs + a_5_rhs_3
-        # b_ub_5_c = b_ub_5_2 - b_ub_5_3
-        # self.add_constraints(a_ub_5_c, b_ub_5_c)
-        #
-        # # a_ub_5_d = a_5_lhs + a_5_rhs_3
-        # # b_ub_5_d = b_ub_5_2 - b_ub_5_4
-        # # self.add_constraints(a_ub_5_d, b_ub_5_d)
-        #
-        # # 2) Less than supply minus service-station demand
-        # a_2_1 = np.zeros((len(j_r), self.m))
-        #
-        # for i, j in enumerate(j_r):
-        #     a_2_1[i, j] += 1
-        #
-        # a_2_lhs = block_diag(*[a_2_1 for _ in range(self.k_int)])
-        #
-        # a_2_rhs_1 = a_5_rhs_1
-        # b_ub_2_1 = b_ub_5_1
-        # b_ub_2_2 = b_ub_5_2
-        #
-        # a_2_rhs_3 = np.zeros((len(j_r)*self.k_int, self.num_variables))
-        #
-        # for j in j_r:
-        #     r = self.j_to_r[j]
-        #     r_1 = [k*len(j_r) + r[0] for k in range(self.k_int)]
-        #     r_2 = [k*self.n_r + r[0] for k in range(self.k_int)]
-        #     a_2_rhs_3[r_1, :] = a_4_a_rhs[r_2, :]
-        #
-        # b_ub_2_3 = np.kron(self.k_ones, np.zeros((len(j_r), 1)))
-        # r = [self.j_to_r[j] for j in j_r]
-        # ids = [self.r_to_st[r_] for r_ in r[0]]
-        # r_s_max_j = self.parameters.stations.r_s_max[tuple(ids)]
-        # b_ub_2_4 = np.kron(self.k_ones, r_s_max_j)
-        #
-        # a_ub_2_a = a_2_lhs + a_2_rhs_1 + a_2_rhs_3
-        # b_ub_2_a = b_ub_2_1 - b_ub_2_3
-        # self.add_constraints(a_ub_2_a, b_ub_2_a)
-        #
-        # # a_ub_2_b = a_2_lhs + a_2_rhs_1
-        # # b_ub_2_b = b_ub_2_1 - b_ub_2_4
-        # # self.add_constraints(a_ub_2_b, b_ub_2_b)
-        #
-        # a_ub_2_c = a_2_lhs + a_2_rhs_3
-        # b_ub_2_c = b_ub_2_2 - b_ub_2_3
-        # self.add_constraints(a_ub_2_c, b_ub_2_c)
-        #
-        # # a_ub_2_d = a_2_lhs + a_2_rhs_3
-        # # b_ub_2_d = b_ub_2_2 - b_ub_2_4
-        # # self.add_constraints(a_ub_2_d, b_ub_2_d)
-        #
-        # if self.controlled:
-        #     b_ub_2_5 = self.control.r_s_c[:, self.j_to_r[j_r]].reshape(-1, 1)
-        #     a_ub_2_e = a_2_lhs + a_2_rhs_1
-        #     b_ub_2_e = b_ub_2_1 - b_ub_2_5
-        #     a_ub_2_f = a_2_lhs
-        #     b_ub_2_f = b_ub_2_2 - b_ub_2_5
-        #
-        #     self.add_constraints(a_ub_2_e, b_ub_2_e)
-        #     self.add_constraints(a_ub_2_f, b_ub_2_f)
-        #
-        # # # #################################
+        # Add all station outflow constraints
+        self.add_constraints(a_ub_4_a, b_ub_4_a)
+        self.add_constraints(a_ub_4_b, b_ub_4_b)
+        # self.add_constraints(a_ub_6_a, b_ub_6_a)    # TODO: Testing assumption, remove constraint
+        # self.add_constraints(a_ub_6_b, b_ub_6_b)    # TODO: Testing assumption, remove constraint
 
-        # Enforce flow into last cell is equivalent to terminal flow
-        a_f = np.zeros(self.m)
-        a_f[self.n_c - 1] = 1
-        a_f[self.n_c] = -1
-        a_eq = block_diag(*[a_f for _ in range(self.k_l)])
-        b_eq = np.zeros((self.k_l, 1))
-        self.add_constraints(a_eq, b_eq, mosek.boundkey.fx)
+        ###################################
+        # Supply minus Demand Constraints #
+        ###################################
+
+        # Service Station Flow Constraints
+        # 5) Less than supply minus mainstream demand
+        a_5_lhs = a_6_a_lhs
+        a_5_rhs_1 = np.multiply(w_j_k, self.rho_matrix[r_6, :])
+        b_ub_5_1 = np.multiply(w_j_k, (rho_max_j_k - np.matmul(self.rho_0_matrix[r_6, :], self.x_0)))
+        b_ub_5_2 = q_max_j_k
+
+        beta_ms_j = 1 - self.beta[:, self.parameters.stations.j_r - 1]
+        beta_ms_j_k = beta_ms_j.reshape(-1, 1)
+        v_j = self.parameters.highway.v[self.parameters.stations.j_r - 1]
+        v_j_k = np.kron(self.k_ones, np.reshape(v_j, (-1, 1)))
+        a_5_1 = np.multiply(beta_ms_j_k, v_j_k)
+        r_7 = [(self.n_c * k) + j - 1 for k in range(self.k_l) for j in self.parameters.stations.j_r]
+        a_5_rhs_3 = np.multiply(a_5_1, self.rho_matrix[r_7, :])  # TODO: Bug here?
+        b_ub_5_3 = np.multiply(a_5_1, np.matmul(self.rho_0_matrix[r_7, :], self.x_0))
+        b_ub_5_4 = np.kron(self.k_ones, self.parameters.highway.q_max[self.parameters.stations.j_r])
+
+        a_ub_5_a = a_5_lhs + a_5_rhs_1 + a_5_rhs_3
+        b_ub_5_a = b_ub_5_1 - b_ub_5_3
+
+        a_ub_5_b = a_5_lhs + a_5_rhs_1
+        b_ub_5_b = b_ub_5_1 - b_ub_5_4
+
+        a_ub_5_c = a_5_lhs + a_5_rhs_3
+        b_ub_5_c = b_ub_5_2 - b_ub_5_3
+
+        a_ub_5_d = a_5_lhs + a_5_rhs_3
+        b_ub_5_d = b_ub_5_2 - b_ub_5_4
+
+        # Add all station outflow constraints
+        self.add_constraints(a_ub_5_a, b_ub_5_a)
+        # self.add_constraints(a_ub_5_b, b_ub_5_b)
+        self.add_constraints(a_ub_5_c, b_ub_5_c)
+        # self.add_constraints(a_ub_5_d, b_ub_5_d)
+
+        # Mainstream Flow Constraints
+        # 2) Less than supply minus service-station demand
+        # Note: For flows unaffected by station outflow, equivalent to ensuring flow is less than supply
+        a_2_lhs = a_3_a_lhs
+        a_2_rhs_1 = np.multiply(w_i_k, self.rho_matrix[r_3, :])
+        b_ub_2_1 = np.multiply(w_i_k, rho_max_i_k - np.matmul(self.rho_0_matrix[r_3, :], self.x_0))
+        b_ub_2_2 = q_max_i_k
+
+        a_2_1 = np.zeros((self.n_c, 1))
+        a_2_1[self.parameters.stations.j_r] = 1
+        a_2_rhs_3 = np.kron(a_2_1, a_4_a_rhs)
+        b_ub_2_3 = np.kron(a_2_1, b_ub_4_a)
+        b_ub_2_4 = np.kron(a_2_1, np.kron(self.k_ones, r_s_max_j))
+
+        a_ub_2_a = a_2_lhs + a_2_rhs_1 + a_2_rhs_3
+        b_ub_2_a = b_ub_2_1 - b_ub_2_3
+
+        a_ub_2_b = a_2_lhs + a_2_rhs_1
+        b_ub_2_b = b_ub_2_1 - b_ub_2_4
+
+        a_ub_2_c = a_2_lhs + a_2_rhs_3
+        b_ub_2_c = b_ub_2_2 - b_ub_2_3
+
+        a_ub_2_d = a_2_lhs + a_2_rhs_3
+        b_ub_2_d = b_ub_2_2 - b_ub_2_4
+
+        # Add all mainstream flow constraints
+        self.add_constraints(a_ub_2_a, b_ub_2_a)
+        self.add_constraints(a_ub_2_b, b_ub_2_b)
+        self.add_constraints(a_ub_2_c, b_ub_2_c)
+        # self.add_constraints(a_ub_2_d, b_ub_2_d)
+
+        #################################
+        #################################
 
     # TODO: Test this function!!
     def define_cost_function(self):
@@ -596,10 +569,9 @@ class MyTrafficOptimizer:
 
         # 2) Minimize service station exit queue length
         tts_2 = np.sum(self.e_matrix, axis=0)
-        # tts = self.dt * (tts_1 + tts_2)
 
         # 3) Maximize service station use
-        tts_3 = 1e9 * np.sum(self.l_matrix, axis=0)
+        tts_3 = np.sum(self.l_matrix, axis=0)
         tts = self.dt * (tts_1 + tts_2 - tts_3)
 
         # Define coefficients from Total Travel Distance (TTD: Maximize)
@@ -613,13 +585,9 @@ class MyTrafficOptimizer:
         # Set cost coefficients corresponding to maximize initial flow
         self.c[::self.m] = -10
 
-        # for id in self.parameters.stations.id:
-        #     i = self.parameters.stations.i[id]
-        #     self.c[i+1::self.m] = -10
-
     def update_variables(self):
         """
-        TODO: Add comments
+        Update variables using solution from LP
         """
 
         self.u_opt_k = np.reshape(self.u_opt, (self.k_l, self.m))
@@ -635,11 +603,12 @@ class MyTrafficOptimizer:
         self.u_phi = self.u_opt_k[:, :self.n_c + 1]
         self.u_rs = self.u_opt_k[:, self.n_c + 1:]
 
-    def get_control(self) -> TrafficControlInput:
+    def get_control(self) -> np.ndarray:
         """
-        TODO: !!!
+        Get ramp-meter control from LP solution
         """
-        raise NotImplementedError
+
+        return self.u_rs
 
     def streamprinter(self, text):
         """
@@ -725,29 +694,29 @@ class MyTrafficOptimizer:
 
                 # Initial flow condition
                 if r == 0:
-                    task.putvarbound(j,  # NOTE: Changed from equality constraint
-                                     mosek.boundkey.ra,  # TODO: ...
-                                     0,  # TODO: ...
-                                     self.phi_0[k])  # TODO: ...
-                # Positive flows
+                    task.putvarbound(j,                     # NOTE: Changed from equality constraint
+                                     mosek.boundkey.ra,     # TODO: ...
+                                     0,                     # TODO: ...
+                                     self.phi_0[k])         # TODO: ...
+                # Non-negative flow condition
                 else:
-                    task.putvarbound(j,  # TODO: ...
-                                     mosek.boundkey.lo,  # TODO: ...
-                                     0,  # TODO: ...
-                                     +inf)  # TODO: ...
+                    task.putvarbound(j,                     # TODO: ...
+                                     mosek.boundkey.lo,     # TODO: ...
+                                     0,                     # TODO: ...
+                                     +inf)                  # TODO: ...
 
                 # Input column j of A (constraints)
-                task.putacol(j,  # Variable (column) index.
-                             self.asub[j],  # Row index of non-zeros in column j.
-                             self.aval[j])  # Non-zero Values of column j.
+                task.putacol(j,                             # Variable (column) index.
+                             self.asub[j],                  # Row index of non-zeros in column j.
+                             self.aval[j])                  # Non-zero Values of column j.
 
             # Set the bounds on constraints.
             # b_lb[i] <= constraint_i <= b_ub[i]
             for i in range(self.num_constraints):
-                task.putconbound(i,  # TODO: ...
-                                 self.bkc[i],  # TODO: ...
-                                 self.b_lb[i][0],  # TODO: ...
-                                 self.b_ub[i][0])  # TODO: ...
+                task.putconbound(i,                         # TODO: ...
+                                 self.bkc[i],               # TODO: ...
+                                 self.b_lb[i][0],           # TODO: ...
+                                 self.b_ub[i][0])           # TODO: ...
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.minimize)
