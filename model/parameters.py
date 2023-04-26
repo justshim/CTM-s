@@ -11,7 +11,7 @@ class HighwayParameters:
     w: np.ndarray           # Congestion Wave Speed [km/hr]
     q_max: np.ndarray       # Maximum Cell Capacity [veh/hr]
     rho_max: np.ndarray     # Maximum Jam Density [veh/km]
-    p_ms: np.ndarray        # Priority of the Mainstream [0,1]
+    p_ms: np.ndarray        # Mainstream priority of each cell [0,1]
     dt: float               # dt [hrs]
 
     def __init__(self, loc: str):
@@ -132,6 +132,7 @@ class CTMsParameters:
         """
         TODO: ...
         """
+
         for j_, j in enumerate(self.onramps.j):
             self.highway.p_ms[j] -= self.onramps.p_r[j_]
 
@@ -142,10 +143,12 @@ class CTMsParameters:
         """
         TODO: ...
         """
+
         self.stations.l_r = self.highway.l[self.stations.j_r]
 
     def update_dt(self, dt: float):
         """
         TODO: ...
         """
+
         self.highway.dt = dt

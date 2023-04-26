@@ -1,9 +1,11 @@
 import os
 
-from read_data import read_parameters, read_phi
+from src.data import *
 from model.factory import Factory
-from optimizer import MyTrafficOptimizer
-from results import plot_comparison
+from model.parameters import CTMsParameters
+from optimizer import TrafficOptimizer
+from results import plot_comparison_test
+from control import ControlParameters
 
 
 if __name__ == '__main__':
@@ -12,11 +14,11 @@ if __name__ == '__main__':
     ####################
 
     dt = 10                     # Sampling rate [sec]
-    window_length = 100         # Length of one interation [hrs]
+    window_length = 90         # Length of one interation [hrs]
     n_iter = 1                  # Number of ILC iterations
     eta = 1                     # Optimization Parameter: Tradeoff Between TTS, TTD
     start = 0
-    congestion_start = 2500
+    congestion_start = 2630
     congestion_end = congestion_start + window_length
     end = 4000
 
@@ -29,16 +31,12 @@ if __name__ == '__main__':
     hi_loc = path[0] + '/data/CTM_param_out_A2_15cells.csv'
     onr_loc = path[0] + '/data/onramps.csv'
     offr_loc = path[0] + '/data/offramps.csv'
-    stations_loc = path[0] + '/data/stations_one.csv'
+    st_loc = path[0] + '/data/stations_one.csv'
     phi_loc = path[0] + '/data/phi_1_24h_realsmooth.csv'
     phi_onr_loc = path[0] + '/data/onramps_signal.csv'
     fig_path = path[0] + '/sandbox/figures/'
 
-    parameters = read_parameters(hi_loc,
-                                 onr_loc,
-                                 offr_loc,
-                                 stations_loc,
-                                 phi_onr_loc)
+    parameters = CTMsParameters(hi_loc, onr_loc, offr_loc, st_loc, phi_onr_loc)
 
     # parameters.update_dt(dt=dt/3600)  # TODO: Default value
 
@@ -49,7 +47,13 @@ if __name__ == '__main__':
     ########################################
 
     fac = Factory(parameters)
-    opt = MyTrafficOptimizer(parameters, eta)
+
+    gen = TrafficFlowGenerator(phi_loc)
+    control_parameters = ControlParameters()
+    opt = TrafficOptimizer(parameters, control_parameters)
+    # hist = TrafficHistory(n_iter, window_length, max_updates)
+    # perf = TrafficEvaluator()
+    # results = TrafficResults(n_iter, n_fact)
 
     ##############################
     # Simulate Factory, Solve LP #
@@ -67,21 +71,25 @@ if __name__ == '__main__':
 
         # During congestion period, run control
         x_0 = fac.stretches[0].get_state(k=congestion_start)
-        phi_s_0 = fac.stretches[0].get_station_inflow(k=congestion_start)
-        phi_0 = read_phi(phi_loc, t_0=congestion_start, t_f=congestion_end, ds=dt / 10)
+        s_s_0 = fac.stretches[0].get_station_inflow(k=congestion_start)
+        phi_0 = read_phi(phi_loc, t_0=congestion_start, t_f=congestion_end, ds=dt/10)  # In reality, should be some average
 
         # Linear Program
         k_0 = congestion_start
-        opt.solve_init(x_0, phi_0, phi_s_0, k_0, window_length)
+        opt.solve_init(x_0, phi_0, s_s_0, k_0, window_length)
         opt.solve(print_sol=True)
-        y_lp = opt.x_rho[:-1, :]
+        # y_lp = opt.y_rho[:-1, :]
         # y_lp = opt.u_phi
+        # y_lp = opt.u_rs_c
+        y_lp = opt.y_e[:-1, :]
 
         for k in range(congestion_start, congestion_end):
             fac.stretches[0].update(k)
 
-        y = fac.stretches[0].x_rho[congestion_start:congestion_end, :]
+        # y = fac.stretches[0].y_rho[congestion_start:congestion_end, :]
         # y = fac.stretches[0].u_phi[congestion_start:congestion_end, :]
+        # y = fac.stretches[0].u_rs[congestion_start:congestion_end, :]
+        y = fac.stretches[0].y_e[congestion_start:congestion_end, :]
 
         # Plotting
-        plot_comparison(y, y_lp, plot_ids, congestion_start, congestion_end, fig_path)
+        plot_comparison_test(y, y_lp, [0], congestion_start, congestion_end, fig_path)

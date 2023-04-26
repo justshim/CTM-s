@@ -39,21 +39,17 @@ class Cell:
 		print("q_max: " + str(self.q_max))
 		print()
 
-	# def computeQ(self):
-	# 	# Q is a vector for capacity drop modelling
-	# 	pass
+	# TODO: Can the velocity be larger than the freeflow velocity?
+	def compute_velocity(self):
+		"""
+		Compute cell velocity
+		"""
 
-	# def computeV(self):
-	# 	#if(self.rho[self.k] == 0 or self.congestion_state == 0 or self.congestion_state == 2):
-	# 	if(self.rho[self.k] == 0):
-	#
-	# 		self.v.append(self.v_free)
-	# 	else:
-	#
-	# 		phi_avg = (self.phi_minus + self.phi_plus)/2
-	# 		#print("rho: ")
-	# 		#print(self.rho[self.k])
-	# 		self.v.append(phi_avg/self.rho[self.k])
+		if self.rho[self.k] == 0:
+			self.v.append(self.v_free)
+		else:
+			phi_avg = (self.phi_minus + self.phi_plus) / 2
+			self.v.append(phi_avg/self.rho[self.k])
 
 	def compute_phi(self, d_prev: float, total_ds: float):
 		"""

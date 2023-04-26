@@ -1,41 +1,42 @@
 from typing import List
 import numpy as np
-from matplotlib import pyplot as plt
 
 from model.cell import Cell
 from model.station import Station
 from model.on_ramp import OnRamp
 from model.off_ramp import OffRamp
-from model.control import TrafficControlInput
 
 
 class Stretch:
 	"""
 	Class to maintain and simulate CTM-s model
 	"""
-	cells: List[Cell]			# TODO: ...
-	on_ramps: List[OnRamp]		# TODO: ...
-	off_ramps: List[OffRamp]  	# TODO: ...
-	stations: List[Station]		# TODO: ...
 
-	n_cells: int				# TODO: ...
-	n_on_ramps: int				# TODO: ...
-	n_off_ramps: int			# TODO: ...
-	n_stations: int				# TODO: ...
-	n_stations_exit: int		# TODO: ...
+	cells: List[Cell]			# Cell in highway stretch
+	on_ramps: List[OnRamp]		# On-ramps in highway stretch
+	off_ramps: List[OffRamp]  	# Off-ramps in highway stretch
+	stations: List[Station]		# Stations in highway stretch
+
+	n_cells: int				# Number of Cells
+	n_on_ramps: int				# Number of On-ramps
+	n_off_ramps: int			# Number of Off-ramps
+	n_stations: int				# Number of Stations
+	n_stations_exit: int		# Number of Station Exit Flow Points
 
 	phi_0: np.ndarray			# Incoming flow of first cell [veh/hr]
 	dt: float					# Time increment [hrs]
 	k: int						# Time step
 
-	# State, Input Variables
-	x_rho: np.ndarray				# TODO: ...
-	x_l: np.ndarray
-	x_e: np.ndarray
-	u_phi: np.ndarray				# TODO: ...
-	u_rs: np.ndarray
+	y_rho: np.ndarray			# State: Density of Cells
+	y_l: np.ndarray				# State: Number of Service Station Users
+	y_e: np.ndarray				# State: Length of Service Station Queue
 
-	"""Controller class for the model, represents the system at large"""
+	u_phi: np.ndarray			# Input: Flows between cells
+	u_rs: np.ndarray			# Input: Flow exiting service station
+
+	s_s: np.ndarray				# Flow entering service station (for LP initialization)
+	beta_total: np.ndarray		# Aggregate split ratio at each cell
+
 	def __init__(self, dt: float):
 		self.cells = []
 		self.on_ramps = []
@@ -52,11 +53,14 @@ class Stretch:
 		self.dt = dt
 		self.k = 0
 
-		self.x_rho = np.empty(0)
-		self.x_l = np.empty(0)
-		self.x_e = np.empty(0)
+		self.y_rho = np.empty(0)
+		self.y_l = np.empty(0)
+		self.y_e = np.empty(0)
+
 		self.u_phi = np.empty(0)
 		self.u_rs = np.empty(0)
+		self.s_s = np.empty(0)
+		self.beta_total = np.empty(0)
 
 	def to_string(self):
 		"""
@@ -81,8 +85,6 @@ class Stretch:
 		print("Number of stations: " + str(self.n_stations))
 
 		print("Time Length: " + str(self.dt))
-		# print("TTT: " + str(self.ttt))
-		# print("delta_big: " + str(self.delta_big))
 		print()
 	
 	def create_cell(self, length, v_free, w, q_max, rho_max, p):
@@ -116,6 +118,7 @@ class Stretch:
 		"""
 		Method to create an instance of the object Station, and add it to this stretch
 		"""
+
 		if j not in [s.j for s in self.stations]:
 			self.n_stations_exit += 1
 
@@ -123,14 +126,14 @@ class Stretch:
 		self.stations.append(station)
 		self.n_stations += 1
 
-	def update(self, kappa):
+	def update(self, k):
 		"""
 		Main method of the class
 		At each time instant k, updates all the parameters of the cells and service stations on this stretch
 		"""
 
 		# Update time instant
-		self.k = kappa
+		self.k = k
 
 		# Preliminary updates
 		# First update time instant for all cells with current k
@@ -150,8 +153,8 @@ class Stretch:
 		# First batch of cell value updates, with special case for first cell
 		for i in range(len(self.cells)):
 			# Compute demand from cell i for cell i+1 (phi_i+1)
-			total_beta = self.compute_total_beta(i)
-			self.cells[i].compute_demand(total_beta)
+			self.beta_total[self.k, i] = self.compute_total_beta(i)
+			self.cells[i].compute_demand(self.beta_total[self.k, i])
 
 			# Compute demand from cell i-1 for cell i (phi_i)
 			total_ds = self.compute_total_ds(i)
@@ -165,7 +168,7 @@ class Stretch:
 			next_phi = self.compute_next_phi(i)
 
 			total_rs_station = self.compute_r_station(i)
-			total_ss_station = self.compute_s_station(i, next_phi)
+			total_ss_station = self.compute_s_station(i, self.beta_total[self.k, i], next_phi)
 
 			total_sr_ramp = self.compute_s_ramp(i, next_phi)
 			total_rr_ramp = self.compute_r_ramp(i)
@@ -191,17 +194,22 @@ class Stretch:
 		for r_on in range(len(self.on_ramps)):
 			self.on_ramps[r_on].computeL(self.dt)
 
+		# Compute cell velocities
+		for i in range(len(self.cells)):
+			self.cells[i].compute_velocity()
+
 		# Track Variables
 		for i, c in enumerate(self.cells):
-			self.x_rho[self.k+1, i] = c.rho[-1]
+			self.y_rho[self.k + 1, i] = c.rho[-1]
 			self.u_phi[self.k, i] = c.phi[-1]
 
 		for i, s in enumerate(self.stations):
-			self.x_l[self.k+1, i] = s.l[-1]
-			self.x_e[self.k+1, i] = s.e[-1]
+			self.y_l[self.k + 1, i] = s.l[-1]
+			self.y_e[self.k + 1, i] = s.e[-1]
 			self.u_rs[self.k, i] = s.r_s[-1]
+			self.s_s[self.k, i] = s.s_s[-1]
 
-	def compute_total_beta(self, i: int):
+	def compute_total_beta(self, i: int) -> float:
 		"""
 		Compute total beta from service-stations and off-ramps, needed to compute D_i
 		"""
@@ -220,7 +228,7 @@ class Stretch:
 
 		return total_beta
 
-	def compute_total_ds(self, i: int):
+	def compute_total_ds(self, i: int) -> float:
 		"""
 		Compute total D_s from service-stations and on-ramps, needed to compute phi_i
 		"""
@@ -239,7 +247,7 @@ class Stretch:
 
 		return total_ds
 	
-	def compute_r_station(self, i: int):
+	def compute_r_station(self, i: int) -> float:
 		"""
 		For each cell, check if any stations merge into it, and compute their r_s
 		"""
@@ -328,23 +336,24 @@ class Stretch:
 				if b.id_station == int(station.id_station):
 					station.compute_rs((b.p / sum_p) * supply_res, cong_state)
 
-	def compute_s_station(self, i: int, next_phi: float):
+	def compute_s_station(self, i: int, beta_total: float, next_phi: float) -> float:
 		"""
-		...
+		Compute total flow exiting cell i to service stations
 		"""
-		##check if any stations stem from it, and compute their s_s. These are then summed up for use, respectively, in the computation of Phi- and Phi+
+
 		total_ss = 0
 		for s in range(len(self.stations)):
 			if self.stations[s].i == i:
-				self.stations[s].compute_ss(next_phi)
+				self.stations[s].compute_ss(beta_total, next_phi)
 				total_ss += self.stations[s].s_s[self.k]
 
 		return total_ss
 
-	def compute_r_ramp(self, i: int):
+	def compute_r_ramp(self, i: int) -> float:
 		"""
-		...
+		Compute total flow entering cell i via on-ramp
 		"""
+
 		total_rs = 0
 		for r_on in range(len(self.on_ramps)):
 
@@ -365,10 +374,11 @@ class Stretch:
 
 		return total_rs
 
-	def compute_s_ramp(self, i: int, next_phi: float):
+	def compute_s_ramp(self, i: int, next_phi: float) -> float:
 		"""
-		...
+		Compute total flow exiting cell i via off-ramps
 		"""
+
 		total_ss = 0
 		for r_off in range(len(self.off_ramps)):
 
@@ -380,9 +390,10 @@ class Stretch:
 
 	def compute_prev_demand(self, i: int) -> float:
 		"""
-		TODO: ...
+		Compute demand of cell i-1, needed to determine phi_i
+		Note: First cell does not have a "previous" cell, hence phi_(i-1) is given as input
 		"""
-		# First cell does not have a "previous" cell, hence phi_(i-1) is given as input
+
 		if i != 0:
 			prev_demand = self.cells[i-1].demand
 		else:
@@ -392,9 +403,11 @@ class Stretch:
 
 	def compute_next_phi(self, i: int) -> float:
 		"""
-		TODO: ...
+		Compute flow leaving cell i, phi_(i+1)
+		Note: Last cell does not have a "next" cell, so flow exiting last cell set to demand of penultimate cell
+		Result: Flow entering last cell equals flow exiting last cell, last cell density = 0 for all time
 		"""
-		# Last cell does not have a "next" cell, hence phi_(i+1) is given as input
+
 		if i < len(self.cells) - 1:
 			next_phi = self.cells[i+1].phi[-1]
 		else:
@@ -404,54 +417,25 @@ class Stretch:
 
 		return next_phi
 
-	# TODO
-	def update_control(self, i: int, control: TrafficControlInput):
-		"""
-		TODO: Add description / comments
-		"""
-
-		self.stations[i].r_s_c = control.r_s_c
-		self.stations[i].beta_s = control.beta_s
-
-	def plot_output(self, cell_ids: List, loc: str):
-		"""
-		TODO: ..
-		"""
-
-		fig = plt.figure()
-		t = np.arange(0, self.k+1)
-		phi_i = self.x_rho[:, cell_ids]
-		plt.plot(t, phi_i)
-		plt.xlabel('Time')  # TODO
-		plt.ylabel('Vehicle Density [veh/km]')
-		fig.savefig(loc + 'ctms/densities.png', dpi=300)  # TODO: Naming scheme for files...
-
-	def plot_fundamental_diagram(self, cell_ids: List, loc: str):
-		"""
-		TODO: Add other relevant fundamental diagram lines here...
-		"""
-
-		fig = plt.figure()
-
-		for i in cell_ids:
-			plt.scatter(self.x_rho[:, i], self.u_phi[:, i], s=0.5)
-
-		plt.xlabel('Vehicle Density [veh/km]')
-		plt.ylabel('Vehicle Flow [veh/hr]')  # TODO
-		fig.savefig(loc + 'ctms/fundamental_diagram.png', dpi=300)  # TODO: Naming scheme for files...
-
 	def simulate_init(self, phi_0: np.ndarray):
 		"""
-		TODO :..
+		Initialize arrays to track the values of states and inputs during simulation
 		"""
+
 		self.phi_0 = phi_0
 		day_length = len(phi_0)
-		self.x_rho = np.zeros((day_length + 1, self.n_cells))
-		self.x_l = np.zeros((day_length + 1, self.n_stations))
-		self.x_e = np.zeros((day_length + 1, self.n_stations))
+		self.y_rho = np.zeros((day_length + 1, self.n_cells))
+		self.y_l = np.zeros((day_length + 1, self.n_stations))
+		self.y_e = np.zeros((day_length + 1, self.n_stations))
 
 		self.u_phi = np.zeros((day_length, self.n_cells + 1))
 		self.u_rs = np.zeros((day_length, self.n_stations_exit))
+		self.s_s = np.zeros((day_length, self.n_stations))
+		self.beta_total = np.zeros((day_length, self.n_cells))
+
+		# Default control value
+		for s in self.stations:
+			s.r_s_c = s.r_s_max * np.ones((day_length, 1))
 
 	def get_state(self, k: int) -> np.ndarray:
 		"""
@@ -459,22 +443,31 @@ class Stretch:
 		"""
 
 		state = np.zeros(self.n_cells + 2*self.n_stations)
-		state[0:self.n_cells] = self.x_rho[k, :]
-		state[self.n_cells::2] = self.x_l[k, :]
-		state[self.n_cells+1::2] = self.x_e[k, :]
+		state[0:self.n_cells] = self.y_rho[k, :]
+		state[self.n_cells::2] = self.y_l[k, :]
+		state[self.n_cells+1::2] = self.y_e[k, :]
 
 		return state.reshape((-1, 1))
 
 	def get_station_inflow(self, k: int) -> np.ndarray:
 		"""
-		Get history of number of people at service station until time instant k
+		Get history of flow into service station until time instant k
 		"""
-		i = [s.i + 1 for s in self.stations]
-		return self.u_phi[:k, i]
+
+		return self.s_s[:k, :]
+
+	def update_control(self, k_0: int, r_s_c: np.ndarray):
+		"""
+		Update ramp-meter control for each service station on the highway from time k_0
+		"""
+
+		k_l = len(r_s_c)
+		for i in range(self.n_stations):
+			self.stations[i].r_s_c[k_0:k_0 + k_l, i] = r_s_c[:, i]
 
 	def reset(self):
 		"""
-		Reset all objects in the stretch to zero initial condition
+		Reset all objects in the stretch
 		"""
 
 		self.k = 0

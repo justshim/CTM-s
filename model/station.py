@@ -1,4 +1,11 @@
+import numpy as np
+
+
 class Station:
+	"""
+	Class modeling the service stations on a highway stretch in the CTM-s model
+	"""
+
 	# TODO: Provide type hints for clarity
 	# TODO: Clean up method function names
 	# id_station: int 		# TODO: ...
@@ -18,7 +25,6 @@ class Station:
 	# p = p
 	# k = 0
 
-	"""Class modeling the service stations on a highway stretch in the CTM-s model"""
 	def __init__(self, id_station, r_s_max, i, j, delta, beta_s, p):
 		self.id_station = id_station
 		self.r_s_max = r_s_max
@@ -27,7 +33,7 @@ class Station:
 		self.j = j
 		self.delta = delta
 		self.beta_s = beta_s
-		self.e_max = 1000  # TODO: !!!
+		self.e_max = 1000  # TODO: Should also have l_max, can be hardcoded value...
 		self.p = p
 
 		self.s_s = []
@@ -50,12 +56,12 @@ class Station:
 		print("Number of vehicles: " + str(self.l))
 		print()
 
-	def compute_ss(self, next_phi):
+	def compute_ss(self, beta_total, next_phi):
 		"""
 		Computation of the flow leaving the mainstream to enter this service station at time instant k
 		"""
 
-		self.s_s.append((self.beta_s / (1 - self.beta_s)) * next_phi)
+		self.s_s.append((self.beta_s / (1 - beta_total)) * next_phi)
 		
 	def compute_rs(self, rs, t):
 		"""
@@ -71,27 +77,27 @@ class Station:
 	def compute_demand(self, dt):
 		"""
 		Computation of the demand of the ramp exiting this service station at time instant k
-		Update: Now takes into account value prescribed from traffic controller
-		In uncontrolled case,
+
+		Note: Now takes into account value prescribed from traffic controller
 		"""
 
 		if self.k < self.delta:
-			d_s = (0 + self.e[self.k]) / dt  # TODO: Check this???
+			d_s = self.e[self.k] / dt
 		else:
-			d_s = self.s_s[self.k - round(self.delta)] + self.e[self.k] / dt  # TODO: Check this??
+			d_s = self.s_s[self.k - round(self.delta)] + (self.e[self.k] / dt)
 
-		# TODO: Need to change this to r_s_c[k, id]
-		self.demand = min([d_s, self.r_s_c, self.r_s_max])
+		self.demand = min([d_s, self.r_s_c[self.k], self.r_s_max])
+
+		# if (d_s > self.r_s_c[self.k]) and (self.r_s_c[self.k] != self.r_s_max):
+		# 	print(self.k)
 
 	def compute_num_vehicles(self, dt: float):
 		"""
 		Computation of the number of vehicles at this service station at time instant k + 1
+
+		Note: Doesn't include vehicles in service-station queue
 		"""
 
-		## L and e together:
-		# self.l.append(self.l[self.k] + time_length * self.s_s[self.k] - time_length * self.r_s)
-
-		## L and e separated:
 		if len(self.s_s) < self.delta:
 			self.l.append(self.l[self.k] + dt * self.s_s[self.k] - 0)
 		else:
@@ -99,7 +105,7 @@ class Station:
 
 	def compute_queue_length(self, dt):
 		"""
-		Computation of the number of vehicles queueing at this service station at time instant k
+		Computation of the number of vehicles queueing at this service station at time instant k + 1
 		(due to the impossibility of merging back into the mainstream)
 		"""
 

@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 
-from read_data import read_parameters, read_phi
+from data import read_parameters, read_phi
 from model.factory import Factory
 
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     times = np.arange(np.datetime64('1999-09-24'), np.datetime64('1999-09-25'), np.timedelta64(10, 's'))
     times = times[start:end]
     # times = np.arange(start, end)
-    rho = fac.stretches[0].x_rho[:-1, :-1]
+    rho = fac.stretches[0].y_rho[:-1, :-1]
     plt.plot(times, rho)
     plt.xlabel('Time')
     plt.ylabel('Vehicle Density [veh/km]')
@@ -93,8 +93,8 @@ if __name__ == '__main__':
 
     # Service Station
     fig_4 = plt.figure()
-    l = fac.stretches[0].x_l[:-1, :]
-    e = fac.stretches[0].x_e[:-1, :]
+    l = fac.stretches[0].y_l[:-1, :]
+    e = fac.stretches[0].y_e[:-1, :]
     plt.plot(times, l)
     plt.plot(times, e)
     plt.xlabel('Time')
