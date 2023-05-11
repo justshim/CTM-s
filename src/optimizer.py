@@ -11,11 +11,11 @@ from control import ControlParameters
 from results import plot_lp
 
 
+# TODO: Cleanup use of np.reshape() throughout the class
 class TrafficOptimizer:
     """
     Class to define optimization problem
     """
-    # TODO: Cleanup use of np.reshape() throughout the class
 
     params: CTMsParameters          # CTM-s Parameters Object
     params_c: ControlParameters     # Traffic Control Parameters Object
@@ -35,8 +35,8 @@ class TrafficOptimizer:
     n: int                          # State Dimension: Cell density, number of users and queue length for each station
     m: int                          # Input Dimension: Flows into each cell, flows exiting stations, terminal flow
 
-    beta: np.ndarray                # TODO: Technically will be an estimate!!
-    beta_s: np.ndarray              # TODO: Technically will be an estimate!!
+    beta: np.ndarray                # Total Split Ratio of each Cell
+    beta_s: np.ndarray              # Service Station Split Ratio of each Cell
 
     rho_0_matrix: np.ndarray        # [Dynamics]: Initial Condition Matrix for Cell Density
     l_0_matrix: np.ndarray          # [Dynamics]: Initial Condition Matrix for Number of Station Users
@@ -68,16 +68,13 @@ class TrafficOptimizer:
     y_l: np.ndarray                 # [Solution]: Number of People at Station (Output)
     y_e: np.ndarray                 # [Solution]: Station Queue Length (Output)
 
-    # delta_ttt: float                # [Performance Metric]: Additional Travel Time
-    # TODO: I should still add some performance metric into the optimizer, even if it's
-
     st_to_r: np.ndarray             # [Helper]: Station ID to Input index (after cell flows)
     r_to_st: List                   # [Helper]: Input index (after cell flows) to Station ID
     j_to_r: Dict                    # [Helper]: Station outlet cell to index of input (after cell flows)
     k_ones: np.ndarray              # [Helper]: Vector of 1s with length k_l
     k_1_ones: np.ndarray            # [Helper]: Vector of 1s with length k_l+1
 
-    def __init__(self, params: CTMsParameters, params_c: ControlParameters):
+    def __init__(self, params: CTMsParameters, params_c=None):
         self.params = params
         self.params_c = params_c
         self.x_0 = np.empty(0)
@@ -131,8 +128,6 @@ class TrafficOptimizer:
         self.y_l = np.empty(0)
         self.y_e = np.empty(0)
 
-        self.delta_ttt = 0
-
         self.st_to_r = np.zeros_like(self.params.stations.j)
         self.r_to_st = [[] for _ in self.params.stations.j_r]
         self.j_to_r = {}
@@ -143,7 +138,7 @@ class TrafficOptimizer:
 
     def build_station_outflow_mapping(self):
         """
-        TODO: Add description / comments
+        Build maps from/to station index,station outlet cell, and input variable index
         """
 
         for id, j in enumerate(self.params.stations.j):
@@ -156,9 +151,9 @@ class TrafficOptimizer:
 
     def compute_total_beta(self):
         """
-        TODO: Add description / comments
+        Compute total beta from service-stations and off-ramps
         """
-        # TODO: Time dependent beta?
+
         if self.params.stations.beta_s.ndim == 1:
             self.beta_s = np.kron(self.k_ones, self.params.stations.beta_s)
 
@@ -547,7 +542,7 @@ class TrafficOptimizer:
         b_ub_3_b = np.multiply(p_ms_i_k, q_max_i_k)
 
         # Add all mainstream flow constraints
-        self.add_constraints(a_eq_0, b_eq_0, mosek.boundkey.fx)  # KEEP
+        # self.add_constraints(a_eq_0, b_eq_0, mosek.boundkey.fx)  # KEEP
         self.add_constraints(a_ub_1_a, b_ub_1_a)  # KEEP
         self.add_constraints(a_ub_1_b, b_ub_1_b)  # KEEP
 
@@ -726,15 +721,10 @@ class TrafficOptimizer:
         self.add_constraints(a_diff_1, b_diff_1)
         self.add_constraints(a_diff_2, b_diff_2)
 
-    # TODO: Need to fix the units on this function...
     def define_cost_function(self):
         """
         TODO: Add description / comments
         """
-
-        # TODO: There should be a cost that at least decreases linearly or exponentially with time
-        #  first time instance affects all time instances, last time instance only affects one time instant,
-        #  so make sense that things are blowing up
 
         # Define coefficients from Total Time Spent (TTS: Minimize)
         # 1) Minimize highway cell density [veh/km]
@@ -744,7 +734,7 @@ class TrafficOptimizer:
         tts_1 = 1 * np.sum(self.rho_matrix, axis=0)
 
         # 2) Minimize service station exit queue length
-        tts_2 = 2 * np.sum(self.e_matrix, axis=0)
+        tts_2 = 0.3 * np.sum(self.e_matrix, axis=0)
 
         tts = self.dt * (tts_1 + tts_2)  # Units: [veh hr / km]
 
@@ -754,19 +744,21 @@ class TrafficOptimizer:
 
         # Define coefficients from Total Travel Distance (TTD: Maximize)
         # Maximize flows [veh/hr]
-        l_1 = np.concatenate((self.params.highway.l, np.array([1]), self.params.stations.l_r))
-        l_2 = np.ones(self.k_l)
-        ttd = self.dt * np.kron(l_2, l_1)
-        # ttd = self.dt * np.ones(self.num_variables)
+        # l_1 = np.concatenate((self.params.highway.l, np.array([1]), self.params.stations.l_r))
+        # l_2 = np.ones(self.k_l)
+        # ttd = self.dt * np.kron(l_2, l_1)
+        ttd_1 = np.ones(self.num_variables)
+        ttd_1[16::self.m] *= 0.1  # TODO: By doing the proper epigraph reformulation, this would be easier...
+        ttd = self.dt * ttd_1
 
-        self.c = (1 * tts) - (1 * ttd)  # TODO: self.eta = 1
-
-        # TODO: Discount to only the on-ramp flow...
-        discount = np.kron(np.exp(-0.05 * np.arange(0, self.k_l)), np.ones(1))
-        self.c[16::self.m] = np.multiply(self.c[16::self.m], discount)
+        self.c = (0.7 * tts) - (1 * ttd)  # TODO: self.eta = 1
 
         # Set cost coefficients corresponding to maximize initial flow
-        self.c[::self.m] = -10
+        self.c[::self.m] = -1
+
+        # Exponential discount to all flows
+        discount = np.kron(np.exp(-0.05 * np.arange(0, self.k_l)), np.ones(self.m))
+        self.c = np.multiply(self.c, discount)
 
     def update_variables(self):
         """
@@ -792,53 +784,6 @@ class TrafficOptimizer:
 
         self.u_phi = self.u_opt_k[:, :self.n_c + 1]
         self.u_rs_c = self.u_opt_k[:, self.n_c + 1:]
-
-    # TODO: This function might be only in the supervisor function, not in the optimizer
-    def evaluate_performance(self):
-        """
-        Calculate performance metrics for the highway stretch
-        """
-
-        # Compute cell velocities
-        v_i_k = np.zeros((self.n_c * self.k_l))
-
-        a_phi_plus_k = np.zeros((self.n_c, self.m))
-        a_phi_plus_k[:, :self.n_c ] = np.eye(self.n_c)
-        c_plus = [self.n_c + 1 + self.j_to_r[j_r][0] for j_r in self.params.stations.j_r]
-        a_phi_plus_k[self.params.stations.j_r, c_plus] += 1
-        a_phi_plus = block_diag(*[a_phi_plus_k for _ in range(self.k_l)])
-        phi_plus = np.matmul(a_phi_plus, self.u_opt).reshape(-1)
-
-        a_phi_minus = np.zeros((self.n_c * self.k_l, self.num_variables))
-        r_minus = np.arange(0, self.n_c * self.k_l)
-        c_minus = [(k * self.m) + i + 1 for k in range(self.k_l) for i in range(self.n_c)]
-
-        a_phi_minus[r_minus, c_minus] = 1 / (1 - self.beta.reshape(-1))
-        phi_minus = np.matmul(a_phi_minus, self.u_opt).reshape(-1)
-
-        phi_avg = (phi_minus + phi_plus) / 2
-        v_free_i_k = np.kron(np.ones(self.k_l), self.params.highway.v.reshape(-1))
-
-        y_rho = self.y_rho[:-1, :].reshape(-1)
-        i = np.nonzero(np.isclose(y_rho, 0))[0]
-        j = np.nonzero(y_rho != 0)[0]
-
-        v_i_k[i] = v_free_i_k[i]
-        v_i_k[j] = np.divide(phi_avg[j], y_rho[j])
-        v_i_k = v_i_k.reshape((self.n_c, -1))
-
-        # Compute delta_ttt [min]
-        # TODO: Getting velocities that are larger than the free-flow velocity? Even though this isn't possible...
-        l = self.params.highway.l.reshape(-1, 1)
-        v_free = self.params.highway.v.reshape(-1, 1)
-        delta_ttt_i_k = np.divide(l, v_i_k) - np.divide(l, v_free)
-        delta_ttt_i_k[delta_ttt_i_k < 0] = 0  # TODO: Impossible velocities?
-        delta_ttt_i = np.sum(delta_ttt_i_k, axis=1)
-        self.delta_ttt = 60 * np.sum(delta_ttt_i[:-1], axis=0)  # Units: [min] TODO: Include the last cell?
-
-        # TODO: Compute percentage of time with queue
-
-        # TODO: Compute average service station wait time in the queue
 
     def streamprinter(self, text):
         """
@@ -896,6 +841,7 @@ class TrafficOptimizer:
         self.b_ub = []
         self.bkc = []
 
+        # TODO: Don't have to recompute all of these every time
         self.compute_total_beta()
         self.compute_state_matrices()
         self.define_state_constraints()
@@ -934,7 +880,7 @@ class TrafficOptimizer:
                     task.putvarbound(j,                     # Variable (column) index.
                                      mosek.boundkey.ra,     # Lower and Upper Bound
                                      0,                     # Non-negative flow lower bound
-                                     self.phi_0[k])         # phi_0 upper bound (froam dat)
+                                     self.phi_0[k])         # phi_0 upper bound (from data)
                 # Non-negative flow condition
                 else:
                     task.putvarbound(j,                     # Variable (column) index.

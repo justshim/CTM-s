@@ -2,92 +2,76 @@ import numpy as np
 import pandas as pd
 
 
+# TODO: Play around with noise parameters, function all works though
 class TrafficFlowGenerator:
     """
-    TODO: ...
     """
     s: np.random.Generator              # TODO: ...
     phi: np.ndarray                     # TODO: ...
 
-    mu: int
-    std: int
-    k: int
+    t_0: int                            # Congestion Start
+    t_f: int                            # Congestion End
 
-    n_spikes: int
+    mu: int                             # TODO: ...
+    std: int                            # TODO: ...
+    k_noise: int                        # TODO: ...
 
-    def __init__(self, loc: str, ds=1):
+    n_spikes: int                       # Number of Spikes
+    t_spike: int                        # Duration of the Spike
+    k_spike: int                        # Magnitude of Spike
+    spike: np.ndarray                   # Spike Profile
+    t_spikes: np.ndarray                # Location of Spikes
+
+    def __init__(self, loc: str, t_0: int, t_f: int, ds=1):
         self.s = np.random.default_rng(0)
         self.phi = pd.read_csv(loc, header=None).to_numpy().flatten()
 
+        self.t_0 = t_0
+        self.t_f = t_f
+
         self.mu = 0
         self.std = 1
-        self.k = 50
+        self.k_noise = 50
 
-        self.n_spikes = 10
+        self.n_spikes = 5
+        self.t_spike = 61
+        self.k_spike = 200
+
+        self.spike = np.zeros(self.t_spike)
+        t_spike_half = int((self.t_spike + 1) / 2)
+        self.spike[:t_spike_half] = np.linspace(0, self.k_spike, t_spike_half)
+        self.spike[t_spike_half-1:] = np.linspace(self.k_spike, 0, t_spike_half)
+
+        self.t_peaks = np.random.choice(int((self.t_f - self.t_0) / self.t_spike), self.n_spikes, replace=False)
 
     def get_flow(self, t_0: int, t_f: int, perturb=False) -> np.ndarray:
         """
-        TODO: ...
+        Return either nominal or perturbed flow incoming into first cell
         """
 
         if perturb:
-            return self.perturb_flow()
+            phi_perturbed = self.perturb_flow()
+            return phi_perturbed[t_0:t_f]
         else:
             return self.phi[t_0:t_f]
 
     def perturb_flow(self) -> np.ndarray:
         """
-        TODO: ...
+        Perturb flow profile with
+
+        1) Random Gaussian Noise
+        2) Flow spikes at random, pre-determined time instances
         """
 
         phi_noisy = np.copy(self.phi)
 
         # Introduce random Gaussian Noise
-        phi_noisy += self.k * self.s.normal(self.mu, self.std, self.phi.shape)
+        phi_noisy += self.k_noise * self.s.normal(self.mu, self.std, self.phi.shape)
 
-        # Introduce random spikes into the flow
-        # TODO: Basically need to ensure that the spikes last for a certain amount of time and are well-spaced
-        #  Also need to determine the magnitude of the peaks...
-        #
-        # np.random.rand(0, len(phi), num_peaks)
+        # Introduce random spikes into the flow (same for all flows)
+        for t in self.t_peaks:
+            t_0 = self.t_0 + (self.t_spike * t)
+            t_f = t_0 + self.t_spike
+            phi_noisy[t_0:t_f] += self.spike
 
         return phi_noisy
-
-def read_phi(loc: str, t_0: int, t_f: int, ds=1) -> np.ndarray:
-    """
-    Read in real-flow data from t_0 to t_f
-    Flow data is measured every 10 seconds over the course of 24 hours
-    ds = down-sampling rate e.g. ds = 6 => flow every minute
-    """
-
-    phi = pd.read_csv(loc, header=None).to_numpy().flatten()
-    return phi[t_0:t_f:int(ds)]
-
-
-# TODO: Function to write synthetic/perturbed phi_data
-def perturb_flow(phi: np.ndarray) -> np.ndarray:
-    """
-    TODO: ...
-    """
-
-    # Introduce random Gaussian Noise
-    # TODO: Seed the random generator?
-    # TODO: Gaussian Noise Parameters
-    mu = 0
-    std = 1
-    k = 100
-    phi += k * np.random.normal(mu, std, phi.shape)
-
-    # Introduce random spikes into the flow
-    # TODO: Basically need to ensure that the spikes last for a certain amount of time and are well-spaced
-    #  Also need to determine the magnitude of the peaks...
-    #
-    num_peaks = 10  # TODO: Hardcoded value here
-    # np.random.rand(0, len(phi), num_peaks)
-
-    return phi
-
-# TODO: Function to write synthetic service station beta split ratio that will need to be learned via ILC...
-
-
-

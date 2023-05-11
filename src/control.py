@@ -1,9 +1,9 @@
-from typing import List
+from dataclasses import dataclass
 
 import numpy as np
-from numpy.random import Generator
 
 
+@dataclass
 class ControlParameters:
     Q: np.ndarray
     R: np.ndarray
@@ -22,16 +22,17 @@ class ControlParameters:
 
     # def __init__(self):
 
+
 class TrafficHistory:
     """
-    TODO: ...
+    Class to track and predict incoming flows
     """
 
-    n_iter: int                     # Number of Iterations
+    n_iter: int                     # Number of iterations
     n_updates: int                  # Number of updates during congestion window
     i: int                          # Index variable
-    phi_0_hist: np.ndarray          # TODO: Array of all previously observed phi_0
-    s: Generator                    # TODO: ...
+    phi_0_hist: np.ndarray          # Array of all previously observed phi_0
+    s: np.random.Generator          # Numpy Generator for flow predictions
 
     def __init__(self, n_iter: int, window_length: int, max_updates):
         self.n_iter = n_iter
@@ -42,7 +43,11 @@ class TrafficHistory:
 
     def log_flow(self, phi_new: np.ndarray):
         """
-        TODO: ...
+        Log observed flow into phi_0_hist[~:,j,k]
+
+        ~: length of the observed flow
+        j: corresponding to the time instance k_0 when the flow is observed
+        k: kth iteration instance of the flow being observed
         """
 
         k, j = divmod(self.i, self.n_updates)
@@ -50,16 +55,20 @@ class TrafficHistory:
         self.phi_0_hist[:, j, k] = phi_new
         self.i += 1
 
-    def estimate_flow(self) -> np.ndarray:
+    def get_flow(self, predict=False) -> np.ndarray:
         """
         Return random, convex-combination of previously observed flows into the first cell
+        Otherwise, return the first observed instance of the flow
         """
 
         k, j = divmod(self.i, self.n_updates)
 
-        if k > 1:
-            s = self.s.dirichlet((k-1, 1))
-        else:
-            s = 1.00
+        if predict:
+            if k > 1:
+                s = self.s.dirichlet((k-1, 1))
+            else:
+                s = 1.00
 
-        return np.sum(np.multiply(s, self.phi_0_hist[:, j, :k]), axis=1)
+            return np.sum(np.multiply(s, self.phi_0_hist[:, j, :k]), axis=1)
+        else:
+            return self.phi_0_hist[:, j, 0]

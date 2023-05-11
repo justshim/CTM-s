@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, TypeVar
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -7,119 +7,159 @@ from matplotlib import pyplot as plt
 from model.supervisor import Stretch
 
 
+P = TypeVar('P', bound='TrafficPerformance')
+
+
 @dataclass
 class TrafficPerformance:
     """
-    Class to define, compute performance metrics
+    Dataclass to define, compute performance metrics
     """
 
-    delta_ttt: float        # Additional travel time due to congestion [veh hr]
-    delta_ttd: float        # Reduced travel distance due to congestion [veh km]
+    cong_sev: float         # TODO: Congestion Severity
     e_time: float           # Minutes in the Day with Queue [min]
     e_wait: float           # Average Queue Wait Time [min]
+
+    def as_array(self) -> np.ndarray:
+        return np.array([self.cong_sev, self.e_time, self.e_wait])
+
+    @staticmethod
+    def from_array(p: np.ndarray) -> P:
+        return TrafficPerformance(p[0], p[1], p[2])
 
 
 class TrafficEvaluator:
     """
-    TODO: ...
+    Wrapper class to compute TrafficPerformance
     """
 
-    def evaluate(self, s: Stretch) -> TrafficPerformance:
+    def evaluate(self, s: Stretch, print_perf: bool) -> TrafficPerformance:
         """
-        TODO: ...
+        Return TrafficPerformance object
         """
 
-        delta_ttt = self.compute_delta_ttt(s)
-        delta_ttd = self.compute_delta_ttd(s)
+        congestion_severity = self.compute_congestion_severity(s)
         e_time = self.compute_e_time(s)
         e_wait = self.compute_e_wait(s)
 
-        return TrafficPerformance(delta_ttt, delta_ttd, e_time, e_wait)
+        perf = TrafficPerformance(congestion_severity, e_time, e_wait)
+
+        if print_perf:
+            print(perf)
+
+        return perf
 
     @classmethod
-    def compute_delta_ttt(cls, s: Stretch):
+    def compute_congestion_severity(cls, s: Stretch):
         """
-        TODO: ...
-        """
-
-        delta_ttt = np.zeros_like(s.cells[0].v, dtype=float)
-
-        for i in range(s.n_cells - 1):
-            l = s.cells[i].l
-            v = np.array(s.cells[i].v, dtype=float)
-            v_free = s.cells[i].v_free
-
-            delta_ttt_i = 60 * (np.divide(l, v) - (l / v_free))
-            delta_ttt_i[delta_ttt_i < 0] = 0
-            delta_ttt += delta_ttt_i
-
-        return np.sum(delta_ttt)
-
-    @classmethod
-    def compute_delta_ttd(cls, s: Stretch):
-        """
-        TODO: ...
+        TODO: Review the intuition of this
         """
 
-        return 0
+        # Compute rho_critical
+        rho_critical = np.zeros(s.n_cells)
+
+        for i, c_i in enumerate(s.cells):
+            if i == 0:
+                rho_critical[i] = c_i.rho_max - (c_i.q_max / c_i.w)
+                continue
+
+            c_prev = s.cells[i-1]
+            beta_prev = s.beta_total[0, i-1]  # Assume constant beta
+
+            rho_critical[i] = max(
+                c_i.rho_max - (c_prev.q_max/c_i.w),
+                c_i.w * c_i.rho_max / ((1 - beta_prev) * c_prev.v_free + c_i.w),
+                c_i.rho_max - (c_i.q_max/c_i.w)
+            )
+
+        # Compute congestion severity
+        congestion_severity = 0
+
+        for i, c in enumerate(s.cells):
+            rho = np.array(c.rho)
+            # print(np.sum(rho >= rho_critical[i]))
+            rho[rho < rho_critical[i]] = 0
+            rho[rho >= rho_critical[i]] -= rho_critical[i]
+            congestion_severity += np.sum(np.power(rho, 2))  # TODO: 2-norm?
+
+        return congestion_severity
 
     @classmethod
     def compute_e_time(cls, s: Stretch):
         """
-        TODO: ...
+        Time with queue at the service station (minutes)
         """
+        e_time = 0
 
-        return 0
+        for st in s.stations:
+            e_time += np.sum(np.array(st.e) > 0)
+
+        return e_time / 6  # Deciseconds to minutes
 
     @classmethod
     def compute_e_wait(cls, s: Stretch):
         """
-        TODO: ...
+        Average wait time in the queue (minutes)
         """
+        e_wait = 0
 
-        return 0
+        for st in s.stations:
+            e_wait += np.sum(np.array(st.e)) / np.sum(np.array(st.s_e))
+
+        return e_wait / 6  # Deciseconds to minutes
 
 
 class TrafficResults:
     """
-    TODO: Class to keep track of ...
+    Class to keep track of TrafficPerformance results
     """
 
     n_iter: int
     n_fact: int
-    results: List
 
     def __init__(self, n_iter: int, n_fact: int):
         self.n_iter = n_iter
         self.n_fact = n_fact
-        self.results = [[] for _ in range(self.n_fact)]  # TODO: Kinda messy
 
-    def log(self, i: int, p: TrafficPerformance, print_perf: bool):
+    def save(self, j: int, n: int, s: Stretch, p: TrafficPerformance, results_path: str):
         """
-        TODO: ...
+        Save state, input arrays from simulation as .npz files
+        Save performance result object as .npy file
         """
 
-        self.results[i] += [p]
-        if print_perf:
-            print(p)
+        for i, c in enumerate(s.cells):
+            np.savez(f"{results_path}f_{j}_it_{n}_cell_{i}.npz",
+                     rho=np.array(c.rho),
+                     phi=np.array(c.phi))
 
-    def plot(self):
-        """
-        TODO: ...
-        """
-        fig = plt.figure()
-        t = np.arange(0, self.n_iter)
-        fig.savefig()
-        plt.close()
+        for i, st in enumerate(s.stations):
+            np.savez(f"{results_path}f_{j}_it_{n}_stat_{i}.npz",
+                     l=np.array(st.l),
+                     e=np.array(st.e),
+                     r_s=np.array(st.r_s))
+
+        np.save(f"{results_path}f_{j}_it_{n}_perf.npy",
+                p.as_array())
 
 
+# TODO: Get rid of these plotting help functions eventually
 def plot_comparison_test(y_0: np.ndarray, y_1: np.ndarray, i: List, k_0: int, k_f: int, loc: str):
     fig = plt.figure()
     t = np.arange(k_0, k_f)
     plt.plot(t, y_0[:, i], '-k')
     plt.plot(t, y_1[:, i], '--r')
     plt.xlabel('Time')
-    fig.savefig(loc + 'comp/cell.png', dpi=300)  # TODO: Naming scheme for files...
+    fig.savefig(loc + 'results_test/cell.png', dpi=300)  # TODO: Naming scheme for files...
+    plt.close()
+
+
+def plot_flow_comparison(y_0: np.ndarray, y_1: np.ndarray, k_0: int, k_f: int, loc: str):
+    fig = plt.figure()
+    t = np.arange(k_0, k_f)
+    plt.plot(t, y_0, '-k')
+    plt.plot(t, y_1, '--r')
+    plt.xlabel('Time')
+    fig.savefig(loc + 'results_test/flow.png', dpi=300)  # TODO: Naming scheme for files...
     plt.close()
 
 
@@ -129,7 +169,7 @@ def plot_comparison(y_0: np.ndarray, y_1: np.ndarray, i: List, k_0: int, k_f: in
     plt.plot(t, y_0[:, i], '-k')
     plt.plot(t, y_1[:, i], '--r')
     plt.xlabel('Time')
-    fig.savefig(loc + 'comp/closed_loop.png', dpi=300)  # TODO: Naming scheme for files...
+    fig.savefig(loc + 'results_test/closed_loop.png', dpi=300)  # TODO: Naming scheme for files...
     plt.close()
 
 
@@ -138,5 +178,6 @@ def plot_lp(y_0: np.ndarray, i: List, k_0: int, k_f: int, n_update: int):
     t = np.arange(k_0, k_f)
     plt.plot(t, y_0[:, i], '-k')
     plt.xlabel('Time')
-    fig.savefig('/Users/justshim/src/semester-project/CTM-s/sandbox/figures/comp/lp' + str(n_update) + '.png', dpi=300)
+    plt.ylim((0, 2100))
+    fig.savefig('/Users/justshim/src/semester-project/CTM-s/sandbox/figures/results_test/lp' + str(n_update) + '.png', dpi=300)
     plt.close()

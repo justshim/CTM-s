@@ -1,4 +1,7 @@
+from typing import List
 import numpy as np
+
+from model.cell import CongState
 
 
 class Station:
@@ -6,41 +9,49 @@ class Station:
 	Class modeling the service stations on a highway stretch in the CTM-s model
 	"""
 
-	# TODO: Provide type hints for clarity
-	# TODO: Clean up method function names
-	# id_station: int 		# TODO: ...
-	# r_s_max
-	# r_s_c
-	# i: int
-	# j: int
-	# s_s: List
-	# r_s = 0
-	# e = [0]
-	e_max: int 				# Max Queue Length # TODO: ?
-							# Max Queue Length can be determined by dividing length of ramp by average length of car...?
-	# d_s_big = 0
-	# delta = delta
-	# beta_s = beta_s
-	# l = [0]
-	# p = p
-	# k = 0
+	id_station: int 			# Service Station ID
+	i: int						# Service Station Inlet Cell ID
+	j: int						# Service Station Outlet Cell ID
+	delta: float				# Time Spent at Service Station [Time Steps]
+	beta_s: float				# Service Station Inflow Split Ratio [0,1]
+	p: float					# Service Station Outflow Priority [0,1]
+	r_s_max: float				# Maximum Supported Outflow [veh/hr]
+	e_max: float  				# TODO: Maximum Queue Length
 
-	def __init__(self, id_station, r_s_max, i, j, delta, beta_s, p):
+	e: List						# Service Station Queue Length [veh]
+	l: List						# Number of Service Station Users [veh]
+
+	s_s: List					# Service Station On-ramp Flow [veh/hr]
+	s_e: List					# Station to Queue Flow [veh/hr]
+	r_s: List					# Service Station Off-ramp Flow [veh/hr]
+
+	demand: float				# Station Off-ramp Demand [veh/hr]
+
+	r_s_c: np.ndarray			# Service Station Off-ramp Control Flow [veh/hr]
+
+	k: int						# Time step
+
+	def __init__(self, id_station: int, i: int, j: int, delta: float, beta_s: float, p: float, r_s_max: float):
 		self.id_station = id_station
-		self.r_s_max = r_s_max
-		self.r_s_c = r_s_max
 		self.i = i
 		self.j = j
 		self.delta = delta
 		self.beta_s = beta_s
-		self.e_max = 1000  # TODO: Should also have l_max, can be hardcoded value...
 		self.p = p
+		self.r_s_max = r_s_max
+		self.e_max = 100  # TODO: Hardcoded
 
-		self.s_s = []
-		self.r_s = []
 		self.e = [0]
 		self.l = [0]
+
+		self.s_s = []
+		self.s_e = []
+		self.r_s = []
+
 		self.demand = 0
+
+		self.r_s_c = np.empty(0)  # Default value
+
 		self.k = 0
 
 	def to_string(self):
@@ -56,25 +67,24 @@ class Station:
 		print("Number of vehicles: " + str(self.l))
 		print()
 
-	def compute_ss(self, beta_total, next_phi):
+	def compute_ss(self, beta_total: float, next_phi: float):
 		"""
 		Computation of the flow leaving the mainstream to enter this service station at time instant k
 		"""
 
 		self.s_s.append((self.beta_s / (1 - beta_total)) * next_phi)
 		
-	def compute_rs(self, rs, t):
+	def compute_rs(self, rs: float, cong_state: CongState):
 		"""
 		Computation of the flow merging into the mainstream from this service station at time instant k
 		"""
 
-		if t == 0 or t == 1:
+		if cong_state == CongState.FREEFLOW or cong_state == CongState.CONG_MS:
 			self.r_s.append(self.demand)
-
-		elif t == 2 or t == 3:
+		elif cong_state == CongState.CONG_ST or cong_state == CongState.CONG_ALL:
 			self.r_s.append(rs)
 
-	def compute_demand(self, dt):
+	def compute_demand(self, dt: float):
 		"""
 		Computation of the demand of the ramp exiting this service station at time instant k
 
@@ -86,10 +96,7 @@ class Station:
 		else:
 			d_s = self.s_s[self.k - round(self.delta)] + (self.e[self.k] / dt)
 
-		self.demand = min([d_s, self.r_s_c[self.k], self.r_s_max])
-
-		# if (d_s > self.r_s_c[self.k]) and (self.r_s_c[self.k] != self.r_s_max):
-		# 	print(self.k)
+		self.demand = min([d_s, self.r_s_c[self.k, self.id_station], self.r_s_max])
 
 	def compute_num_vehicles(self, dt: float):
 		"""
@@ -99,24 +106,27 @@ class Station:
 		"""
 
 		if len(self.s_s) < self.delta:
-			self.l.append(self.l[self.k] + dt * self.s_s[self.k] - 0)
+			self.l.append(self.l[self.k] + dt * self.s_s[self.k])
 		else:
 			self.l.append(self.l[self.k] + dt * (self.s_s[self.k] - self.s_s[int(self.k - self.delta)]))
 
-	def compute_queue_length(self, dt):
+	def compute_queue_length(self, dt: float):
 		"""
 		Computation of the number of vehicles queueing at this service station at time instant k + 1
 		(due to the impossibility of merging back into the mainstream)
 		"""
 
 		d_queue = self.e[self.k] - (dt * self.r_s[-1])
+		s_queue = 0
 
 		if len(self.s_s) >= self.delta:
-			d_queue += (dt * self.s_s[int(self.k - self.delta)])
+			s_queue += (dt * self.s_s[int(self.k - self.delta)])
+			d_queue += s_queue
 
+		self.s_e.append(s_queue)
 		self.e.append(d_queue)
 
-	def update_k(self, kappa):
+	def update_k(self, kappa: int):
 		"""
 		Each iteration starts with the update of the time instant
 		"""
@@ -130,7 +140,8 @@ class Station:
 
 		self.k = 0
 		self.s_s = []
+		self.s_e = []
 		self.r_s = []
 		self.e = [0]
-		self.demand = 0
 		self.l = [0]
+		self.demand = 0

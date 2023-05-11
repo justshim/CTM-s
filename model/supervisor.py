@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 
-from model.cell import Cell
+from model.cell import Cell, CongState
 from model.station import Station
 from model.on_ramp import OnRamp
 from model.off_ramp import OffRamp
@@ -12,7 +12,7 @@ class Stretch:
 	Class to maintain and simulate CTM-s model
 	"""
 
-	cells: List[Cell]			# Cell in highway stretch
+	cells: List[Cell]			# Cells in highway stretch
 	on_ramps: List[OnRamp]		# On-ramps in highway stretch
 	off_ramps: List[OffRamp]  	# Off-ramps in highway stretch
 	stations: List[Station]		# Stations in highway stretch
@@ -122,7 +122,7 @@ class Stretch:
 		if j not in [s.j for s in self.stations]:
 			self.n_stations_exit += 1
 
-		station = Station(self.n_stations, r_s_max, i, j, delta, beta_s, p)
+		station = Station(self.n_stations, i, j, delta, beta_s, p, r_s_max)
 		self.stations.append(station)
 		self.n_stations += 1
 
@@ -255,29 +255,30 @@ class Stretch:
 		total_rs = 0
 		for s in range(len(self.stations)):
 			if self.stations[s].j == i:
-				if self.cells[i].cong_state == 0 or self.cells[i].cong_state == 1:
+				if self.cells[i].cong_state == CongState.FREEFLOW or self.cells[i].cong_state == CongState.CONG_MS:
 					self.stations[s].compute_rs(0, self.cells[i].cong_state)
 					
-				elif self.cells[i].cong_state == 2:
+				elif self.cells[i].cong_state == CongState.CONG_ST:
 					self.iterative_procedure(i, self.cells[i].cong_state)
 					
-				elif self.cells[i].cong_state == 3:
+				elif self.cells[i].cong_state == CongState.CONG_ALL:
 					self.iterative_procedure(i, self.cells[i].cong_state)
 					
 				total_rs += self.stations[s].r_s[-1]
 
 		return total_rs
 
-	def iterative_procedure(self, i: int, cong_state: int):
+	def iterative_procedure(self, i: int, cong_state: CongState):
 		"""
 		Method called during the update procedure and used to assign r_s to all stations merging into the same cell
-		in case of congestions of type 2 and 3
+		in case of congestion in the station [2] or both the mainstream and station [3]
 		"""
 
 		# initialization of support variables
 		demands = []
 		prev_demand = self.cells[i - 1].demand
 		supply = self.cells[i].supply
+		supply_res = 0
 		good = [0]  # list to contain "good" demands, i.e. the ones that do not saturate the flow
 		sum_d_good = 0
 		sum_p = 0
@@ -286,10 +287,10 @@ class Stretch:
 			if s.j == i:
 				demands.append(s)
 
-		if cong_state == 2:
+		if cong_state == CongState.CONG_ST:
 			supply_res = supply - prev_demand
 
-		elif cong_state == 3:
+		elif cong_state == CongState.CONG_ALL:
 			supply_res = (1 - self.cells[i].p_ms) * supply
 
 		bad = demands  # list to contain "bad" demands, i.e. the ones that do saturate the flow
@@ -297,7 +298,7 @@ class Stretch:
 		# Recursively compute "bad" (E_cal_overline in the paper) and "good" (E_cal_underline in the paper)
 		while len(good) != 0:
 			good.clear()
-			if cong_state == 2:
+			if cong_state == CongState.CONG_ST:
 				for d in demands:
 					if d.demand <= (supply_res - sum_d_good) / len(bad):
 						bad.remove(d)
@@ -311,7 +312,7 @@ class Stretch:
 						sum_d_good = sum_d_good + d.demand
 
 						supply_res = supply_res - d.demand
-			elif cong_state == 3:
+			elif cong_state == CongState.CONG_ALL:
 				for d in demands:
 					if d.demand <= (((1 - self.cells[i].p_ms) * supply_res) - sum_d_good) / len(bad):
 						bad.remove(d)
@@ -324,7 +325,7 @@ class Stretch:
 
 						sum_d_good = sum_d_good + d.demand
 
-						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.demand  ## VERIFICARE FORMULA
+						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.demand
 
 		# Compute sum of priorities for all involved stations
 		for b in bad:

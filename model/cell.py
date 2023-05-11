@@ -1,29 +1,66 @@
-class Cell:
-	# TODO: Provide type hints for clarity
-	# TODO: Clean up method function names
-	# TODO: Congestion state variables
+from typing import List
+from enum import Enum
 
+
+class CongState(Enum):
 	"""
-	Class describing the cells of the CTM-s model
+	Four congestion states as described in
+	"A Novel Control-Oriented Cell Transmission Model Including Service Stations on Highways"
+	Cenedese et al. 2022
 	"""
+
+	FREEFLOW = 0
+	CONG_MS = 1
+	CONG_ST = 2
+	CONG_ALL = 3
+
+
+class Cell:
+	"""
+	Class modeling the cells on a highway stretch in the CTM-s model
+	"""
+
+	id_cell: int						# Cell ID
+	l: float							# Length of Cell [km]
+	v_free: float						# Freeflow Velocity [km/hr]
+	w: float							# Congestion Wave Velocity [km/hr]
+	p_ms: float							# Mainstream Priority [0,1]
+	q_max: float						# Maximum Supported Vehicle Flow [veh/hr]
+	rho_max: float						# Maximum Supported Vehicle Density [veh/km]
+
+	rho: List							# Cell Vehicle Density [veh/km]
+	phi: List							# Cell Incoming Mainstream Vehicle Flow [veh/hr]
+	v: List								# Cell Velocity [km/hr]
+	phi_minus: float					# Total Exit Vehicle Flow [veh/hr]
+	phi_plus: float						# Total Entering Vehicle Flow [veh/hr]
+
+	demand: float						# Cell Demand [veh/hr]
+	supply: float						# Cell Supply [veh/hr]
+
+	cong_state: CongState				# Cell Congestion State
+
+	k: int								# Time step
+
 	def __init__(self, id_cell, length, v_free, w, q_max, rho_max, p_ms):
 		self.id_cell = id_cell
 		self.l = length
 		self.v_free = v_free
-		self.v = []
 		self.w = w
-		# self.q = [4000]  # Q is a vector for capacity drop modelling
 		self.p_ms = p_ms
 		self.q_max = q_max
 		self.rho_max = rho_max
 
 		self.rho = [0]
 		self.phi = []
+		self.v = []
 		self.phi_minus = 0
 		self.phi_plus = 0
+
 		self.demand = 0
 		self.supply = 0
-		self.cong_state = 0
+
+		self.cong_state = CongState.FREEFLOW
+
 		self.k = 0
 
 	def to_string(self):
@@ -39,16 +76,17 @@ class Cell:
 		print("q_max: " + str(self.q_max))
 		print()
 
-	# TODO: Can the velocity be larger than the freeflow velocity?
 	def compute_velocity(self):
 		"""
 		Compute cell velocity
+
+		Note: CTM-s is only a 1st order model, so v <= v_free is not respected for all times
 		"""
 
 		if self.rho[self.k] == 0:
 			self.v.append(self.v_free)
 		else:
-			phi_avg = (self.phi_minus + self.phi_plus) / 2
+			phi_avg = self.phi_plus
 			self.v.append(phi_avg/self.rho[self.k])
 
 	def compute_phi(self, d_prev: float, total_ds: float):
@@ -59,16 +97,16 @@ class Cell:
 
 		self.update_cong_state(d_prev, total_ds)
 
-		if self.cong_state == 0:  # FREE FLOW
+		if self.cong_state == CongState.FREEFLOW:
 			self.phi.append(d_prev)
 		
-		elif self.cong_state == 1:  # CONGESTED MAINSTREAM
+		elif self.cong_state == CongState.CONG_MS:
 			self.phi.append(self.supply - total_ds)
 
-		elif self.cong_state == 2:  # CONGESTED SERVICE
+		elif self.cong_state == CongState.CONG_ST:
 			self.phi.append(d_prev)
 
-		elif self.cong_state == 3:  # CONGESTED ALL
+		elif self.cong_state == CongState.CONG_ALL:
 			self.phi.append(self.supply * self.p_ms)
 
 	def compute_phi_plus(self, rs_total: float):
@@ -112,20 +150,20 @@ class Cell:
 		"""
 
 		if d_prev + total_ds <= self.supply:
-			self.cong_state = 0  # FREE FLOW
+			self.cong_state = CongState.FREEFLOW
 		
 		elif (d_prev > self.p_ms * self.supply) and (total_ds <= (1 - self.p_ms) * self.supply):
-			self.cong_state = 1  # CONGESTED MAINSTREAM
+			self.cong_state = CongState.CONG_MS
 
 		elif (d_prev <= self.p_ms * self.supply) and (total_ds > (1 - self.p_ms) * self.supply):
-			self.cong_state = 2  # CONGESTED SERVICE
+			self.cong_state = CongState.CONG_ST
 
 		elif (d_prev > self.p_ms * self.supply) and (total_ds > (1 - self.p_ms) * self.supply):
-			self.cong_state = 3  # CONGESTED ALL
+			self.cong_state = CongState.CONG_ALL
 		else:
 			print("cell: " + str(self.id_cell) + " Congestion Error")
 
-	def update_k(self, kappa):
+	def update_k(self, kappa: int):
 		"""
 		Each iteration starts with the update of the time instant
 		"""
@@ -136,6 +174,7 @@ class Cell:
 		"""
 		Reset cell to zero initial condition
 		"""
+
 		self.v = []
 		self.phi = []
 		self.phi_minus = 0
@@ -143,5 +182,5 @@ class Cell:
 		self.rho = [0]
 		self.demand = 0
 		self.supply = 0
-		self.cong_state = 0
+		self.cong_state = CongState.FREEFLOW
 		self.k = 0
