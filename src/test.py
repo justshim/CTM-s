@@ -2,7 +2,7 @@ import os
 import unittest
 import numpy as np
 
-from read_data import read_parameters, read_phi
+from data import read_parameters, read_phi
 from optimizer import MyTrafficOptimizer
 
 # TODO: Outdated

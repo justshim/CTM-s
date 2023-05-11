@@ -1,5 +1,4 @@
 from typing import List
-import numpy as np
 
 from model.supervisor import Stretch
 from model.parameters import CTMsParameters

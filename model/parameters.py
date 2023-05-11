@@ -1,9 +1,12 @@
+from dataclasses import dataclass
 from typing import Dict
 import numpy as np
 import pandas as pd
 
 
 # TODO: Add assert statements to check that data is well formatted
+# TODO: Add def __post_init__(self)
+@dataclass
 class HighwayParameters:
     id: np.ndarray          # Cell ID [0,1,...,N-1]
     l: np.ndarray           # Cell Length [km]
@@ -11,7 +14,7 @@ class HighwayParameters:
     w: np.ndarray           # Congestion Wave Speed [km/hr]
     q_max: np.ndarray       # Maximum Cell Capacity [veh/hr]
     rho_max: np.ndarray     # Maximum Jam Density [veh/km]
-    p_ms: np.ndarray        # Priority of the Mainstream [0,1]
+    p_ms: np.ndarray        # Mainstream priority of each cell [0,1]
     dt: float               # dt [hrs]
 
     def __init__(self, loc: str):
@@ -29,6 +32,7 @@ class HighwayParameters:
         return len(self.id)
 
 
+@dataclass
 class OnRampParameters:
     id: np.ndarray          # On-ramp ID [0,1,...,N-1]
     j: np.ndarray           # On-ramp Access Cell
@@ -51,7 +55,7 @@ class OnRampParameters:
     def __len__(self):
         return len(self.id)
 
-
+@dataclass
 class OffRampParameters:
     id: np.ndarray          # Off-ramp ID [0,1,...,N-1]
     i: np.ndarray           # Off-ramp Exit Cell
@@ -67,12 +71,13 @@ class OffRampParameters:
         return len(self.id)
 
 
+@dataclass
 class StationParameters:  # TODO: Come back and fix the maps...
     id: np.ndarray          # Station ID [0,1,...,N-1]
     i: np.ndarray           # Station Access Cell
     j: np.ndarray           # Station Exit Cell
     j_r: np.ndarray         # Unique Station Exit Cells
-    l_r: np.ndarray         # TODO: Length of the Off-ramp?
+    l_r: np.ndarray         # Length of the Off-ramp
     e_max: np.ndarray       # TODO: Maximum Queue Length?
     r_s_max: np.ndarray     # Maximum Service Station Exit Flow [veh/hr]
     delta: np.ndarray       # Average Time Spent at Service Station []  # TODO: Units?
@@ -87,12 +92,11 @@ class StationParameters:  # TODO: Come back and fix the maps...
         self.j = station[:, 2].astype(int)
         self.j_r = np.unique(self.j).astype(int)
         self.l_r = np.empty_like(self.j_r)
-        self.e_max = 100 * np.ones_like(self.j)  # TODO: Need to calculate this?
+        self.e_max = 100 * np.ones_like(self.j)  # TODO: Hardcoded
         self.r_s_max = station[:, 3]
         self.delta = station[:, 4]
-        self.beta_s = station[:, 5]
-        self.p = station[:, 6]
-        self.j_to_p = {}
+        self.beta_s = station[:, 5]  # Default value
+        self.p = station[:, 6]  # TODO: Should this be set to 0?
 
         self.build_j_to_p()
 
@@ -100,6 +104,9 @@ class StationParameters:  # TODO: Come back and fix the maps...
         """
         TODO: ...
         """
+
+        self.j_to_p = {}
+
         for j in self.j_r:
             self.j_to_p[j] = 0
 
@@ -119,7 +126,8 @@ class CTMsParameters:
     offramps: OffRampParameters
     stations: StationParameters
 
-    def __init__(self, hi_loc: str, onr_loc: str, offr_loc: str, st_loc: str, phi_onr_loc: str):
+    def __init__(self, hi_loc: str, onr_loc: str, offr_loc: str, st_loc: str, phi_onr_loc: str, gen_beta=(False, 0)):
+
         self.highway = HighwayParameters(hi_loc)
         self.onramps = OnRampParameters(onr_loc, phi_onr_loc)
         self.offramps = OffRampParameters(offr_loc)
@@ -128,10 +136,14 @@ class CTMsParameters:
         self.update_mainstream_priorities()
         self.update_station_lengths()
 
+        if gen_beta[0]:
+            self.generate_beta(gen_beta[1])
+
     def update_mainstream_priorities(self):
         """
         TODO: ...
         """
+
         for j_, j in enumerate(self.onramps.j):
             self.highway.p_ms[j] -= self.onramps.p_r[j_]
 
@@ -142,10 +154,20 @@ class CTMsParameters:
         """
         TODO: ...
         """
+
         self.stations.l_r = self.highway.l[self.stations.j_r]
 
     def update_dt(self, dt: float):
         """
         TODO: ...
         """
+
         self.highway.dt = dt
+
+    # TODO: Maybe it doesn't make sense to generate beta?
+    def generate_beta(self, day_length: int):
+        """
+        TODO: ...
+        """
+
+        self.stations.beta_s = np.random.uniform(0.00, 0.10, day_length)

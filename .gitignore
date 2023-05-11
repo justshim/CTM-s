@@ -3,3 +3,7 @@
 .DS_Store
 sandbox/
 __pycache__/
+src/sandbox.py
+src/main_test.py
+src/test.py
+figures/
