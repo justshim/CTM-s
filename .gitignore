@@ -1,0 +1,13 @@
+/venv/
+.idea
+.DS_Store
+sandbox/
+__pycache__/
+src/sandbox.py
+src/main_test.py
+src/test.py
+figures/
+data/test/
+src/plot_dynamics.py
+src/plot_results.py
+src/plot_validation.py
