@@ -39,9 +39,8 @@ if __name__ == '__main__':
     st_loc = f"{path[0]}/data/stations_one.csv"
     phi_loc = f"{path[0]}/data/phi_1_24h_realsmooth.csv"
     phi_onr_loc = f"{path[0]}/data/onramps_signal.csv"
-    fig_path = f"{path[0]}/sandbox/figures/"
 
-    results_path = f"{path[0]}/sandbox/results/{date_time}/"
+    results_path = f"{path[0]}/results/{date_time}/"
     os.mkdir(results_path)
 
     day_length = day_end - day_start

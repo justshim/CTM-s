@@ -1,0 +1,4 @@
+Plots generated with src/plot_dynamics.py
+Cell density, cell flow, fundamental diagrams over a 24 hour period
+Simulated either w/ or w/o stations ('stations_none.csv', 'stations_one.csv')
+Simualted either w/ 'doublepeak.csv' or 'realsmooth.csv' first cell incoming flow profiles
