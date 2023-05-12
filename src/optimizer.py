@@ -8,7 +8,6 @@ import mosek
 
 from model.parameters import CTMsParameters
 from control import ControlParameters
-from results import plot_lp
 
 
 # TODO: Cleanup use of np.reshape() throughout the class
@@ -431,6 +430,8 @@ class TrafficOptimizer:
         # Epigraph Constraints #
         ########################
 
+        # TODO: Add comments
+        # Maximize flows to match nominal dynamics as defined by inequalities
         a_epigraph = -np.ones(self.num_variables)
 
         for i in range(self.n_r):
@@ -444,27 +445,31 @@ class TrafficOptimizer:
 
     def define_cost_function(self):
         """
-        TODO: Add description / comments
+        Define cost function for LP
+
+        cost = (a_epigraph * epigraph) + (a_control * control)
+
+        control: Minimize highway cell densities and station queue length
         """
 
         # Define control objective
         # Minimize highway cell density [veh/km]
         # Note: Minimizing density rather than number of vehicles
-        cost_rho = self.params_c.a_rho * np.sum(self.rho_matrix, axis=0)
+        cont_rho = self.params_c.a_rho * np.sum(self.rho_matrix, axis=0)
 
         # Minimize service station exit queue length
-        cost_queue = self.params_c.a_queue * np.sum(self.e_matrix, axis=0)
+        cont_queue = self.params_c.a_queue * np.sum(self.e_matrix, axis=0)
 
-        cost = cost_rho + cost_queue  # TODO: Units: [veh hr / km]
+        cont = cont_rho + cont_queue  # TODO: Units: [veh hr / km]
 
         # Exponential discount
-        cost[:-1] = np.multiply(cost[:-1], self.discount)
+        cont[:-1] = np.multiply(cont[:-1], self.discount)
 
         # Define epigraph of flows
         epi = np.zeros(self.num_variables)
         epi[-1] = 1
 
-        self.c = (self.params_c.a_epi * epi) + (self.params_c.a_cost * cost)
+        self.c = (self.params_c.a_epi * epi) + (self.params_c.a_cont * cont)
 
     def update_variables(self):
         """
@@ -548,7 +553,7 @@ class TrafficOptimizer:
         self.formulate_constraints()
         self.define_cost_function()
 
-    def solve(self, print_sol=False, plot_sol=False, n_update=0):
+    def solve(self, print_sol=False):
         """
         Solve LP for optimal flows using Mosek
         """
@@ -574,6 +579,7 @@ class TrafficOptimizer:
                 # blx[j] <= x_j <= bux[j]
                 (k, r) = divmod(j, self.m)
 
+                # Flow Variables
                 if k < self.k_l:
                     # Initial flow condition
                     if r == 0:
@@ -581,15 +587,16 @@ class TrafficOptimizer:
                                          mosek.boundkey.ra,     # Lower and Upper Bound
                                          0,                     # Non-negative flow lower bound
                                          self.phi_0[k])         # phi_0 upper bound (from data)
-                    # Non-negative flow condition
+                    # All the other flows
                     else:
                         task.putvarbound(j,                     # Variable (column) index.
                                          mosek.boundkey.lo,     # Lower bound
                                          0,                     # Non-negative flow lower bound
                                          +inf)
+                # Epigraph Variable
                 else:
                     task.putvarbound(j,                         # Variable (column) index.
-                                     mosek.boundkey.fr,         # Lower bound
+                                     mosek.boundkey.fr,         # Free Bound
                                      0,
                                      0)
 
@@ -630,9 +637,6 @@ class TrafficOptimizer:
                     print("Optimal solution: ")
                     for i in range(self.num_variables):
                         print("x[" + str(i) + "]=" + str(self.u_opt[i]))
-
-                if plot_sol:
-                    plot_lp(self.u_rs_c, [0], self.k_0, self.k_0 + self.k_l, n_update)
 
             elif (solsta == mosek.solsta.dual_infeas_cer or
                   solsta == mosek.solsta.prim_infeas_cer):
