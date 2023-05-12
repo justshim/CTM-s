@@ -57,8 +57,8 @@ if __name__ == '__main__':
     fac_1 = Factory(parameters)  # Highway w/ receding-horizon control (MPC)
     # fac_2 = Factory(parameters)  # TODO: Highway w/ receding-horizon ILC control
 
-    # control_parameters = ControlParameters()  # TODO: Highway w/ receding-horizon ILC control
-    opt_1 = TrafficOptimizer(parameters)
+    control_parameters = ControlParameters()
+    opt_1 = TrafficOptimizer(parameters, control_parameters)
     # opt_2 = TrafficOptimizer(parameters, control_parameters)  # TODO: Highway w/ receding-horizon ILC control
 
     gen = TrafficFlowGenerator(phi_loc, congestion_start, congestion_end)
@@ -101,11 +101,10 @@ if __name__ == '__main__':
 
                     # Generate estimate of flow from data
                     phi_0 = hist.get_flow(predict=False)
-                    # plot_flow_comparison(real_phi_0, phi_0, window_start, window_end, fig_path)
 
                     # Solve LP
                     opt_1.solve_init(x_0, phi_0, s_s_0, window_start, window_length)
-                    opt_1.solve(print_sol=False, plot_sol=False, n_update=n_update)
+                    opt_1.solve(print_sol=False)
 
                     # Update service stations with ramp-meter control term from LP solution
                     fac_1.stretches[0].update_control(window_start, opt_1.u_rs_c)

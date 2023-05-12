@@ -92,7 +92,7 @@ class Cell:
 	def compute_phi(self, d_prev: float, total_ds: float):
 		"""
 		Computation of the flow entering this cell from the previous one at time instant k
-		Varies according to the congestion state of the cell so we update it first
+		Varies according to the congestion state of the cell, so we update it first
 		"""
 
 		self.update_cong_state(d_prev, total_ds)

@@ -5,22 +5,16 @@ import numpy as np
 
 @dataclass
 class ControlParameters:
-    Q: np.ndarray
-    R: np.ndarray
+    """
+    TODO: ...
+    """
 
-    # Q: np.ndarray
-    # R: np.ndarray
-    # G: np.ndarray
-    # w: np.ndarray
-    # d: np.ndarray
-    # M: np.ndarray
-    #
-    # H: np.ndarray
-    # f: np.ndarray
-
-    # eta: float
-
-    # def __init__(self):
+    discount = 0.05                 # TODO: ...
+    epi_st = 0.01                    # TODO: ...
+    a_rho = 0.003                   # TODO: ...
+    a_queue = 0.0009                # TODO: ...
+    a_epi = 0.003                   # TODO: ...
+    a_cont = 0.70                   # TODO: ...
 
 
 class TrafficHistory:

@@ -6,8 +6,13 @@ import pandas as pd
 
 # TODO: Add assert statements to check that data is well formatted
 # TODO: Add def __post_init__(self)
+# TODO: Make sure that @dataclass is the right option. More of a python question than anything
 @dataclass
 class HighwayParameters:
+    """
+    Class to represent all parameters for the highway in the CTM-s model
+    """
+
     id: np.ndarray          # Cell ID [0,1,...,N-1]
     l: np.ndarray           # Cell Length [km]
     v: np.ndarray           # Free-flow Speed [km/hr]
@@ -34,6 +39,10 @@ class HighwayParameters:
 
 @dataclass
 class OnRampParameters:
+    """
+    Class to represent all parameters for on-ramps in the CTM-s model
+    """
+
     id: np.ndarray          # On-ramp ID [0,1,...,N-1]
     j: np.ndarray           # On-ramp Access Cell
     r_r_max: np.ndarray     # Maximum On-ramp Flow [veh/hr]
@@ -55,8 +64,13 @@ class OnRampParameters:
     def __len__(self):
         return len(self.id)
 
+
 @dataclass
 class OffRampParameters:
+    """
+    Class to represent all parameters for off-ramps in the CTM-s model
+    """
+
     id: np.ndarray          # Off-ramp ID [0,1,...,N-1]
     i: np.ndarray           # Off-ramp Exit Cell
     beta_r: np.ndarray      # Split Ratio [0,1]
@@ -73,6 +87,10 @@ class OffRampParameters:
 
 @dataclass
 class StationParameters:  # TODO: Come back and fix the maps...
+    """
+    Class to represent all parameters for stations in the CTM-s model
+    """
+
     id: np.ndarray          # Station ID [0,1,...,N-1]
     i: np.ndarray           # Station Access Cell
     j: np.ndarray           # Station Exit Cell
@@ -80,7 +98,7 @@ class StationParameters:  # TODO: Come back and fix the maps...
     l_r: np.ndarray         # Length of the Off-ramp
     e_max: np.ndarray       # TODO: Maximum Queue Length?
     r_s_max: np.ndarray     # Maximum Service Station Exit Flow [veh/hr]
-    delta: np.ndarray       # Average Time Spent at Service Station []  # TODO: Units?
+    delta: np.ndarray       # Average Time Spent at Service Station [Time increments]
     beta_s: np.ndarray      # Split Ratio (Entering Service Station) [0,1]
     p: np.ndarray           # Priority (Exiting Service Station) [0,1]
     j_to_p: Dict            # Map: j -> p; cell j -> priority of all stations exiting at cell j
@@ -102,7 +120,7 @@ class StationParameters:  # TODO: Come back and fix the maps...
 
     def build_j_to_p(self):
         """
-        TODO: ...
+        Build map from station outlet cell to total priority
         """
 
         self.j_to_p = {}
@@ -119,15 +137,15 @@ class StationParameters:  # TODO: Come back and fix the maps...
 
 class CTMsParameters:
     """
-    Basic Class to represent all CTMs Parameters
+    Class to represent all parameters in the CTM-s model
     """
+
     highway: HighwayParameters
     onramps: OnRampParameters
     offramps: OffRampParameters
     stations: StationParameters
 
-    def __init__(self, hi_loc: str, onr_loc: str, offr_loc: str, st_loc: str, phi_onr_loc: str, gen_beta=(False, 0)):
-
+    def __init__(self, hi_loc: str, onr_loc: str, offr_loc: str, st_loc: str, phi_onr_loc: str):
         self.highway = HighwayParameters(hi_loc)
         self.onramps = OnRampParameters(onr_loc, phi_onr_loc)
         self.offramps = OffRampParameters(offr_loc)
@@ -136,12 +154,9 @@ class CTMsParameters:
         self.update_mainstream_priorities()
         self.update_station_lengths()
 
-        if gen_beta[0]:
-            self.generate_beta(gen_beta[1])
-
     def update_mainstream_priorities(self):
         """
-        TODO: ...
+        Calculate mainstream_priorities by considering both stations ond on-ramps
         """
 
         for j_, j in enumerate(self.onramps.j):
@@ -152,22 +167,14 @@ class CTMsParameters:
 
     def update_station_lengths(self):
         """
-        TODO: ...
+        TODO: Might not be necessary
         """
 
         self.stations.l_r = self.highway.l[self.stations.j_r]
 
     def update_dt(self, dt: float):
         """
-        TODO: ...
+        TODO: Might not be necessary
         """
 
         self.highway.dt = dt
-
-    # TODO: Maybe it doesn't make sense to generate beta?
-    def generate_beta(self, day_length: int):
-        """
-        TODO: ...
-        """
-
-        self.stations.beta_s = np.random.uniform(0.00, 0.10, day_length)
