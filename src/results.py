@@ -67,10 +67,16 @@ class TrafficEvaluator:
             beta_prev = s.beta_total[0, i-1]  # Assume constant beta
 
             rho_critical[i] = max(
-                c_i.rho_max - (c_prev.q_max/c_i.w),
-                c_i.w * c_i.rho_max / ((1 - beta_prev) * c_prev.v_free + c_i.w),
-                c_i.rho_max - (c_i.q_max/c_i.w)
+                [c_i.rho_max - (c_prev.q_max/c_i.w),
+                 c_i.w * c_i.rho_max / ((1 - beta_prev) * c_prev.v_free + c_i.w),
+                 c_i.rho_max - (c_i.q_max/c_i.w)]
             )
+
+            # a = [c_i.rho_max - (c_prev.q_max / c_i.w),
+            #      c_i.w * c_i.rho_max / ((1 - beta_prev) * c_prev.v_free + c_i.w),
+            #      c_i.rho_max - (c_i.q_max / c_i.w)]
+            #
+            # print(a.index(max(a)))
 
         # Compute congestion severity
         congestion_severity = 0
@@ -121,25 +127,38 @@ class TrafficResults:
         self.n_iter = n_iter
         self.n_fact = n_fact
 
-    def save(self, j: int, n: int, s: Stretch, p: TrafficPerformance, results_path: str):
+    @staticmethod
+    def save(j: int, n: int, s: Stretch, p: TrafficPerformance, results_path: str):
         """
         Save state, input arrays from simulation as .npz files
         Save performance result object as .npy file
         """
 
-        for i, c in enumerate(s.cells):
-            np.savez(f"{results_path}f_{j}_it_{n}_cell_{i}.npz",
-                     rho=np.array(c.rho),
-                     phi=np.array(c.phi))
+        np.savez(f"{results_path}f_{j}_it_{n}_cells.npz",
+                 rho=s.y_rho,
+                 phi=s.u_phi,
+                 dem=s.u_dem,
+                 sup=s.u_sup,
+                 cong=s.u_cong)
 
-        for i, st in enumerate(s.stations):
-            np.savez(f"{results_path}f_{j}_it_{n}_stat_{i}.npz",
-                     l=np.array(st.l),
-                     e=np.array(st.e),
-                     r_s=np.array(st.r_s))
+        np.savez(f"{results_path}f_{j}_it_{n}_stations.npz",
+                 l=s.y_l,
+                 e=s.y_e,
+                 r_s=s.u_rs)
 
         np.save(f"{results_path}f_{j}_it_{n}_perf.npy",
                 p.as_array())
+
+        # for i, c in enumerate(s.cells):
+        #     np.savez(f"{results_path}f_{j}_it_{n}_cell_{i}.npz",
+        #              rho=np.array(c.rho),
+        #              phi=np.array(c.phi))
+        #
+        # for i, st in enumerate(s.stations):
+        #     np.savez(f"{results_path}f_{j}_it_{n}_stat_{i}.npz",
+        #              l=np.array(st.l),
+        #              e=np.array(st.e),
+        #              r_s=np.array(st.r_s))
 
 
 # TODO: Get rid of these plotting help functions eventually

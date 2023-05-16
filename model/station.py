@@ -9,7 +9,7 @@ class Station:
 	Class modeling the service stations on a highway stretch in the CTM-s model
 	"""
 
-	id_station: int 			# Service Station ID
+	id: int 					# Service Station ID
 	i: int						# Service Station Inlet Cell ID
 	j: int						# Service Station Outlet Cell ID
 	delta: float				# Time Spent at Service Station [Time Steps]
@@ -18,21 +18,21 @@ class Station:
 	r_s_max: float				# Maximum Supported Outflow [veh/hr]
 	e_max: float  				# TODO: Maximum Queue Length
 
-	e: List						# Service Station Queue Length [veh]
-	l: List						# Number of Service Station Users [veh]
+	e: List[float]				# Service Station Queue Length [veh]
+	l: List[float]				# Number of Service Station Users [veh]
 
-	s_s: List					# Service Station On-ramp Flow [veh/hr]
-	s_e: List					# Station to Queue Flow [veh/hr]
-	r_s: List					# Service Station Off-ramp Flow [veh/hr]
+	s_s: List[float]			# Service Station On-ramp Flow [veh/hr]
+	s_e: List[float]			# Station to Queue Flow [veh/hr]
+	r_s: List[float]			# Service Station Off-ramp Flow [veh/hr]
 
-	demand: float				# Station Off-ramp Demand [veh/hr]
+	dem: List[float]			# Station Off-ramp Demand [veh/hr]
 
 	r_s_c: np.ndarray			# Service Station Off-ramp Control Flow [veh/hr]
 
 	k: int						# Time step
 
 	def __init__(self, id_station: int, i: int, j: int, delta: float, beta_s: float, p: float, r_s_max: float):
-		self.id_station = id_station
+		self.id = id_station
 		self.i = i
 		self.j = j
 		self.delta = delta
@@ -48,7 +48,7 @@ class Station:
 		self.s_e = []
 		self.r_s = []
 
-		self.demand = 0
+		self.dem = []
 
 		self.r_s_c = np.empty(0)  # Default value
 
@@ -59,7 +59,7 @@ class Station:
 		Utility method to print some information about the service station
 		"""
 
-		print("Station ID: " + str(self.id_station))
+		print("Station ID: " + str(self.id))
 		print("From cell " + str(self.i))
 		print("To cell " + str(self.j))
 		print("Time delay: " + str(self.delta))
@@ -80,7 +80,7 @@ class Station:
 		"""
 
 		if cong_state == CongState.FREEFLOW or cong_state == CongState.CONG_MS:
-			self.r_s.append(self.demand)
+			self.r_s.append(self.dem[self.k])
 		elif cong_state == CongState.CONG_ST or cong_state == CongState.CONG_ALL:
 			self.r_s.append(rs)
 
@@ -96,7 +96,7 @@ class Station:
 		else:
 			d_s = self.s_s[self.k - round(self.delta)] + (self.e[self.k] / dt)
 
-		self.demand = min([d_s, self.r_s_c[self.k, self.id_station], self.r_s_max])
+		self.dem.append(min([d_s, self.r_s_c[self.k, self.id], self.r_s_max]))
 
 	def compute_num_vehicles(self, dt: float):
 		"""
@@ -144,4 +144,4 @@ class Station:
 		self.r_s = []
 		self.e = [0]
 		self.l = [0]
-		self.demand = 0
+		self.dem = []

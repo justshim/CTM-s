@@ -32,7 +32,11 @@ class Stretch:
 	y_e: np.ndarray				# State: Length of Service Station Queue
 
 	u_phi: np.ndarray			# Input: Flows between cells
+	u_dem: np.ndarray			# TODO:
+	u_sup: np.ndarray			# TODO:
+	u_cong: np.ndarray			# TODO:
 	u_rs: np.ndarray			# Input: Flow exiting service station
+	# u_dem_s: np.ndarray			# TODO: ...
 
 	s_s: np.ndarray				# Flow entering service station (for LP initialization)
 	beta_total: np.ndarray		# Aggregate split ratio at each cell
@@ -49,18 +53,8 @@ class Stretch:
 		self.n_stations = 0
 		self.n_stations_exit = 0
 
-		self.phi_0 = np.empty(0)
 		self.dt = dt
 		self.k = 0
-
-		self.y_rho = np.empty(0)
-		self.y_l = np.empty(0)
-		self.y_e = np.empty(0)
-
-		self.u_phi = np.empty(0)
-		self.u_rs = np.empty(0)
-		self.s_s = np.empty(0)
-		self.beta_total = np.empty(0)
 
 	def to_string(self):
 		"""
@@ -159,6 +153,9 @@ class Stretch:
 			# Compute demand from cell i-1 for cell i (phi_i)
 			total_ds = self.compute_total_ds(i)
 			d_prev = self.compute_prev_demand(i)  # Cell 0: prev. demand as input (first_phi)
+
+			self.u_dem[self.k, i] = d_prev + total_ds
+
 			self.cells[i].compute_phi(d_prev, total_ds)
 
 		# Second batch of cell value updates, with special case for last cell
@@ -202,12 +199,16 @@ class Stretch:
 		for i, c in enumerate(self.cells):
 			self.y_rho[self.k + 1, i] = c.rho[-1]
 			self.u_phi[self.k, i] = c.phi[-1]
+			# self.u_dem[self.k, i] = c.dem[-1]
+			self.u_sup[self.k, i] = c.sup[-1]
+			self.u_cong[self.k, i] = c.cong[-1]
 
 		for i, s in enumerate(self.stations):
 			self.y_l[self.k + 1, i] = s.l[-1]
 			self.y_e[self.k + 1, i] = s.e[-1]
 			self.u_rs[self.k, i] = s.r_s[-1]
 			self.s_s[self.k, i] = s.s_s[-1]
+			# self.u_dem_s[self.k, i] = s.dem[-1]
 
 	def compute_total_beta(self, i: int) -> float:
 		"""
@@ -238,7 +239,7 @@ class Stretch:
 		# Check for service-stations with exit point at cell i
 		for s in range(len(self.stations)):
 			if self.stations[s].j == i:
-				total_ds += self.stations[s].demand
+				total_ds += self.stations[s].dem[self.k]
 
 		# Check for on-ramps entering at cell i
 		for r_on in range(len(self.on_ramps)):
@@ -253,18 +254,18 @@ class Stretch:
 		"""
 
 		total_rs = 0
+		cong_state = self.cells[i].cong[self.k]
+
 		for s in range(len(self.stations)):
 			if self.stations[s].j == i:
-				if self.cells[i].cong_state == CongState.FREEFLOW or self.cells[i].cong_state == CongState.CONG_MS:
-					self.stations[s].compute_rs(0, self.cells[i].cong_state)
+				if cong_state == CongState.FREEFLOW or cong_state == CongState.CONG_MS:
+					self.stations[s].compute_rs(0, cong_state)
+				elif cong_state == CongState.CONG_ST:
+					self.iterative_procedure(i, cong_state)
+				elif cong_state == CongState.CONG_ALL:
+					self.iterative_procedure(i, cong_state)
 					
-				elif self.cells[i].cong_state == CongState.CONG_ST:
-					self.iterative_procedure(i, self.cells[i].cong_state)
-					
-				elif self.cells[i].cong_state == CongState.CONG_ALL:
-					self.iterative_procedure(i, self.cells[i].cong_state)
-					
-				total_rs += self.stations[s].r_s[-1]
+				total_rs += self.stations[s].r_s[self.k]
 
 		return total_rs
 
@@ -276,8 +277,8 @@ class Stretch:
 
 		# initialization of support variables
 		demands = []
-		prev_demand = self.cells[i - 1].demand
-		supply = self.cells[i].supply
+		prev_demand = self.cells[i-1].dem[self.k]
+		supply = self.cells[i].sup[self.k]
 		supply_res = 0
 		good = [0]  # list to contain "good" demands, i.e. the ones that do not saturate the flow
 		sum_d_good = 0
@@ -300,32 +301,32 @@ class Stretch:
 			good.clear()
 			if cong_state == CongState.CONG_ST:
 				for d in demands:
-					if d.demand <= (supply_res - sum_d_good) / len(bad):
+					if d.dem[self.k] <= (supply_res - sum_d_good) / len(bad):
 						bad.remove(d)
 						good.append(d)
 
 						# update RS for "good"
 						for station in self.stations:
-							if d.id_station == int(station.id_station):
-								station.compute_rs(d.demand, cong_state)
+							if d.id == int(station.id):
+								station.compute_rs(d.dem[self.k], cong_state)
 
-						sum_d_good = sum_d_good + d.demand
+						sum_d_good = sum_d_good + d.dem[self.k]
 
-						supply_res = supply_res - d.demand
+						supply_res = supply_res - d.dem[self.k]
 			elif cong_state == CongState.CONG_ALL:
 				for d in demands:
-					if d.demand <= (((1 - self.cells[i].p_ms) * supply_res) - sum_d_good) / len(bad):
+					if d.dem[self.k] <= (((1 - self.cells[i].p_ms) * supply_res) - sum_d_good) / len(bad):
 						bad.remove(d)
 						good.append(d)
 
 						# update RS for "good"
 						for station in self.stations:
-							if d.id_station == int(station.id_station):
-								station.compute_rs(d.demand, cong_state)
+							if d.id == int(station.id):
+								station.compute_rs(d.dem[self.k], cong_state)
 
-						sum_d_good = sum_d_good + d.demand
+						sum_d_good = sum_d_good + d.dem[self.k]
 
-						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.demand
+						supply_res = (1 - self.cells[i].p_ms) * supply_res - d.dem[self.k]
 
 		# Compute sum of priorities for all involved stations
 		for b in bad:
@@ -334,7 +335,7 @@ class Stretch:
 		# Update RS for "bad"
 		for b in bad:
 			for station in self.stations:
-				if b.id_station == int(station.id_station):
+				if b.id == int(station.id):
 					station.compute_rs((b.p / sum_p) * supply_res, cong_state)
 
 	def compute_s_station(self, i: int, beta_total: float, next_phi: float) -> float:
@@ -343,6 +344,7 @@ class Stretch:
 		"""
 
 		total_ss = 0
+
 		for s in range(len(self.stations)):
 			if self.stations[s].i == i:
 				self.stations[s].compute_ss(beta_total, next_phi)
@@ -360,16 +362,16 @@ class Stretch:
 
 			if self.on_ramps[r_on].j == i:
 					
-				if self.cells[i].cong_state == 0 or self.cells[i].cong_state == 1:
-					self.on_ramps[r_on].computeRr(0, self.cells[i].cong_state)
+				if self.cells[i].cong == 0 or self.cells[i].cong == 1:
+					self.on_ramps[r_on].computeRr(0, self.cells[i].cong)
 				
-				elif self.cells[i].cong_state == 2:
-					rr = self.cells[i].supply - self.cells[i - 1].demand
-					self.on_ramps[r_on].computeRr(rr, self.cells[i].cong_state)
+				elif self.cells[i].cong == 2:
+					rr = self.cells[i].sup[-1] - self.cells[i - 1].dem[-1]
+					self.on_ramps[r_on].computeRr(rr, self.cells[i].cong)
 				
-				elif self.cells[i].cong_state == 3:
-					rr = self.cells[i].supply * self.on_ramps[r_on].p_r
-					self.on_ramps[r_on].computeRr(rr, self.cells[i].cong_state)
+				elif self.cells[i].cong == 3:
+					rr = self.cells[i].sup * self.on_ramps[r_on].p_r
+					self.on_ramps[r_on].computeRr(rr, self.cells[i].cong)
 				
 				total_rs += self.on_ramps[r_on].r_r
 
@@ -396,7 +398,7 @@ class Stretch:
 		"""
 
 		if i != 0:
-			prev_demand = self.cells[i-1].demand
+			prev_demand = self.cells[i-1].dem[self.k]
 		else:
 			prev_demand = self.phi_0[self.k]
 			
@@ -410,10 +412,10 @@ class Stretch:
 		"""
 
 		if i < len(self.cells) - 1:
-			next_phi = self.cells[i+1].phi[-1]
+			next_phi = self.cells[i+1].phi[self.k]
 		else:
 			# next_phi = self.last_phi[self.k]
-			next_phi = self.cells[i-1].demand
+			next_phi = self.cells[i-1].dem[self.k]
 			self.u_phi[self.k, -1] = next_phi
 
 		return next_phi
@@ -430,7 +432,11 @@ class Stretch:
 		self.y_e = np.zeros((day_length + 1, self.n_stations))
 
 		self.u_phi = np.zeros((day_length, self.n_cells + 1))
+		self.u_dem = np.zeros((day_length, self.n_cells + 1))
+		self.u_sup = np.zeros((day_length, self.n_cells + 1))
+		self.u_cong = np.zeros((day_length, self.n_cells + 1))
 		self.u_rs = np.zeros((day_length, self.n_stations_exit))
+		# self.u_dem_s = np.zeros((day_length, self.n_stations_exit))
 		self.s_s = np.zeros((day_length, self.n_stations))
 		self.beta_total = np.zeros((day_length, self.n_cells))
 
