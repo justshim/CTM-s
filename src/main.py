@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
+
 from model.factory import Factory
 from model.parameters import CTMsParameters
 from src.data import TrafficFlowGenerator
-from optimizer import TrafficOptimizer
-from control import ControlParameters, TrafficHistory
-from results import TrafficEvaluator, TrafficResults
+from src.optimizer import TrafficOptimizer
+from src.control import ControlParameters, TrafficHistory
+from src.results import TrafficEvaluator, TrafficResults
 
 
 if __name__ == '__main__':
@@ -15,7 +16,7 @@ if __name__ == '__main__':
 
     dt = 10                         # Sampling rate [sec]: Default = 10 seconds
     window_length = 270             # Length of one LP window [# of time  increments]: 270 = 45 minutes
-    freq = 60                       # Frequency of Solving the LP [# of time increments]: 60 = 10 minutes
+    freq = 30                       # Frequency of Solving the LP [# of time increments]: 30 = 5 minutes
     n_fact = 2                      # Number of factories / algorithms
     n_iter = 2                      # Number of iterations
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     fac_1 = Factory(parameters)  # Highway w/ receding-horizon control (MPC)
     # fac_2 = Factory(parameters)  # TODO: Highway w/ receding-horizon ILC control
 
-    control_parameters = ControlParameters()
+    control_parameters = ControlParameters(0)
     opt_1 = TrafficOptimizer(parameters, control_parameters)
     # opt_2 = TrafficOptimizer(parameters, control_parameters)  # TODO: Highway w/ receding-horizon ILC control
 
@@ -103,6 +104,7 @@ if __name__ == '__main__':
 
                     # Solve LP
                     opt_1.solve_init(x_0, phi_0, s_s_0, window_start, window_length)
+
                     opt_1.solve(print_sol=False)
 
                     # Update service stations with ramp-meter control term from LP solution

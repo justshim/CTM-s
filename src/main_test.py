@@ -3,9 +3,9 @@ import os
 from src.data import *
 from model.factory import Factory
 from model.parameters import CTMsParameters
-from optimizer import TrafficOptimizer
-from results import plot_comparison_test, plot_flow_comparison
-from control import ControlParameters
+from src.optimizer import TrafficOptimizer
+from src.results import plot_comparison_test, plot_flow_comparison
+from src.control import ControlParameters
 
 
 if __name__ == '__main__':
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     ####################
 
     dt = 10                     # Sampling rate [sec]
-    window_length = 270         # Length of one interation [hrs]
+    window_length = 180         # Length of one interation [hrs]
     n_iter = 1                  # Number of ILC iterations
     eta = 1                     # Optimization Parameter: Tradeoff Between TTS, TTD
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     parameters = CTMsParameters(hi_loc, onr_loc, offr_loc, st_loc, phi_onr_loc)
     fac = Factory(parameters)
     gen = TrafficFlowGenerator(phi_loc, congestion_start, congestion_end)
-    control_parameters = ControlParameters()
+    control_parameters = ControlParameters(0)
     opt = TrafficOptimizer(parameters, control_parameters)
 
     ##############################
@@ -49,10 +49,9 @@ if __name__ == '__main__':
 
     day_length = day_end - day_start
     plot_ids = list(range(0, 14))
-
     phi_day = 1.2 * gen.get_flow(t_0=day_start, t_f=day_end, perturb=False)
 
-    window_start = 2900
+    window_start = 2790
     window_end = window_start + window_length
 
     for n in range(n_iter):
@@ -77,8 +76,7 @@ if __name__ == '__main__':
         # y_lp = opt.y_rho[:-1, :]
         # y_lp = opt.u_phi
         y_lp = opt.u_rs_c
-        # y_lp = opt.y_e[:-1, :]
-
+        # y_lp = opt.y_e[:-1, :
         for k in range(window_start, window_end):
             fac.stretches[0].update(k)
 

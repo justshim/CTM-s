@@ -112,6 +112,8 @@ class TrafficOptimizer:
         Compute total beta from service-stations and off-ramps
         """
 
+        self.beta = np.zeros((self.k_l, self.n_c))
+
         if self.params.stations.beta_s.ndim == 1:
             self.beta_s = np.kron(self.k_ones, self.params.stations.beta_s)
 
@@ -130,6 +132,16 @@ class TrafficOptimizer:
         l_q(k) = (l_0_matrix * initial state) + (l_s_0_matrix * station inflow history) + (l_matrix * input)
         e_q(k) = (e_0_matrix * initial state) + (e_s_0_matrix * station inflow history) + (e_matrix * input)
         """
+
+        self.rho_0_matrix = np.zeros(((self.k_l + 1) * self.n_c, self.n))
+        self.l_0_matrix = np.zeros(((self.k_l + 1) * self.n_s, self.n))
+        self.l_s_0_matrix = np.zeros(((self.k_l + 1) * self.n_s, len(self.s_s_0)))
+        self.e_0_matrix = np.zeros(((self.k_l + 1) * self.n_s, self.n))
+        self.e_s_0_matrix = np.zeros(((self.k_l + 1) * self.n_s, len(self.s_s_0)))
+
+        self.rho_matrix = np.zeros(((self.k_l + 1) * self.n_c, self.num_variables))
+        self.l_matrix = np.zeros(((self.k_l + 1) * self.n_s, self.num_variables))
+        self.e_matrix = np.zeros(((self.k_l + 1) * self.n_s, self.num_variables))
 
         a_i = np.divide(self.dt, self.params.highway.l)
         a_i_k = np.kron(self.k_ones, a_i)
@@ -455,7 +467,9 @@ class TrafficOptimizer:
         # Define control objective
         # Minimize highway cell density [veh/km]
         # Note: Minimizing density rather than number of vehicles
-        cont_rho = self.params_c.a_rho * np.sum(self.rho_matrix, axis=0)
+        # Note: Only minimize cells after the service station
+        j_min = min(self.params.stations.j)
+        cont_rho = self.params_c.a_rho * np.sum(self.rho_matrix[j_min:, :], axis=0)
 
         # Minimize service station exit queue length
         cont_queue = self.params_c.a_queue * np.sum(self.e_matrix, axis=0)
@@ -496,7 +510,7 @@ class TrafficOptimizer:
         self.u_phi = self.u_opt_k[:, :self.n_c + 1]
         self.u_rs_c = self.u_opt_k[:, self.n_c + 1:]
 
-    def solve_init(self, x_0: np.ndarray, phi_0: np.ndarray, s_s_0: np.ndarray, k_0: int, k_l: int):
+    def solve_init(self, x_0: np.ndarray, phi_0: np.ndarray, s_s_0: np.ndarray, k_0: int, k_l: int, re_comp=True):
         """
         Dimension of State: k_0 ~ k_0 + k_l        (Dimension = k_l + 1)
         Dimension of Input: k_0 ~ k_0 + k_l - 1    (Dimension = k_l)
@@ -508,30 +522,18 @@ class TrafficOptimizer:
 
         self.k_0 = k_0
         self.k_l = k_l
-        k_l_1 = self.k_l + 1
         self.k_ones = np.ones((self.k_l, 1))
-        self.k_1_ones = np.ones((k_l_1, 1))
+        self.k_1_ones = np.ones((self.k_l + 1, 1))
         self.discount = np.kron(np.exp(-self.params_c.discount * np.arange(0, self.k_l)), np.ones(self.m))
 
         self.num_variables = (self.k_l * self.m) + 1
-        self.beta = np.zeros((self.k_l, self.n_c))
-
-        self.rho_0_matrix = np.zeros((k_l_1 * self.n_c, self.n))
-        self.l_0_matrix = np.zeros((k_l_1 * self.n_s, self.n))
-        self.l_s_0_matrix = np.zeros((k_l_1 * self.n_s, len(self.s_s_0)))
-        self.e_0_matrix = np.zeros((k_l_1 * self.n_s, self.n))
-        self.e_s_0_matrix = np.zeros((k_l_1 * self.n_s, len(self.s_s_0)))
-
-        self.rho_matrix = np.zeros((k_l_1 * self.n_c, self.num_variables))
-        self.l_matrix = np.zeros((k_l_1 * self.n_s, self.num_variables))
-        self.e_matrix = np.zeros((k_l_1 * self.n_s, self.num_variables))
 
         self.u_opt = np.zeros(self.num_variables)
         self.u_opt_k = np.zeros((self.k_l, self.m))
 
-        self.y_rho = np.zeros((k_l_1, self.n_c))
-        self.y_l = np.zeros((k_l_1, self.n_s))
-        self.y_e = np.zeros((k_l_1, self.n_s))
+        self.y_rho = np.zeros((self.k_l + 1, self.n_c))
+        self.y_l = np.zeros((self.k_l + 1, self.n_s))
+        self.y_e = np.zeros((self.k_l + 1, self.n_s))
 
         self.u_phi = np.zeros((self.k_l, self.n_c + 1))  # Including terminal flow
         self.u_rs_c = np.zeros((self.k_l, self.n_r))
@@ -546,8 +548,10 @@ class TrafficOptimizer:
         self.bkc = []
 
         # TODO: Don't have to recompute all of these every time
-        self.compute_total_beta()
-        self.compute_state_matrices()
+        if re_comp:
+            self.compute_total_beta()
+            self.compute_state_matrices()
+
         self.define_state_constraints()
         self.define_flow_constraints()
         self.formulate_constraints()
