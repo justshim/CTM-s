@@ -86,7 +86,7 @@ class OffRampParameters:
 
 
 @dataclass
-class StationParameters:  # TODO: Come back and fix the maps...
+class StationParameters:
     """
     Class to represent all parameters for stations in the CTM-s model
     """
@@ -95,8 +95,6 @@ class StationParameters:  # TODO: Come back and fix the maps...
     i: np.ndarray           # Station Access Cell
     j: np.ndarray           # Station Exit Cell
     j_r: np.ndarray         # Unique Station Exit Cells
-    l_r: np.ndarray         # Length of the Off-ramp
-    e_max: np.ndarray       # TODO: Maximum Queue Length?
     r_s_max: np.ndarray     # Maximum Service Station Exit Flow [veh/hr]
     delta: np.ndarray       # Average Time Spent at Service Station [Time increments]
     beta_s: np.ndarray      # Split Ratio (Entering Service Station) [0,1]
@@ -109,12 +107,10 @@ class StationParameters:  # TODO: Come back and fix the maps...
         self.i = station[:, 1].astype(int)
         self.j = station[:, 2].astype(int)
         self.j_r = np.unique(self.j).astype(int)
-        self.l_r = np.empty_like(self.j_r)
-        self.e_max = 100 * np.ones_like(self.j)  # TODO: Hardcoded
         self.r_s_max = station[:, 3]
         self.delta = station[:, 4]
         self.beta_s = station[:, 5]  # Default value
-        self.p = station[:, 6]  # TODO: Should this be set to 0?
+        self.p = station[:, 6]
 
         self.build_j_to_p()
 
@@ -152,7 +148,6 @@ class CTMsParameters:
         self.stations = StationParameters(st_loc)
 
         self.update_mainstream_priorities()
-        self.update_station_lengths()
 
     def update_mainstream_priorities(self):
         """
@@ -164,17 +159,3 @@ class CTMsParameters:
 
         for j_, j in enumerate(self.stations.j):
             self.highway.p_ms[j] -= self.stations.p[j_]
-
-    def update_station_lengths(self):
-        """
-        TODO: Might not be necessary
-        """
-
-        self.stations.l_r = self.highway.l[self.stations.j_r]
-
-    def update_dt(self, dt: float):
-        """
-        TODO: Might not be necessary
-        """
-
-        self.highway.dt = dt
