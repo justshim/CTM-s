@@ -72,12 +72,6 @@ class TrafficEvaluator:
                  c_i.rho_max - (c_i.q_max/c_i.w)]
             )
 
-            # a = [c_i.rho_max - (c_prev.q_max / c_i.w),
-            #      c_i.w * c_i.rho_max / ((1 - beta_prev) * c_prev.v_free + c_i.w),
-            #      c_i.rho_max - (c_i.q_max / c_i.w)]
-            #
-            # print(a.index(max(a)))
-
         # Compute congestion severity
         congestion_severity = 0
 
@@ -148,55 +142,3 @@ class TrafficResults:
 
         np.save(f"{results_path}f_{j}_it_{n}_perf.npy",
                 p.as_array())
-
-        # for i, c in enumerate(s.cells):
-        #     np.savez(f"{results_path}f_{j}_it_{n}_cell_{i}.npz",
-        #              rho=np.array(c.rho),
-        #              phi=np.array(c.phi))
-        #
-        # for i, st in enumerate(s.stations):
-        #     np.savez(f"{results_path}f_{j}_it_{n}_stat_{i}.npz",
-        #              l=np.array(st.l),
-        #              e=np.array(st.e),
-        #              r_s=np.array(st.r_s))
-
-
-# TODO: Get rid of these plotting help functions eventually
-def plot_comparison_test(y_0: np.ndarray, y_1: np.ndarray, i: List, k_0: int, k_f: int, loc: str):
-    fig = plt.figure()
-    t = np.arange(k_0, k_f)
-    plt.plot(t, y_0[:, i], '-k')
-    plt.plot(t, y_1[:, i], '--r')
-    plt.xlabel('Time')
-    fig.savefig(loc + 'results_test/cell.png', dpi=300)  # TODO: Naming scheme for files...
-    plt.close()
-
-
-def plot_flow_comparison(y_0: np.ndarray, y_1: np.ndarray, k_0: int, k_f: int, loc: str):
-    fig = plt.figure()
-    t = np.arange(k_0, k_f)
-    plt.plot(t, y_0, '-k')
-    plt.plot(t, y_1, '--r')
-    plt.xlabel('Time')
-    fig.savefig(loc + 'results_test/flow.png', dpi=300)  # TODO: Naming scheme for files...
-    plt.close()
-
-
-def plot_comparison(y_0: np.ndarray, y_1: np.ndarray, i: List, k_0: int, k_f: int, loc: str):
-    fig = plt.figure()
-    t = np.arange(k_0, k_f)
-    plt.plot(t, y_0[:, i], '-k')
-    plt.plot(t, y_1[:, i], '--r')
-    plt.xlabel('Time')
-    fig.savefig(loc + 'results_test/closed_loop.png', dpi=300)  # TODO: Naming scheme for files...
-    plt.close()
-
-
-def plot_lp(y_0: np.ndarray, i: List, k_0: int, k_f: int, n_update: int):
-    fig = plt.figure()
-    t = np.arange(k_0, k_f)
-    plt.plot(t, y_0[:, i], '-k')
-    plt.xlabel('Time')
-    plt.ylim((0, 2100))
-    fig.savefig('/Users/justshim/src/semester-project/CTM-s/sandbox/figures/results_test/lp' + str(n_update) + '.png', dpi=300)
-    plt.close()
